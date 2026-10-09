@@ -132,7 +132,7 @@ describe("vocabulary helpers", () => {
   });
 
   test("collectionLabel resolves keys", () => {
-    expect(collectionLabel("mindapps")).toBe("MindApps.org");
+    expect(collectionLabel("willowfen-directory")).toBe("Willowfen App Directory");
   });
 
   test("formatDate turns ISO dates into month and year", () => {

@@ -28,8 +28,8 @@ export const AGE_GROUPS = [
 
 export const COLLECTIONS = [
   { key: "our-library", label: "Our library" },
-  { key: "mhcc-directory", label: "MHCC mHealth directory" },
-  { key: "mindapps", label: "MindApps.org" },
+  { key: "alderpath-directory", label: "Alderpath App Directory" },
+  { key: "willowfen-directory", label: "Willowfen App Directory" },
 ];
 
 const BADGES = Object.fromEntries([

@@ -271,8 +271,7 @@ export default function GridPage() {
         <div className="empty-state">
           <p className="empty-title">No matches yet.</p>
           <p className="empty-text">
-            Nothing fits all of those together — try removing a filter, or search for something
-            else.
+            Nothing fits all of those together. Try removing a filter, or search for something else.
           </p>
           <div className="empty-actions">
             {terms.length > 0 && (

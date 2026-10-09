@@ -50,9 +50,9 @@ describe("search matching", () => {
   });
 
   test("requires every term, across title, tags, description, and source", () => {
-    const entry = make({ title: "Sleep Guide", tags: ["mood"], source: "Open Lens" });
+    const entry = make({ title: "Sleep Guide", tags: ["mood"], source: "Mossgate" });
     expect(entryMatches(entry, ["sleep", "mood"])).toBe(true);
-    expect(entryMatches(entry, ["sleep", "lens"])).toBe(true);
+    expect(entryMatches(entry, ["sleep", "mossgate"])).toBe(true);
     expect(entryMatches(entry, ["sleep", "podcast"])).toBe(false);
   });
 
@@ -153,11 +153,13 @@ describe("facet counts", () => {
 describe("URL state", () => {
   test("parses filters, dropping unknown values", () => {
     const { kind, who, apps } = parseFilters(
-      new URLSearchParams("kind=video&kind=bogus&who=under-18&apps=mindapps&kind=library"),
+      new URLSearchParams(
+        "kind=video&kind=bogus&who=under-18&apps=willowfen-directory&kind=library",
+      ),
     );
     expect([...kind].sort()).toEqual(["library", "video"]);
     expect([...who]).toEqual(["under-18"]);
-    expect([...apps]).toEqual(["mindapps"]);
+    expect([...apps]).toEqual(["willowfen-directory"]);
   });
 
   test("best match is dropped without a query", () => {
@@ -173,12 +175,12 @@ describe("URL state", () => {
     const chips = activeFilterEntries({
       kind: set("video"),
       who: set("all-ages"),
-      apps: set("mindapps"),
+      apps: set("willowfen-directory"),
     });
     expect(chips).toEqual([
       { group: "kind", key: "video", label: "Videos" },
       { group: "who", key: "all-ages", label: "All ages" },
-      { group: "apps", key: "mindapps", label: "MindApps.org" },
+      { group: "apps", key: "willowfen-directory", label: "Willowfen App Directory" },
     ]);
   });
 

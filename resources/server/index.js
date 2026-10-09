@@ -35,7 +35,7 @@ const FORMATS = [
   "tool",
   "app",
 ];
-const COLLECTIONS = ["our-library", "mhcc-directory", "mindapps"];
+const COLLECTIONS = ["our-library", "alderpath-directory", "willowfen-directory"];
 const AGE_GROUPS = ["all-ages", "under-18", "18-65", "65-plus"];
 
 const CONTENT_TYPES = {

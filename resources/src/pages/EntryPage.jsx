@@ -27,7 +27,7 @@ export default function EntryPage() {
     return (
       <div className="not-found">
         <h1>Entry not found</h1>
-        <p>That entry could not be found — it may have been removed, or the link may be wrong.</p>
+        <p>That entry could not be found. It may have been removed, or the link may be wrong.</p>
         <p className="not-found-action">
           <Link className="button-secondary" to="/browse">
             Browse resources

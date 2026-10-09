@@ -112,7 +112,7 @@ test("search narrows, highlights, and keeps the query in the field", () => {
   expect(screen.getByRole("status")).toHaveTextContent(`2 of ${TOTAL} resources`);
   expect(screen.getByLabelText("Search resources")).toHaveValue("sleep");
   const headings = screen.getAllByRole("heading", { level: 2 });
-  expect(headings[0]).toHaveTextContent("Harbourlight — Mood and Sleep Journal");
+  expect(headings[0]).toHaveTextContent("Harbourlight: Mood and Sleep Journal");
   expect(document.querySelectorAll("mark").length).toBeGreaterThan(0);
 });
 
@@ -332,7 +332,7 @@ test("entry quick banner shows age, dates, and topics", () => {
 test("apps show the collection they are listed in", () => {
   renderAt("/entry/stillbrook-app");
   expect(screen.getByText("Listed in")).toBeInTheDocument();
-  expect(screen.getByText("MHCC mHealth directory")).toBeInTheDocument();
+  expect(screen.getByText("Alderpath App Directory")).toBeInTheDocument();
 });
 
 test("unknown entry shows a quiet not-found", () => {
@@ -368,7 +368,7 @@ function mockAdminApi(overrides = {}) {
             id: "alpha-entry",
             title: "Alpha Entry",
             format: "video",
-            source: "Open Lens Media",
+            source: "Mossgate Media",
             added_date: "2025-01-01",
           },
         ],
