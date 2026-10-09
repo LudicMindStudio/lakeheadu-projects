@@ -21,7 +21,7 @@ Every app supports:
     npm run dev       start the Vite dev server
     npm run build     production build to dist/
     npm run preview   serve the production build
-    npm run lint      run ESLint
+    npm run lint      run oxlint
     npm run format    run Prettier
     npm test          run the test suite
 
