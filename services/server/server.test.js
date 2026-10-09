@@ -63,7 +63,7 @@ describe("validateEntry", () => {
 
   it("refuses a slug already in use", () => {
     const { errors } = validateEntry(ENTRIES[1], {
-      existingSlugs: new Set(["boreal-path-community-wellbeing"]),
+      existingSlugs: new Set(["fireweed-community-wellbeing"]),
     });
     expect(errors.slug).toBe("Already used by another entry.");
   });

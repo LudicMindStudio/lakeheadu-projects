@@ -4,8 +4,8 @@
 
 export const ENTRIES = [
   {
-    slug: "northshore-walk-in",
-    org: "Northshore Counselling Collective",
+    slug: "cedarline-walk-in",
+    org: "Cedarline Counselling Collective",
     program: "Walk-In Counselling",
     description:
       "Free one-on-one counselling with no appointment needed. Talk with a counsellor about stress, low mood, anxiety, or relationships.",
@@ -26,8 +26,8 @@ export const ENTRIES = [
     lastVerified: "2026-09-18",
   },
   {
-    slug: "boreal-path-community-wellbeing",
-    org: "Boreal Path Wellness",
+    slug: "fireweed-community-wellbeing",
+    org: "Fireweed Wellness",
     program: "Community Wellbeing Program",
     description:
       "A community program for Indigenous adults built around sharing circles and land-based activities. Counsellors also support people working through substance use and trauma.",
@@ -48,8 +48,8 @@ export const ENTRIES = [
     lastVerified: "2026-09-20",
   },
   {
-    slug: "full-circle-womens-counselling",
-    org: "Full Circle Women's Counselling",
+    slug: "willowwood-womens-counselling",
+    org: "Willowwood Women's Counselling",
     program: "Individual Counselling",
     description:
       "One-on-one counselling for women with a focus on trauma and relationships. Sessions are free and confidential.",
@@ -70,8 +70,8 @@ export const ENTRIES = [
     lastVerified: "2026-09-14",
   },
   {
-    slug: "cedar-ridge-adult-mental-health",
-    org: "Cedar Ridge District Hospital",
+    slug: "sprucewood-adult-mental-health",
+    org: "Sprucewood District Hospital",
     program: "Adult Mental Health Program",
     description:
       "Assessment and treatment for adults through the hospital's mental health team, including group programs. A referral from a family doctor or nurse practitioner is required.",
@@ -93,9 +93,9 @@ export const ENTRIES = [
     lastVerified: "2026-09-11",
   },
   {
-    slug: "fireside-teen-talk",
-    org: "Fireside Youth Counselling",
-    program: "Teen Talk",
+    slug: "bunchberry-teen-counselling",
+    org: "Bunchberry Youth Counselling",
+    program: "Counselling for Teens",
     description:
       "One-on-one counselling for teens who want someone to talk to about school stress, worry, or friendships.",
     cost: "free",
@@ -115,8 +115,8 @@ export const ENTRIES = [
     lastVerified: "2026-09-19",
   },
   {
-    slug: "northwest-peer-support-line",
-    org: "Northwest Peer Support Network",
+    slug: "northwind-peer-support-line",
+    org: "Northwind Peer Support Network",
     program: "Peer Support Line",
     description:
       "Talk with a trained peer supporter by phone about everyday stress, anxiety, or substance use. This is a non-emergency line open to anyone in the region.",
@@ -137,8 +137,8 @@ export const ENTRIES = [
     lastVerified: "2026-09-17",
   },
   {
-    slug: "clearwater-video-counselling",
-    org: "Clearwater Therapy Services",
+    slug: "slatewater-video-counselling",
+    org: "Slatewater Therapy Services",
     program: "Counselling by Video",
     description:
       "Private video sessions with registered therapists. Options include a short program for sleep concerns and ongoing counselling for anxiety.",
@@ -159,8 +159,8 @@ export const ENTRIES = [
     lastVerified: "2026-09-21",
   },
   {
-    slug: "northward-managing-stress-online",
-    org: "Northward Counselling",
+    slug: "northline-managing-stress-online",
+    org: "Northline Counselling",
     program: "Managing Stress Online",
     description:
       "A small online group that meets by video to build practical skills for managing stress and worry over six sessions.",
@@ -181,9 +181,9 @@ export const ENTRIES = [
     lastVerified: "2026-09-16",
   },
   {
-    slug: "kestrel-app",
+    slug: "sanderling-app",
     org: "Harbourline Health",
-    program: "Kestrel App",
+    program: "Sanderling App",
     description: "A free self-help app with short daily exercises for worry, low mood, and sleep.",
     cost: "free",
     nature: ["mhealth-app", "remote"],
@@ -195,16 +195,16 @@ export const ENTRIES = [
     region: "Thunder Bay",
     lat: 48.375,
     lng: -89.238,
-    firstStep: "Download the Kestrel app and start the first module with no referral needed.",
-    firstStepShort: "Download the Kestrel app",
+    firstStep: "Download the Sanderling app and start the first module with no referral needed.",
+    firstStepShort: "Download the Sanderling app",
     availability: "Free to download and use at any time.",
     status: "accepting",
     lastVerified: "2026-09-22",
   },
   {
-    slug: "northnet-textcare",
+    slug: "northnet-counselling-by-text",
     org: "NorthNet Community Counselling",
-    program: "TextCare",
+    program: "Counselling by Text",
     description:
       "Talk with a counsellor by text about stress or anxiety. Conversations happen in a secure message thread at your own pace.",
     cost: "free",
@@ -247,8 +247,8 @@ export const ENTRIES = [
     lastVerified: "2026-09-15",
   },
   {
-    slug: "northlight-affirming-counselling",
-    org: "Northlight Inclusive Counselling",
+    slug: "juniper-affirming-counselling",
+    org: "Juniper Inclusive Counselling",
     program: "Affirming Counselling",
     description:
       "Counselling that welcomes LGBTQ+ clients, with therapists experienced in identity, relationships, and trauma. Sliding-scale fees are available.",

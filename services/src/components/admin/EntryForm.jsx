@@ -186,12 +186,12 @@ export default function EntryForm({ initial, errors, busy, onSubmit, onCancel })
       </label>
 
       <label className="form-field">
-        <span>First step — what someone does first, in one sentence</span>
+        <span>First step: what someone does first, in one sentence</span>
         <textarea value={draft.firstStep} onChange={set("firstStep")} rows={2} required />
       </label>
 
       <label className="form-field">
-        <span>Short first step — up to five words, for the map and lists</span>
+        <span>Short first step: up to five words, for the map and lists</span>
         <input
           value={draft.firstStepShort ?? ""}
           onChange={set("firstStepShort")}
@@ -275,7 +275,7 @@ export default function EntryForm({ initial, errors, busy, onSubmit, onCancel })
           onChange={(lat, lng) => setDraft((prev) => ({ ...prev, lat, lng }))}
         />
         <span className="form-hint">
-          Click the map to place the pin — the numbers above update as you go.
+          Click the map to place the pin; the numbers above update as you go.
         </span>
       </div>
 
@@ -285,7 +285,7 @@ export default function EntryForm({ initial, errors, busy, onSubmit, onCancel })
           <input
             value={draft.contactText ?? ""}
             onChange={set("contactText")}
-            placeholder="How — e.g. Phone, Text, Email"
+            placeholder="e.g. Phone, Text, Email"
             maxLength={40}
           />
           <input
@@ -317,7 +317,7 @@ export default function EntryForm({ initial, errors, busy, onSubmit, onCancel })
             <input
               value={draft.availability}
               onChange={set("availability")}
-              placeholder="Optional — one line"
+              placeholder="Optional: one line"
             />
           </label>
         </div>

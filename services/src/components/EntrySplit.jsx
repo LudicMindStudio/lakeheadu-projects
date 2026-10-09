@@ -25,7 +25,7 @@ export default function EntrySplit({ entry, onClose }) {
   }, [onClose]);
 
   return (
-    <aside className="entry-card" role="dialog" aria-label={`${entry.program} — service details`}>
+    <aside className="entry-card" role="dialog" aria-label={`${entry.program}: service details`}>
       <header className="ec-head">
         <button
           ref={closeRef}

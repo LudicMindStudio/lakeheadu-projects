@@ -18,11 +18,11 @@ const slugs = (entries) => entries.map((entry) => entry.slug).sort();
 
 describe("searchEntries", () => {
   it("matches town names case-insensitively", () => {
-    expect(slugs(searchEntries(ENTRIES, "KENORA"))).toEqual(["full-circle-womens-counselling"]);
+    expect(slugs(searchEntries(ENTRIES, "KENORA"))).toEqual(["willowwood-womens-counselling"]);
   });
 
   it("matches words inside descriptions and field values", () => {
-    expect(slugs(searchEntries(ENTRIES, "text"))).toContain("northnet-textcare");
+    expect(slugs(searchEntries(ENTRIES, "text"))).toContain("northnet-counselling-by-text");
   });
 
   it("indexes the cost wording, so 'free' finds free services", () => {
@@ -33,12 +33,12 @@ describe("searchEntries", () => {
 
   it("requires every word to appear somewhere in the entry", () => {
     expect(searchEntries(ENTRIES, "zzzz")).toEqual([]);
-    expect(slugs(searchEntries(ENTRIES, "text counsellor"))).toEqual(["northnet-textcare"]);
+    expect(slugs(searchEntries(ENTRIES, "text counsellor"))).toEqual(["northnet-counselling-by-text"]);
   });
 
   it("strips punctuation off query words", () => {
     expect(slugs(searchEntries(ENTRIES, "counselling, kenora?"))).toEqual([
-      "full-circle-womens-counselling",
+      "willowwood-womens-counselling",
     ]);
   });
 });
@@ -51,14 +51,14 @@ describe("filterEntries", () => {
 
     const fee = filterEntries(ENTRIES, { ...emptyFilters(), cost: ["not-free"] });
     expect(slugs(fee)).toEqual([
-      "clearwater-video-counselling",
-      "northlight-affirming-counselling",
+      "juniper-affirming-counselling",
+      "slatewater-video-counselling",
     ]);
   });
 
   it("combines options with OR inside a group", () => {
     const results = filterEntries(ENTRIES, { ...emptyFilters(), nature: ["phone", "mhealth-app"] });
-    expect(slugs(results)).toEqual(["kestrel-app", "northwest-peer-support-line"]);
+    expect(slugs(results)).toEqual(["northwind-peer-support-line", "sanderling-app"]);
   });
 
   it("combines groups with AND", () => {
@@ -67,7 +67,7 @@ describe("filterEntries", () => {
       cost: ["free"],
       nature: ["phone"],
     });
-    expect(slugs(results)).toEqual(["northwest-peer-support-line"]);
+    expect(slugs(results)).toEqual(["northwind-peer-support-line"]);
   });
 
   it("treats an untouched group as no constraint", () => {
@@ -78,21 +78,21 @@ describe("filterEntries", () => {
   it("matches considerations, ages, and referral", () => {
     expect(
       slugs(filterEntries(ENTRIES, { ...emptyFilters(), considerations: ["indigenous"] })),
-    ).toEqual(["boreal-path-community-wellbeing"]);
+    ).toEqual(["fireweed-community-wellbeing"]);
     expect(
       slugs(filterEntries(ENTRIES, { ...emptyFilters(), considerations: ["lgbtq-plus"] })),
-    ).toEqual(["northlight-affirming-counselling"]);
+    ).toEqual(["juniper-affirming-counselling"]);
     expect(slugs(filterEntries(ENTRIES, { ...emptyFilters(), ages: ["under-18"] }))).toEqual([
-      "fireside-teen-talk",
+      "bunchberry-teen-counselling",
       "lakewood-student-wellbeing",
     ]);
     expect(slugs(filterEntries(ENTRIES, { ...emptyFilters(), referral: ["required"] }))).toEqual([
-      "cedar-ridge-adult-mental-health",
       "lakewood-student-wellbeing",
+      "sprucewood-adult-mental-health",
     ]);
     expect(slugs(filterEntries(ENTRIES, { ...emptyFilters(), concerns: ["sleep"] }))).toEqual([
-      "clearwater-video-counselling",
-      "kestrel-app",
+      "sanderling-app",
+      "slatewater-video-counselling",
     ]);
   });
 });
@@ -114,7 +114,7 @@ describe("map area", () => {
   it("filters entries to the bounds", () => {
     const kenora = { west: -94.6, south: 49.6, east: -94.3, north: 49.9 };
     expect(slugs(selectEntries(ENTRIES, { area: kenora }))).toEqual([
-      "full-circle-womens-counselling",
+      "willowwood-womens-counselling",
     ]);
   });
 
@@ -187,7 +187,7 @@ describe("sortEntries", () => {
 
   it("sorts closest first from a chosen town", () => {
     const sorted = sortEntries(ENTRIES, { sort: "closest", town: "Kenora" });
-    expect(sorted[0].slug).toBe("full-circle-womens-counselling");
+    expect(sorted[0].slug).toBe("willowwood-womens-counselling");
     const origin = findTown("Kenora");
     let previous = -1;
     for (const entry of sorted) {

@@ -86,17 +86,17 @@ test("closest first asks for a town and reports distances", async () => {
 });
 
 test("opens a service entry with the first step leading", async () => {
-  renderAt("/entry/kestrel-app");
-  expect(await screen.findByRole("heading", { level: 1, name: "Kestrel App" })).toBeInTheDocument();
+  renderAt("/entry/sanderling-app");
+  expect(await screen.findByRole("heading", { level: 1, name: "Sanderling App" })).toBeInTheDocument();
   expect(screen.getByRole("region", { name: "Your first step" })).toBeInTheDocument();
-  expect(screen.getByText("Download the Kestrel app")).toBeInTheDocument();
+  expect(screen.getByText("Download the Sanderling app")).toBeInTheDocument();
   expect(screen.getByText("September 22, 2026")).toBeInTheDocument();
   expect(screen.queryByText(/Sample listing/i)).toBeNull();
 });
 
 test("the brand control returns to the start", async () => {
-  renderAt("/entry/kestrel-app");
-  await screen.findByRole("heading", { level: 1, name: "Kestrel App" });
+  renderAt("/entry/sanderling-app");
+  await screen.findByRole("heading", { level: 1, name: "Sanderling App" });
   fireEvent.click(screen.getByRole("link", { name: "Services" }));
   expect(
     await screen.findByRole("heading", {
@@ -107,7 +107,7 @@ test("the brand control returns to the start", async () => {
 });
 
 test("closing the entry returns to the browsed map", async () => {
-  renderAt("/entry/kestrel-app");
+  renderAt("/entry/sanderling-app");
   fireEvent.click(await screen.findByRole("button", { name: "Close service details" }));
   expect(await screen.findByText("12 services")).toBeInTheDocument();
 });

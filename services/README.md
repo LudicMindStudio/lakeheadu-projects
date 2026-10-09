@@ -23,9 +23,9 @@ Part of the lakeheadu-projects repository. The design note lives at
 
 Two modes, one app:
 
-- **Static hosting** — `npm run preview`, or any static host serving `dist/`.
+- **Static hosting:** `npm run preview`, or any static host serving `dist/`.
   The app reads the sample dataset bundled with it.
-- **With the server** — `npm run serve` serves the built app, a small JSON API,
+- **With the server:** `npm run serve` serves the built app, a small JSON API,
   and the entry editor. The public site reads the live entries store instead of
   the bundled samples.
 
@@ -37,8 +37,8 @@ The server has no dependencies (plain `node:http`). Environment variables:
 | `SERVICES_ADMIN_PASSWORD` | admin password; unset, the editor stays off             |
 | `SERVICES_DATA_FILE`      | entries store path (default `server/data/entries.json`) |
 
-The entries store is a JSON file created on first run — seeded from the sample
-dataset — and written atomically on every change. It is never part of the
+The entries store is a JSON file created on first run (seeded from the sample
+dataset) and written atomically on every change. It is never part of the
 repository, and `.env`-style files are ignored. The editor lives at `/admin`:
 sign in, then create, edit, and delete entries; changes publish to the store
 the public site reads.

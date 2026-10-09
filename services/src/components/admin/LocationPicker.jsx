@@ -118,7 +118,7 @@ export default function LocationPicker({ lat, lng, fallback, onChange }) {
       <div className="form-map-pick-canvas" ref={containerRef} />
       {failed && (
         <p className="form-map-pick-note">
-          The map preview is not available here — set the coordinates above.
+          The map preview is not available here. Set the coordinates above.
         </p>
       )}
     </div>

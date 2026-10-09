@@ -1,4 +1,4 @@
-// The map surface. MapLibre GL over the vendored light-gray tile set, with
+// The map surface. MapLibre GL over the vendored warm-palette tile set, with
 // one pin per listing, quiet town and lake labels, the hover preview, and the
 // camera moves that open an entry as a split of the same window.
 

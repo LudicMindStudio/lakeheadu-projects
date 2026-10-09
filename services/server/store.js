@@ -68,7 +68,7 @@ export function validateEntry(input, { existingSlugs = new Set() } = {}) {
     errors.description = "Required.";
   }
   if (!firstStep) {
-    errors.firstStep = "Required — the precise first action.";
+    errors.firstStep = "Required. The precise first action.";
   }
   if (firstStepShort && firstStepShort.trim().split(/\s+/).length > 5) {
     errors.firstStepShort = "Keep it to five words or fewer.";
