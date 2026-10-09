@@ -1,14 +1,24 @@
-import { Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, Route, Routes, useLocation } from "react-router-dom";
 import LandingPage from "./pages/LandingPage.jsx";
 import BrowsePage from "./pages/BrowsePage.jsx";
 import EntryPage from "./pages/EntryPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 
 export default function App() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return (
     <div className="app">
       <header className="app-header">
-        <span className="app-title">Resources</span>
+        <Link className="app-title" to="/">
+          Resources &amp; tools
+        </Link>
+        <span className="sample-pill">Sample content</span>
       </header>
       <main className="app-main">
         <Routes>
