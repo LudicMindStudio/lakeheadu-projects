@@ -62,6 +62,7 @@
 
 html {
   color-scheme: light;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -265,9 +266,24 @@ a {
 .stage[data-state="ring"] {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(3, minmax(150px, 1fr));
-  gap: 18px;
-  min-height: min(780px, calc(100vh - 250px));
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 16px;
+}
+
+/* On desktop the ring fills the window: full-bleed, header to footer. The
+   height is definite so the grid cannot inflate the page, and the center row
+   takes the panel's natural height. */
+@media (min-width: 1101px) {
+  .app-main:has(.stage[data-state="ring"]) {
+    max-width: none;
+    padding: 0;
+  }
+
+  .stage[data-state="ring"] {
+    height: calc(100vh - 106px);
+    min-height: 480px;
+    padding: 16px;
+  }
 }
 
 /* The center panel */
@@ -709,22 +725,37 @@ a {
   border-top: 1px solid var(--line-soft);
 }
 
-.card-more {
-  padding: 5px 13px;
+.card-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
   font-family: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
   color: var(--ink);
   background: var(--card);
   border: 1px solid var(--line-soft);
-  border-radius: var(--r-pill);
+  border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(34, 38, 31, 0.04);
-  transition: border-color 140ms ease;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease;
 }
 
-.card-more:hover {
+.card-toggle:hover {
   border-color: var(--line);
+  background: var(--bg);
+}
+
+.card-toggle svg {
+  display: block;
+  transition: transform 220ms var(--ease);
+}
+
+.card-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
 }
 
 .card-expand {
@@ -788,11 +819,6 @@ a {
   text-decoration-color: currentColor;
 }
 
-.card-sample {
-  font-size: 12px;
-  color: var(--faint);
-}
-
 /* Badges */
 
 .badge {
@@ -849,6 +875,7 @@ a {
 
 .stage[data-state="ring"] .card {
   display: block;
+  min-height: 0;
   height: 100%;
   animation: drift 150s linear infinite;
   animation-delay: var(--drift-delay, 0s);
@@ -1383,6 +1410,44 @@ mark {
 
 ::view-transition-group(masthead) {
   animation-duration: 440ms;
+}
+
+/* The ring and the list swap with one clean wash: the leaving surface fades
+   as it lifts, the arriving one rises into place. Scoped to the morph. */
+html.vt-morph::view-transition-old(root) {
+  animation: morph-out 300ms var(--ease) both;
+}
+
+html.vt-morph::view-transition-new(root) {
+  animation: morph-in 300ms var(--ease) both;
+}
+
+@keyframes morph-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes morph-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* The swap's guaranteed half: when the platform drops its transition, the
+   fresh surface still arrives with the same fade and step up. */
+.stage.swap-in {
+  animation: morph-in 300ms var(--ease) both;
 }
 
 /* Narrow screens */

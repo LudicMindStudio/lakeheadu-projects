@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router-dom";
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import App from "./App.jsx";
 import { ENTRIES } from "./lib/entries.js";
 
@@ -8,7 +8,12 @@ const TOTAL = ENTRIES.length;
 
 function LocationSpy() {
   const location = useLocation();
-  return <div data-testid="location">{location.search}</div>;
+  return (
+    <div data-testid="location">
+      {location.pathname}
+      {location.search}
+    </div>
+  );
 }
 
 function renderAt(path) {
@@ -42,26 +47,50 @@ test("typing morphs the ring into the list and captures the query", () => {
   expect(stage(view).dataset.state).toBe("list");
   expect(screen.getByRole("status")).toHaveTextContent(`2 of ${TOTAL} resources`);
   expect(screen.getByTestId("location")).toHaveTextContent("q=sleep");
-  expect(window.sessionStorage.getItem("resources.ring-entered")).toBe("1");
 });
 
-test("the ring stays gone for the rest of the visit", () => {
+test("clearing the search returns to the ring", () => {
+  const view = renderAt("/");
+  const input = screen.getByLabelText("Search resources");
+  fireEvent.change(input, { target: { value: "sleep" } });
+  expect(stage(view).dataset.state).toBe("list");
+  fireEvent.change(input, { target: { value: "" } });
+  expect(stage(view).dataset.state).toBe("ring");
+  expect(screen.getByText(/in one searchable place/)).toBeInTheDocument();
+  expect(screen.getByTestId("location")).not.toHaveTextContent("q=");
+});
+
+test("clearing the search keeps the list while a filter is active", () => {
+  const view = renderAt("/?q=sleep&kind=tool");
+  fireEvent.change(screen.getByLabelText("Search resources"), { target: { value: "" } });
+  expect(stage(view).dataset.state).toBe("list");
+  expect(screen.getByTestId("location")).toHaveTextContent("kind=tool");
+  expect(screen.getByTestId("location")).not.toHaveTextContent("q=");
+});
+
+test("clearing the last filter returns to the ring", () => {
+  const view = renderAt("/?kind=video");
+  expect(stage(view).dataset.state).toBe("list");
+  fireEvent.click(screen.getByRole("button", { name: "Remove filter: Videos" }));
+  expect(stage(view).dataset.state).toBe("ring");
+  expect(screen.getByTestId("location")).not.toHaveTextContent("kind=");
+});
+
+test("a fresh arrival opens the ring again", () => {
   const first = renderAt("/");
   fireEvent.change(screen.getByLabelText("Search resources"), { target: { value: "sleep" } });
   first.unmount();
 
   const second = renderAt("/");
-  expect(stage(second).dataset.state).toBe("list");
-  expect(screen.getByRole("status")).toHaveTextContent(`${TOTAL} resources`);
+  expect(stage(second).dataset.state).toBe("ring");
 });
 
-test("?intro=1 re-opens the ring on demand", () => {
-  const first = renderAt("/");
-  fireEvent.change(screen.getByLabelText("Search resources"), { target: { value: "sleep" } });
-  first.unmount();
-
-  const second = renderAt("/?intro=1");
-  expect(stage(second).dataset.state).toBe("ring");
+test("the ring's browse link opens the list at /browse", () => {
+  const view = renderAt("/");
+  fireEvent.click(screen.getByRole("link", { name: "Browse everything" }));
+  expect(screen.getByTestId("location")).toHaveTextContent("/browse");
+  expect(stage(view).dataset.state).toBe("list");
+  expect(screen.getByRole("status")).toHaveTextContent(`${TOTAL} resources`);
 });
 
 test("browse opens the list directly", () => {
@@ -72,10 +101,9 @@ test("browse opens the list directly", () => {
   expect(headings).toHaveLength(TOTAL);
   expect(headings[0]).toHaveTextContent("Sleep Habits Check-In");
   expect(headings[TOTAL - 1]).toHaveTextContent("Northwood Calm for Teens");
-  expect(window.sessionStorage.getItem("resources.ring-entered")).toBe("1");
 });
 
-test("every surface carries the sample marker", () => {
+test("the header carries the sample marker", () => {
   renderAt("/");
   expect(screen.getByText("Sample content", { selector: ".sample-pill" })).toBeInTheDocument();
 });
@@ -151,14 +179,68 @@ test("a card opens its details in place", () => {
   const card = screen
     .getByRole("heading", { level: 2, name: /Sleep Habits Check-In/ })
     .closest(".card");
-  const more = within(card).getByRole("button", { name: "More" });
-  expect(more).toHaveAttribute("aria-expanded", "false");
-  fireEvent.click(more);
-  expect(within(card).getByRole("button", { name: "Less" })).toHaveAttribute(
+  const toggle = within(card).getByRole("button", { name: "Show details" });
+  expect(toggle).toHaveAttribute("aria-expanded", "false");
+  fireEvent.click(toggle);
+  expect(within(card).getByRole("button", { name: "Hide details" })).toHaveAttribute(
     "aria-expanded",
     "true",
   );
-  expect(within(card).getByRole("link", { name: "Open the full page" })).toBeInTheDocument();
+  expect(within(card).getByRole("link", { name: "More" })).toBeInTheDocument();
+  expect(card.querySelector(".card-sample")).toBeNull();
+  expect(card.textContent).not.toContain("Sample entry");
+});
+
+test("a two-second hover opens the card, and closing turns hover off", () => {
+  vi.useFakeTimers();
+  try {
+    renderAt("/browse");
+    const card = screen
+      .getByRole("heading", { level: 2, name: /Sleep Habits Check-In/ })
+      .closest(".card");
+
+    // A hover shorter than two seconds leaves the card closed.
+    fireEvent.mouseEnter(card);
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    fireEvent.mouseLeave(card);
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(within(card).getByRole("button", { name: "Show details" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+
+    // Two full seconds open it, and it stays open.
+    fireEvent.mouseEnter(card);
+    act(() => {
+      vi.advanceTimersByTime(2100);
+    });
+    fireEvent.mouseLeave(card);
+    expect(within(card).getByRole("button", { name: "Hide details" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+
+    // Closing it by hand turns hover-open off for the card.
+    fireEvent.click(within(card).getByRole("button", { name: "Hide details" }));
+    expect(within(card).getByRole("button", { name: "Show details" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    fireEvent.mouseEnter(card);
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(within(card).getByRole("button", { name: "Show details" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  } finally {
+    vi.useRealTimers();
+  }
 });
 
 test("every card leads to its full page", () => {

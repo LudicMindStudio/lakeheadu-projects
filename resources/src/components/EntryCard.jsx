@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ageLabels, badgeFor, familyFor, formatDate, recencyKey } from "../lib/entries.js";
 import { highlightParts } from "../lib/browse.js";
 import { supportsViewTransitions, useReducedMotion } from "../lib/motion.js";
 import EntryMedia from "./EntryMedia.jsx";
+
+const HOVER_OPEN_MS = 2000;
 
 function Highlighted({ text, terms }) {
   return highlightParts(text, terms).map((part, index) =>
@@ -12,9 +14,13 @@ function Highlighted({ text, terms }) {
 }
 
 // One entry as a media-led card: it fills a cell in the ring, runs as a wide
-// band in the list, and opens its details in place.
-export default function EntryCard({ entry, terms, browseSearch, style }) {
+// band in the list, and opens its details in place. The arrow toggles the
+// details, a two-second hover opens them on its own, and closing by hand
+// turns that hover-open off for the card.
+export default function EntryCard({ entry, terms, browseSearch, style, expandable = true }) {
   const [open, setOpen] = useState(false);
+  const [hoverArmed, setHoverArmed] = useState(true);
+  const hoverTimer = useRef(null);
   const reduced = useReducedMotion();
   const detailsId = `card-details-${entry.id}`;
   const meta = [ageLabels(entry.age_groups), formatDate(recencyKey(entry))]
@@ -24,11 +30,40 @@ export default function EntryCard({ entry, terms, browseSearch, style }) {
   const viewTransition = supportsViewTransitions() && !reduced;
   const vtName = viewTransition ? `entry-${entry.id}` : undefined;
 
+  useEffect(() => () => clearTimeout(hoverTimer.current), []);
+
+  const onMouseEnter = () => {
+    if (!expandable || !hoverArmed || open || hoverTimer.current) return;
+    hoverTimer.current = setTimeout(() => {
+      hoverTimer.current = null;
+      setOpen(true);
+    }, HOVER_OPEN_MS);
+  };
+
+  const onMouseLeave = () => {
+    clearTimeout(hoverTimer.current);
+    hoverTimer.current = null;
+  };
+
+  const onToggle = () => {
+    clearTimeout(hoverTimer.current);
+    hoverTimer.current = null;
+    if (open) {
+      // A manual close disarms hover-open for this card.
+      setOpen(false);
+      setHoverArmed(false);
+    } else {
+      setOpen(true);
+    }
+  };
+
   return (
     <article
       className="card"
       data-open={open ? "true" : undefined}
       style={{ viewTransitionName: vtName, ...style }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <div className="card-media">
         <Link
@@ -61,12 +96,22 @@ export default function EntryCard({ entry, terms, browseSearch, style }) {
           <span className="card-meta-text">{meta}</span>
           <button
             type="button"
-            className="card-more"
+            className="card-toggle"
             aria-expanded={open}
             aria-controls={detailsId}
-            onClick={() => setOpen((was) => !was)}
+            aria-label={open ? "Hide details" : "Show details"}
+            onClick={onToggle}
           >
-            {open ? "Less" : "More"}
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+              <path
+                d="M4 6.25l4 4 4-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         </div>
 
@@ -82,9 +127,8 @@ export default function EntryCard({ entry, terms, browseSearch, style }) {
             )}
             <p className="card-open-row">
               <Link className="card-open-link" to={target} viewTransition={viewTransition}>
-                Open the full page
+                More
               </Link>
-              {!entry.url && <span className="card-sample">Sample entry</span>}
             </p>
           </div>
         </div>

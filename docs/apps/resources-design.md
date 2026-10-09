@@ -1,6 +1,6 @@
 # Resources — design note
 
-Draft v2 — 2026-10-09. Second design pass for the Resources app: a grid that opens as a ring, a search that morphs it into a working list, media-forward entries, embedded media on full pages, and a password-protected way to manage the shelf. The first pass's search, filters, sorts, and data carry forward.
+Draft v3 — 2026-10-09. Third design pass for the Resources app: the ring fills the window and returns whenever the search clears, with one clean, animated wash between the two states; media-forward cards expand from a quiet arrow that also opens on a long hover; full pages embed video and documents; and the shelf stays editable behind a password. The first pass's search, filters, sorts, and data carry forward.
 
 **Find trusted resources and tools on digital mental health technology, in one searchable place.**
 
@@ -22,7 +22,7 @@ Entry kinds: libraries, lesson plans, videos, podcasts, organizations & websites
 
 | Route | Surface | Job |
 |---|---|---|
-| `/` | The grid | Arrival: the ring; once entered: the list. |
+| `/` | The grid | The ring whenever nothing is active; the list once a search, filter, or sort is set. |
 | `/browse` | The list, directly | Skips the ring; opens the list with the full control row. |
 | `/entry/:id` | Full page | One entry, everything, embeds included. |
 | `/admin` | Management | Sign in; add, edit, and remove entries. |
@@ -34,11 +34,13 @@ Route names are defaults. Landing and browse are one surface, not two pages: the
 
 A fresh arrival at `/` with nothing typed opens the grid as a ring:
 
+On desktop the ring fills the window — edge to edge and header to footer, with one consistent gutter — instead of sitting in its own fixed frame.
+
 - **The center.** A quiet panel at the center of the surface carries, in order: the app's one-line promise, the search field, and two lines of instruction ("Type to search, or browse the shelf around you. Filters for kind, age, and app directory appear with the results."). This is the page's single focal point. A small "Browse everything" link goes straight to the list.
 - **The shelf around it.** The eight latest entries sit in the cells of a box around the center — three across, three down, the middle reserved for the panel. Each cell is a full media card (see Cards).
 - **The drift.** The cards keep their boxed formation and translate very slightly along the ring's path on one slow shared cycle: a few pixels, minutes long, staggered per card. It should read as the ring gently turning, never as cards wandering. The drift pauses off-tab and stops entirely under reduced motion.
 
-The ring is the door, not a permanent page. It shows on the visit's first arrival; once a search starts, or a browse link is taken, the ring is done for that visit, and later arrivals at `/` open straight onto the list. A new visit opens the door again. (For tours and captures, `?intro=1` re-opens the ring on demand.)
+The ring is the resting state, not a one-time door. It opens on every arrival at `/` with nothing active, and it comes back whenever the search clears — the surface settles into the shelf again. A search, a filter, or the browse link takes it into the list; clearing everything brings it home.
 
 Narrow screens stack the composition: the center panel first — promise, search, instructions — then the cards in a single column beneath it. No drift below the ring width; a soft staggered entrance instead.
 
@@ -46,11 +48,11 @@ Narrow screens stack the composition: the center panel first — promise, search
 
 When the search field takes its first characters, the surface changes shape:
 
-1. The search bar animates to the top of the page and settles as the list's top bar. It stays there for the rest of the visit.
+1. The search bar animates to the top of the page and settles as the list's top bar. It settles there while the list is showing, and glides back to the center when the ring returns.
 2. The ring loosens: cards glide out of the box formation and expand into wide bands — two per row on desktop, the first screen landing two rows of results.
 3. The count, the "Filters (n)" control, and the sort control slide in beneath the search bar; results step into place with a small stagger.
 
-Typing stays live throughout: matches highlight, the count updates as you type, and filters and chips work as before. Clearing the query brings every card back, in the same list. From `/browse`, search is already at the top, so typing only narrows.
+Typing stays live throughout: matches highlight, the count updates as you type, and filters and chips work as before. Clearing the query — or removing the last active filter — brings the ring back, and both swaps animate in both directions: the leaving surface fades as it lifts, the arriving one rises into place. From `/browse`, search is already at the top, so typing only narrows.
 
 ## Cards
 
@@ -58,7 +60,7 @@ One card anatomy across the app, media first:
 
 - **Media leads.** The entry's banner (image, or a video where one exists) carries the card. In the ring, it fills the cell and the badge and title sit over a soft scrim; in the list, it runs as the left panel of the wide band, with the info panel beside it. Media can lead without shouting — sample art is calm, in the format's color family.
 - **Info in front.** A color-coded format badge, the title in the display face at a generous size, the source, and a quiet meta row (age, dates). While a search is active, a one-line snippet shows under the title with the match highlighted.
-- **Expandable section.** A quiet "More" control opens the card's details in place: the description, topic tags, and a link to the full page. Panels animate open and push the grid gently; nothing overlays. The title and an explicit "Open" affordance both go to the full page, so the full page per entry stays exactly as it should.
+- **Expandable section.** A small arrow opens the card's details in place: the description, topic tags, and a "More" link to the full page. Hovering a card for two full seconds opens it on its own and it stays open; closing it with the arrow turns that hover-open off for the card. Panels animate open and push the grid gently; nothing overlays. The title, the media, and the "More" link all go to the full page, so the full page per entry stays exactly as it should.
 - **Alive, not jumpy.** Hover lifts the card a few pixels with the pop shadow; the media eases in a hair. That is the whole budget for a card.
 
 ## Full page (`/entry/:id`)
@@ -96,7 +98,7 @@ Accessible by construction: semantic HTML (one h1 per page, real landmarks, labe
 One grammar, carried from the earlier iteration: settles on a soft ease, micro-pops on a light spring. About 120–200ms for micro moments, 400–560ms for layout changes, nothing longer.
 
 - **The drift** — the ring's slow turn, paused off-tab.
-- **The morph** — the search bar travels as the cards re-seat from ring to list, measured first so nothing jumps, staggered about 30ms per card. It plays once per visit; it does not loop or replay on every keystroke.
+- **The morph** — one native transition carries each swap: the cards glide between the ring's cells and the list's wide bands, the search bar travels between the center and the top, and the rest of the surface crosses with a clean fade and a small vertical step. It runs on every swap between the two states, never on every keystroke. If a browser drops the native transition, the swap falls back to the same fade and step as a plain entrance, so the surface never cuts.
 - **Screen changes** — opening an entry and coming back feel continuous: the browser's native view transitions carry the card into the page where the browser supports them, with a calm cross-fade as the fallback. No white-blink cuts.
 - **Micro** — hover lift, chip pop, count tick. No spinners, no bounces, no scroll effects.
 
@@ -193,7 +195,7 @@ Coverage: each of the eight kinds at least once; each app collection at least on
 
 Each with a stated default. The build proceeds on defaults unless corrected.
 
-1. **Ring re-show** — default: once per visit (the door returns for the next visit). Alternatives: first visit ever, or every arrival. (`?intro=1` re-opens it on demand either way.)
+1. **Ring re-show** — resolved: the ring returns whenever the search box is empty and nothing else is active, and every fresh arrival at `/` opens it.
 2. **Ring contents** — default: the eight newest entries. Alternative: a curated flag later.
 3. **List geometry** — default: wide bands, two per row, two rows landing in the first screen on desktop; one per row below about 1100px. Tune on sight.
 4. **Video banners** — default: muted, looping, inline, poster-first; the poster replaces the clip under reduced motion.

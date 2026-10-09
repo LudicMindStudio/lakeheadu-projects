@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { flushSync } from "react-dom";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import EntryCard from "../components/EntryCard.jsx";
 import FilterPanel from "../components/FilterPanel.jsx";
 import { AGE_GROUPS, COLLECTIONS, FORMATS } from "../lib/entries.js";
@@ -20,34 +20,16 @@ import {
   sortNewest,
 } from "../lib/browse.js";
 
-const ENTERED_KEY = "resources.ring-entered";
-
-function readEntered() {
-  try {
-    return window.sessionStorage.getItem(ENTERED_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function markEntered() {
-  try {
-    window.sessionStorage.setItem(ENTERED_KEY, "1");
-  } catch {
-    // Storage is unavailable, so the ring returns on the next visit.
-  }
-}
-
 // The grid surface. A fresh arrival at / opens the ring: a center panel boxed
-// in by the eight latest cards. Typing, or the browse link, morphs it into the
-// list. /browse opens the list directly.
+// in by the eight latest cards. Typing, or the browse link, swaps it into the
+// list, and clearing the search brings the ring back. Both swaps run through
+// one animated morph. /browse opens the list directly.
 export default function GridPage() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const entries = useEntries();
   const [params, setParams] = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [entered, setEntered] = useState(readEntered);
-  const morphing = useRef(false);
   const visible = useDocumentVisible();
 
   const query = parseQuery(params);
@@ -60,17 +42,12 @@ export default function GridPage() {
   const results = sortEntries(filterEntries(entries, state), sort, terms);
   const chips = activeFilterEntries({ kind, who, apps });
   const activeCount = chips.length;
+  const filtersEmpty = kind.size === 0 && who.size === 0 && apps.size === 0;
+  const hasState = terms.length > 0 || !filtersEmpty || sortParam !== null;
   const narrowed = terms.length > 0 || activeCount > 0;
 
   const atRoot = pathname === "/";
-  const intro = params.get("intro") === "1";
-  const hasState =
-    terms.length > 0 || kind.size > 0 || who.size > 0 || apps.size > 0 || sortParam !== null;
-  const ring = atRoot && !hasState && (intro || !entered);
-
-  useEffect(() => {
-    if (pathname === "/browse") markEntered();
-  }, [pathname]);
+  const ring = atRoot && !hasState;
 
   useEffect(() => {
     document.title = ring ? "Resources & tools" : "Browse · Resources & tools";
@@ -105,35 +82,32 @@ export default function GridPage() {
     [setParams],
   );
 
-  // Entering the list from the ring: the morph is one-shot.
-  const enterList = useCallback(
-    (next) => {
-      const apply = () => {
-        markEntered();
-        setEntered(true);
-        if (next) setParams(next, { replace: true });
-      };
-      if (ring && !morphing.current) {
-        morphing.current = true;
-        morphWithTransition(() => flushSync(apply));
-      } else {
-        apply();
-      }
-    },
-    [ring, setParams],
-  );
+  // Both swaps between the ring and the list land inside a view transition,
+  // so the surfaces cross with one clean wash and the search bar travels.
+  const morph = useCallback((apply) => {
+    morphWithTransition(() => flushSync(apply));
+  }, []);
 
   const onQueryChange = (value) => {
     if (ring && value !== "") {
       const next = new URLSearchParams(params);
       next.set("q", value);
-      enterList(next);
+      morph(() => setParams(next, { replace: true }));
+      return;
+    }
+    // Clearing the last of the search state brings the ring back.
+    if (atRoot && !ring && value === "" && query !== "" && filtersEmpty) {
+      morph(() =>
+        update((next) => {
+          next.delete("q");
+          next.delete("sort");
+        }),
+      );
       return;
     }
     update((next) => {
       if (value === "") {
         next.delete("q");
-        // Clearing the query also ends an explicit sort choice.
         next.delete("sort");
       } else {
         next.set("q", value);
@@ -143,26 +117,44 @@ export default function GridPage() {
 
   const onSortChange = (value) => update((next) => next.set("sort", value));
 
-  const onToggleFilter = (group, key) =>
-    update((next) => {
-      const values = next.getAll(group);
-      next.delete(group);
-      const nextValues = values.includes(key)
-        ? values.filter((value) => value !== key)
-        : [...values, key];
-      for (const value of nextValues) next.append(group, value);
-    });
+  const onToggleFilter = (group, key) => {
+    const selected = group === "kind" ? kind : group === "who" ? who : apps;
+    // Removing the last active filter empties the state, so the ring returns.
+    const returnsToRing =
+      atRoot &&
+      !ring &&
+      selected.has(key) &&
+      activeCount === 1 &&
+      query === "" &&
+      sortParam === null;
+    const apply = () =>
+      update((next) => {
+        const values = next.getAll(group);
+        next.delete(group);
+        const nextValues = values.includes(key)
+          ? values.filter((value) => value !== key)
+          : [...values, key];
+        for (const value of nextValues) next.append(group, value);
+      });
+    if (returnsToRing) morph(apply);
+    else apply();
+  };
 
-  const clearFilters = () =>
-    update((next) => {
-      next.delete("kind");
-      next.delete("who");
-      next.delete("apps");
-    });
+  const clearFilters = () => {
+    const returnsToRing = atRoot && !ring && !filtersEmpty && query === "" && sortParam === null;
+    const apply = () =>
+      update((next) => {
+        next.delete("kind");
+        next.delete("who");
+        next.delete("apps");
+      });
+    if (returnsToRing) morph(apply);
+    else apply();
+  };
 
   const onBrowseAll = (event) => {
     event.preventDefault();
-    enterList();
+    morph(() => navigate("/browse"));
   };
 
   const linkParams = new URLSearchParams(params);
@@ -287,6 +279,7 @@ export default function GridPage() {
               entry={entry}
               terms={terms}
               browseSearch={browseSearch}
+              expandable={!ring}
               style={ring ? { "--drift-delay": `${index * 9}s` } : undefined}
             />
           ))}
