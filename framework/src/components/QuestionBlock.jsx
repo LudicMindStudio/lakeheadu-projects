@@ -26,7 +26,13 @@ export default function QuestionBlock({ question }) {
           );
         })}
       </div>
-      {selected?.note ? <Prose text={selected.note} className="note" /> : null}
+      {selected?.note ? (
+        <div className="note-reveal">
+          <div className="note-reveal-inner">
+            <Prose text={selected.note} className="note" />
+          </div>
+        </div>
+      ) : null}
     </fieldset>
   );
 }

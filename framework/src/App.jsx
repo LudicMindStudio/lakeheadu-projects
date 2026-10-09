@@ -1,5 +1,5 @@
-import { Link, Route, Routes, useParams } from "react-router-dom";
-import { domainByKey, domains, meta } from "./content.js";
+import { Link, Route, Routes, useLocation, useParams } from "react-router-dom";
+import { domainByKey, domains, meta, partNumberFor } from "./content.js";
 import AnswersProvider from "./state/AnswersProvider.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
 import StepPage from "./pages/StepPage.jsx";
@@ -13,10 +13,29 @@ function DomainStepRoute() {
   return <StepPage domain={domain} />;
 }
 
+// Which color world the page sits in: the hub (all three washes), one part's
+// wash, or the finished map.
+function fieldKeyFor(pathname) {
+  if (pathname === "/") return "hub";
+  if (pathname === "/evaluate/guidance") return "map";
+  const match = pathname.replace(/\/+$/, "").match(/^\/evaluate\/?([^/]*)$/);
+  if (match) {
+    const domain = match[1] ? domainByKey(match[1]) : domains[0];
+    if (domain) return `p${partNumberFor(domain)}`;
+  }
+  return "hub";
+}
+
 export default function App() {
+  const location = useLocation();
   return (
     <AnswersProvider>
-      <div className="app">
+      <div className="app" data-field={fieldKeyFor(location.pathname)}>
+        <div className="field" aria-hidden="true">
+          <div className="field-layer field-layer--1" />
+          <div className="field-layer field-layer--2" />
+          <div className="field-layer field-layer--3" />
+        </div>
         <header className="app-header">
           <div className="shell">
             <span className="app-title">
@@ -25,13 +44,15 @@ export default function App() {
           </div>
         </header>
         <main className="app-main">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/evaluate" element={<StepPage domain={domains[0]} />} />
-            <Route path="/evaluate/guidance" element={<GuidancePage />} />
-            <Route path="/evaluate/:domainKey" element={<DomainStepRoute />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+          <div className="page-frame" key={location.pathname}>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/evaluate" element={<StepPage domain={domains[0]} />} />
+              <Route path="/evaluate/guidance" element={<GuidancePage />} />
+              <Route path="/evaluate/:domainKey" element={<DomainStepRoute />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </div>
         </main>
         {meta.sample ? (
           <footer className="app-footer">

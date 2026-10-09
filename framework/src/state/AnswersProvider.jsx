@@ -1,41 +1,73 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AnswersContext, STORAGE_KEY } from "./answers-context.js";
+import { AnswersContext, LEGACY_KEY, STORAGE_KEY } from "./answers-context.js";
 
-function loadAnswers() {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
+function emptyRecord() {
+  return { subject: "", answers: {} };
 }
 
-// Answers stay in the browser: in memory for the session, and in
-// localStorage across reloads.
+// One local record: { subject, answers }. Answers-only records are read
+// across once, so nobody loses answers.
+function loadRecord() {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        return {
+          subject: typeof parsed.subject === "string" ? parsed.subject : "",
+          answers:
+            parsed.answers && typeof parsed.answers === "object" ? parsed.answers : {},
+        };
+      }
+    }
+    const legacy = window.localStorage.getItem(LEGACY_KEY);
+    if (legacy) {
+      const parsed = JSON.parse(legacy);
+      if (parsed && typeof parsed === "object") {
+        return { subject: "", answers: parsed };
+      }
+    }
+  } catch {
+    // Storage can be unavailable. The walkthrough still works in memory.
+  }
+  return emptyRecord();
+}
+
 export default function AnswersProvider({ children }) {
-  const [answers, setAnswers] = useState(loadAnswers);
+  const [record, setRecord] = useState(loadRecord);
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
     } catch {
       // Storage can be unavailable. The walkthrough still works in memory.
     }
-  }, [answers]);
+  }, [record]);
 
-  const setAnswer = useCallback((questionId, label) => {
-    setAnswers((current) => ({ ...current, [questionId]: label }));
+  const setSubject = useCallback((subject) => {
+    setRecord((current) => ({ ...current, subject }));
   }, []);
 
-  const clearAnswers = useCallback(() => {
-    setAnswers({});
+  const setAnswer = useCallback((questionId, label) => {
+    setRecord((current) => ({
+      ...current,
+      answers: { ...current.answers, [questionId]: label },
+    }));
+  }, []);
+
+  const clearAll = useCallback(() => {
+    setRecord(emptyRecord());
   }, []);
 
   const value = useMemo(
-    () => ({ answers, setAnswer, clearAnswers }),
-    [answers, setAnswer, clearAnswers],
+    () => ({
+      subject: record.subject,
+      answers: record.answers,
+      setSubject,
+      setAnswer,
+      clearAll,
+    }),
+    [record, setSubject, setAnswer, clearAll],
   );
 
   return <AnswersContext.Provider value={value}>{children}</AnswersContext.Provider>;

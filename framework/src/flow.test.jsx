@@ -2,8 +2,8 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { expect, test } from "vitest";
 import App from "./App.jsx";
-import { domains, pickerQuestion } from "./content.js";
-import { STORAGE_KEY } from "./state/answers-context.js";
+import { domains, pickerQuestion, visibleQuestions } from "./content.js";
+import { LEGACY_KEY, STORAGE_KEY } from "./state/answers-context.js";
 
 const quality = domains.find((domain) => domain.key === "quality");
 const userConsiderations = domains.find((domain) => domain.key === "user-considerations");
@@ -17,12 +17,16 @@ function renderAt(path) {
   );
 }
 
-function seedAnswers(answers) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+function seedRecord(answers, subject = "") {
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ subject, answers }));
 }
 
-function storedAnswers() {
-  return JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "{}");
+function seedLegacy(answers) {
+  window.localStorage.setItem(LEGACY_KEY, JSON.stringify(answers));
+}
+
+function storedRecord() {
+  return JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "null");
 }
 
 function questionGroup(text) {
@@ -45,26 +49,26 @@ test("chatbot-only question stays hidden when no technology is chosen", () => {
 });
 
 test("chatbot-only question appears when a chatbot is chosen", () => {
-  seedAnswers({ [pickerQuestion.id]: "Chatbot" });
+  seedRecord({ [pickerQuestion.id]: "Chatbot" });
   renderAt("/evaluate/quality");
   expect(screen.getByRole("group", { name: gatedQuestion.text })).toBeInTheDocument();
 });
 
 test("switching the technology hides gated questions without discarding answers", () => {
-  seedAnswers({ [pickerQuestion.id]: "Chatbot", [gatedQuestion.id]: "Yes" });
+  seedRecord({ [pickerQuestion.id]: "Chatbot", [gatedQuestion.id]: "Yes" });
   renderAt("/evaluate");
   fireEvent.click(screen.getByRole("radio", { name: "Social media" }));
-  fireEvent.click(screen.getByRole("link", { name: "Next" }));
+  fireEvent.click(screen.getByRole("link", { name: "Next part" }));
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(quality.name);
   expect(screen.queryByRole("group", { name: gatedQuestion.text })).not.toBeInTheDocument();
-  expect(storedAnswers()[gatedQuestion.id]).toBe("Yes");
+  expect(storedRecord().answers[gatedQuestion.id]).toBe("Yes");
 });
 
 test("the guidance panel composes notes from the answers", () => {
   const [first, second] = quality.questions;
   const noNote = first.options.find((o) => o.label === "No").note;
   const unsureNote = second.options.find((o) => o.label === "Not sure").note;
-  seedAnswers({
+  seedRecord({
     [pickerQuestion.id]: "Chatbot",
     [first.id]: "No",
     [second.id]: "Not sure",
@@ -77,7 +81,7 @@ test("the guidance panel composes notes from the answers", () => {
 });
 
 test("the panel shows only base guidance before any answers", () => {
-  seedAnswers({ [pickerQuestion.id]: "Chatbot" });
+  seedRecord({ [pickerQuestion.id]: "Chatbot" });
   renderAt("/evaluate/quality");
   const panel = screen.getByRole("region", { name: "Guidance" });
   expect(within(panel).getByText(quality.guidance)).toBeInTheDocument();
@@ -87,7 +91,7 @@ test("the panel shows only base guidance before any answers", () => {
 test("changing an answer updates the note and the panel", () => {
   const first = quality.questions[0];
   const noNote = first.options.find((o) => o.label === "No").note;
-  seedAnswers({ [pickerQuestion.id]: "Chatbot" });
+  seedRecord({ [pickerQuestion.id]: "Chatbot" });
   renderAt("/evaluate/quality");
   const group = questionGroup(first.text);
   const panel = screen.getByRole("region", { name: "Guidance" });
@@ -100,6 +104,23 @@ test("changing an answer updates the note and the panel", () => {
   expect(within(panel).queryByText(noNote)).not.toBeInTheDocument();
 });
 
+test("the wrap-up settles when the part's visible questions are answered", () => {
+  const visible = visibleQuestions(quality, null);
+  const answers = {};
+  for (const question of visible) {
+    answers[question.id] = question.options[0].label;
+  }
+  seedRecord(answers);
+  const { container } = renderAt("/evaluate/quality");
+  expect(container.querySelector(".guidance--settled")).not.toBeNull();
+});
+
+test("the wrap-up stays unsettled while questions are open", () => {
+  seedRecord({ [quality.questions[0].id]: "Yes" });
+  const { container } = renderAt("/evaluate/quality");
+  expect(container.querySelector(".guidance--settled")).toBeNull();
+});
+
 test("answers persist in the browser across remounts", () => {
   const { unmount } = renderAt("/evaluate");
   fireEvent.click(screen.getByRole("radio", { name: "Chatbot" }));
@@ -108,36 +129,89 @@ test("answers persist in the browser across remounts", () => {
   expect(screen.getByRole("radio", { name: "Chatbot" })).toBeChecked();
 });
 
-test("the summary gathers every domain's guidance and notes", () => {
+test("records saved by the v1 build are read across so nobody loses answers", () => {
+  seedLegacy({ [pickerQuestion.id]: "Chatbot" });
+  renderAt("/evaluate");
+  expect(screen.getByRole("radio", { name: "Chatbot" })).toBeChecked();
+  expect(storedRecord().answers[pickerQuestion.id]).toBe("Chatbot");
+});
+
+test("the landing offers Continue once there are answers", () => {
+  seedLegacy({ [pickerQuestion.id]: "Chatbot" });
+  renderAt("/");
+  expect(screen.queryByRole("button", { name: "Begin" })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(quality.name);
+});
+
+test("the landing shows per-part progress", () => {
+  seedRecord({
+    [quality.questions[0].id]: "Yes",
+    [quality.questions[1].id]: "No",
+    [userConsiderations.questions[0].id]: "Yes",
+  });
+  const { container } = renderAt("/");
+  const wheel = within(container.querySelector('[data-variant="wheel"]'));
+  expect(
+    wheel.getByRole("link", { name: /Quality of technology — part 2 of 3, 2 of 5 answered/ }),
+  ).toBeInTheDocument();
+  expect(screen.getByText("2 of 5 answered")).toBeInTheDocument();
+  expect(screen.getByText("1 of 5 answered")).toBeInTheDocument();
+});
+
+test("naming the technology carries it into the walkthrough", () => {
+  renderAt("/");
+  fireEvent.change(screen.getByLabelText("What are you evaluating?"), {
+    target: { value: "Calm Harbour" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Begin" }));
+  expect(screen.getAllByText("Calm Harbour").length).toBeGreaterThan(0);
+});
+
+test("the assessment is titled with the subject", () => {
+  seedRecord({ [pickerQuestion.id]: "Chatbot" }, "Calm Harbour");
+  renderAt("/evaluate/guidance");
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+    "Your assessment of Calm Harbour",
+  );
+});
+
+test("the assessment gathers guidance and findings with their questions", () => {
   const noNote = quality.questions[0].options.find((o) => o.label === "No").note;
   const gatedNote = gatedQuestion.options.find((o) => o.label === "Yes").note;
   const userNote = userConsiderations.questions[0].options.find((o) => o.label === "No").note;
-  seedAnswers({
+  seedRecord({
     [pickerQuestion.id]: "Chatbot",
     [quality.questions[0].id]: "No",
     [gatedQuestion.id]: "Yes",
     [userConsiderations.questions[0].id]: "No",
   });
   renderAt("/evaluate/guidance");
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Your guidance");
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Your assessment");
   expect(screen.getByRole("heading", { name: "What was evaluated" })).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: quality.name })).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: userConsiderations.name })).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: `Part 2 · ${quality.name}` }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: `Part 3 · ${userConsiderations.name}` }),
+  ).toBeInTheDocument();
   expect(screen.getByText(noNote)).toBeInTheDocument();
   expect(screen.getByText(gatedNote)).toBeInTheDocument();
   expect(screen.getByText(userNote)).toBeInTheDocument();
+  // each note shows the question it came from
+  expect(screen.getByText(quality.questions[0].text)).toBeInTheDocument();
+  expect(screen.getByText(gatedQuestion.text)).toBeInTheDocument();
 });
 
-test("Start over clears the walkthrough and returns to the first step", () => {
-  seedAnswers({ [pickerQuestion.id]: "Chatbot", [quality.questions[0].id]: "No" });
+test("Start over clears the walkthrough and returns home", () => {
+  seedRecord({ [pickerQuestion.id]: "Chatbot" }, "Calm Harbour");
   renderAt("/evaluate/guidance");
   fireEvent.click(screen.getByRole("button", { name: "Start over" }));
-  expect(screen.getByText(`Step 1 of ${domains.length}`)).toBeInTheDocument();
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(domains[0].name);
-  expect(storedAnswers()).toEqual({});
+  expect(screen.getByRole("button", { name: "Begin" })).toBeInTheDocument();
+  expect(storedRecord()).toEqual({ subject: "", answers: {} });
 });
 
-test("an empty summary invites the walkthrough", () => {
+test("an empty assessment invites the walkthrough", () => {
   renderAt("/evaluate/guidance");
   expect(screen.getByText(/nothing here yet/i)).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Start the evaluation" })).toHaveAttribute(

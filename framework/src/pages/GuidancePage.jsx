@@ -1,32 +1,38 @@
 import { Link, useNavigate } from "react-router-dom";
 import {
   chosenOption,
+  countsFor,
   currentTypeSlug,
   domains,
+  findingsFor,
   hasAnyAnswers,
-  notesFor,
+  partNumberFor,
   pickerQuestion,
+  stepNumberFor,
 } from "../content.js";
 import { useAnswers } from "../state/answers-context.js";
 import Prose from "../components/Prose.jsx";
+import PartNav from "../components/PartNav.jsx";
 
 export default function GuidancePage() {
-  const { answers, clearAnswers } = useAnswers();
+  const { subject, answers, clearAll } = useAnswers();
   const navigate = useNavigate();
 
   if (!hasAnyAnswers(answers)) {
     return (
-      <article className="summary">
-        <h1>Your guidance</h1>
-        <p className="lead">
-          Nothing here yet — work through the steps and your guidance will gather here.
-        </p>
-        <p className="cta">
-          <Link className="button" to="/evaluate">
-            Start the evaluation
-          </Link>
-        </p>
-      </article>
+      <div className="page page--assessment">
+        <article className="sheet summary summary--empty">
+          <h1>Your assessment</h1>
+          <p className="lead">
+            Nothing here yet — work through the parts and your guidance will gather here.
+          </p>
+          <p className="cta">
+            <Link className="button" to="/evaluate">
+              Start the evaluation
+            </Link>
+          </p>
+        </article>
+      </div>
     );
   }
 
@@ -35,49 +41,71 @@ export default function GuidancePage() {
   const guidedDomains = domains.filter((domain) => domain.guidance);
 
   const startOver = () => {
-    clearAnswers();
-    navigate("/evaluate");
+    clearAll();
+    navigate("/");
   };
 
   return (
-    <article className="summary">
-      <h1>Your guidance</h1>
-      <p className="lead">Everything the walkthrough surfaced, in one place.</p>
-      <section className="summary-part">
-        <h2>What was evaluated</h2>
-        {type ? (
-          <p className="summary-type">
-            <strong>{type.label}.</strong>
-            {type.note ? ` ${type.note}` : null}
-          </p>
-        ) : (
-          <p className="summary-type">No technology chosen yet.</p>
-        )}
-      </section>
-      {guidedDomains.map((domain) => {
-        const notes = notesFor(domain, answers, typeSlug);
-        return (
-          <section key={domain.key} className="summary-part">
-            <h2>{domain.name}</h2>
-            <Prose text={domain.guidance} />
-            {notes.length > 0 ? (
-              <>
-                <h3 className="summary-notes-title">Based on your answers</h3>
-                <ul className="summary-notes">
-                  {notes.map((note) => (
-                    <li key={note.id}>{note.text}</li>
-                  ))}
-                </ul>
-              </>
-            ) : null}
-          </section>
-        );
-      })}
-      <div className="summary-actions">
-        <button type="button" className="button button-quiet" onClick={startOver}>
-          Start over
-        </button>
-      </div>
-    </article>
+    <div className="page page--assessment">
+      <header className="assessment-head">
+        <h1>{subject ? `Your assessment of ${subject}` : "Your assessment"}</h1>
+        <p className="lead">Everything the walkthrough surfaced, in one place.</p>
+        <div className="assessment-wheel">
+          <PartNav />
+        </div>
+      </header>
+      <article className="sheet summary">
+        <section className="summary-part">
+          <h2>What was evaluated</h2>
+          {type ? (
+            <p className="summary-type">
+              <strong>{type.label}.</strong>
+              {type.note ? ` ${type.note}` : null}
+            </p>
+          ) : (
+            <p className="summary-type">No technology chosen yet.</p>
+          )}
+        </section>
+        {guidedDomains.map((domain) => {
+          const count = countsFor(domain, answers);
+          const findings = findingsFor(domain, answers, typeSlug);
+          return (
+            <section
+              key={domain.key}
+              className="summary-part"
+              data-part={partNumberFor(domain)}
+            >
+              <div className="summary-part-head">
+                <h2>
+                  Part {stepNumberFor(domain)} · {domain.name}
+                </h2>
+                <p className="summary-part-count">
+                  {count.answered} of {count.total} answered
+                </p>
+              </div>
+              <Prose text={domain.guidance} />
+              {findings.length > 0 ? (
+                <>
+                  <h3 className="summary-notes-title">Based on your answers</h3>
+                  <ul className="findings">
+                    {findings.map((finding) => (
+                      <li key={finding.id}>
+                        <p className="finding-question">{finding.question}</p>
+                        <p className="finding-note">{finding.note}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+            </section>
+          );
+        })}
+        <div className="summary-actions">
+          <button type="button" className="button button-quiet" onClick={startOver}>
+            Start over
+          </button>
+        </div>
+      </article>
+    </div>
   );
 }
