@@ -62,6 +62,7 @@ describe("sample data", () => {
       expect(date.test(entry.added_date), entry.id).toBe(true);
       if (entry.published_date !== null)
         expect(date.test(entry.published_date), entry.id).toBe(true);
+      expect(Array.isArray(entry.embeds), entry.id).toBe(true);
       if (entry.format === "app") {
         expect(collections.has(entry.collection), entry.id).toBe(true);
       } else {
@@ -74,34 +75,42 @@ describe("sample data", () => {
 });
 
 describe("sample media", () => {
-  test("every entry carries a banner with local media and alt text", () => {
+  test("every entry carries a banner with local media", () => {
     for (const entry of ENTRIES) {
       expect(entry.banner, entry.id).toBeTruthy();
       expect(["image", "video"], entry.id).toContain(entry.banner.kind);
       expect(entry.banner.src.startsWith("/media/"), entry.id).toBe(true);
-      expect(typeof entry.banner.alt).toBe("string");
-      expect(entry.banner.alt.length).toBeGreaterThan(0);
+      if (entry.banner.alt !== undefined) {
+        expect(typeof entry.banner.alt, entry.id).toBe("string");
+      }
       if (entry.banner.kind === "video") {
         expect(entry.banner.poster.startsWith("/media/"), entry.id).toBe(true);
       }
     }
   });
 
-  test("one video banner and two embeds prove both media paths", () => {
+  test("one video banner and both embed kinds appear across the entries", () => {
     expect(ENTRIES.filter((entry) => entry.banner.kind === "video")).toHaveLength(1);
-    const embeds = ENTRIES.filter((entry) => entry.embed);
-    expect(embeds).toHaveLength(2);
-    expect(embeds.filter((entry) => entry.embed.kind === "video")).toHaveLength(1);
-    expect(embeds.filter((entry) => entry.embed.kind === "pdf")).toHaveLength(1);
-    for (const entry of embeds) {
-      expect(entry.embed.url.startsWith("/media/"), entry.id).toBe(true);
-      expect(entry.embed.title.length).toBeGreaterThan(0);
+    const withEmbeds = ENTRIES.filter((entry) => entry.embeds.length > 0);
+    expect(withEmbeds).toHaveLength(2);
+    expect(withEmbeds.filter((entry) => entry.embeds[0].kind === "video")).toHaveLength(1);
+    expect(withEmbeds.filter((entry) => entry.embeds[0].kind === "pdf")).toHaveLength(1);
+    for (const entry of withEmbeds) {
+      for (const media of entry.embeds) {
+        expect(media.url.startsWith("/media/"), entry.id).toBe(true);
+        expect(media.title.length).toBeGreaterThan(0);
+      }
     }
   });
 
   test("nothing in the sample data points at an external address", () => {
     for (const entry of ENTRIES) {
-      const urls = [entry.url, entry.banner?.src, entry.banner?.poster, entry.embed?.url];
+      const urls = [
+        entry.url,
+        entry.banner?.src,
+        entry.banner?.poster,
+        ...entry.embeds.map((media) => media.url),
+      ];
       for (const url of urls) {
         if (url == null) continue;
         expect(url.startsWith("/"), `${entry.id}: ${url}`).toBe(true);

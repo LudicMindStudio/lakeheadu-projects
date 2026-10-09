@@ -2,13 +2,15 @@
 // "the server is not running" and fall back to bundled data.
 
 async function request(path, options = {}) {
+  const { headers: extraHeaders, ...rest } = options;
   const response = await fetch(path, {
     credentials: "same-origin",
     headers: {
       accept: "application/json",
-      ...(options.body ? { "content-type": "application/json" } : {}),
+      ...(rest.body ? { "content-type": "application/json" } : {}),
+      ...extraHeaders,
     },
-    ...options,
+    ...rest,
   });
   const type = response.headers?.get?.("content-type") ?? "";
   const data = type.includes("json") ? await response.json() : null;
@@ -33,4 +35,10 @@ export const api = {
       body: JSON.stringify(entry),
     }),
   remove: (id) => request(`/api/entries/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  upload: (file) =>
+    request("/api/uploads", {
+      method: "POST",
+      body: file,
+      headers: { "content-type": file.type, "x-file-name": file.name },
+    }),
 };

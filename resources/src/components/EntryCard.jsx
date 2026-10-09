@@ -5,7 +5,7 @@ import { highlightParts } from "../lib/browse.js";
 import { supportsViewTransitions, useReducedMotion } from "../lib/motion.js";
 import EntryMedia from "./EntryMedia.jsx";
 
-const HOVER_OPEN_MS = 2000;
+const HOVER_OPEN_MS = 500;
 
 function Highlighted({ text, terms }) {
   return highlightParts(text, terms).map((part, index) =>
@@ -15,7 +15,7 @@ function Highlighted({ text, terms }) {
 
 // One entry as a media-led card: it fills a cell in the ring, runs as a wide
 // band in the list, and opens its details in place. The arrow toggles the
-// details, a two-second hover opens them on its own, and closing by hand
+// details, a half-second hover opens them on its own, and closing by hand
 // turns that hover-open off for the card.
 export default function EntryCard({ entry, terms, browseSearch, style, expandable = true }) {
   const [open, setOpen] = useState(false);

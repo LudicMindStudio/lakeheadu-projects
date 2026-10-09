@@ -14,9 +14,9 @@
     "banner": {
       "kind": "image",
       "src": "/media/banners/digital-health-reading-room.jpg",
-      "alt": "Abstract artwork with soft grey washes and a fine ring"
+      "alt": "A woman in a red blazer reading a book beside a window"
     },
-    "embed": null
+    "embeds": []
   },
   {
     "id": "screen-time-classroom-lab",
@@ -33,9 +33,9 @@
     "banner": {
       "kind": "image",
       "src": "/media/banners/screen-time-classroom-lab.jpg",
-      "alt": "Abstract artwork with soft green washes"
+      "alt": "Students at their desks in a classroom as a teacher speaks"
     },
-    "embed": null
+    "embeds": []
   },
   {
     "id": "how-apps-track-mood",
@@ -53,13 +53,15 @@
       "kind": "video",
       "src": "/media/video/mood-loop.mp4",
       "poster": "/media/video/mood-loop-poster.jpg",
-      "alt": "A slow blue gradient drifting across warm paper"
+      "alt": "A doctor talking with a patient over a video consultation"
     },
-    "embed": {
-      "kind": "video",
-      "url": "/media/video/mood-explainer.mp4",
-      "title": "The full explainer"
-    }
+    "embeds": [
+      {
+        "kind": "video",
+        "url": "/media/video/mood-explainer.mp4",
+        "title": "The full explainer"
+      }
+    ]
   },
   {
     "id": "talking-tech-and-feelings",
@@ -76,9 +78,9 @@
     "banner": {
       "kind": "image",
       "src": "/media/banners/talking-tech-and-feelings.jpg",
-      "alt": "Abstract artwork in layered blue tones"
+      "alt": "Two people in conversation on a couch"
     },
-    "embed": null
+    "embeds": []
   },
   {
     "id": "northshore-wellbeing-network",
@@ -95,9 +97,9 @@
     "banner": {
       "kind": "image",
       "src": "/media/banners/northshore-wellbeing-network.jpg",
-      "alt": "Abstract artwork with quiet grey tones and a faint ring"
+      "alt": "A group meeting around a table with laptops and notes"
     },
-    "embed": null
+    "embeds": []
   },
   {
     "id": "five-questions-choosing-an-app",
@@ -114,9 +116,9 @@
     "banner": {
       "kind": "image",
       "src": "/media/banners/five-questions-choosing-an-app.jpg",
-      "alt": "Abstract artwork with a warm amber wash"
+      "alt": "A doctor in a white coat talking on a phone"
     },
-    "embed": null
+    "embeds": []
   },
   {
     "id": "smartphone-anxiety-review",
@@ -133,9 +135,9 @@
     "banner": {
       "kind": "image",
       "src": "/media/banners/smartphone-anxiety-review.jpg",
-      "alt": "Abstract artwork in layered amber tones"
+      "alt": "A doctor in glasses reviewing notes at a desk"
     },
-    "embed": null
+    "embeds": []
   },
   {
     "id": "sleep-habits-check-in",
@@ -152,13 +154,15 @@
     "banner": {
       "kind": "image",
       "src": "/media/banners/sleep-habits-check-in.jpg",
-      "alt": "Abstract artwork with a calm green wash"
+      "alt": "A person sleeping peacefully"
     },
-    "embed": {
-      "kind": "pdf",
-      "url": "/media/docs/sleep-habits-check-in.pdf",
-      "title": "The check-in page"
-    }
+    "embeds": [
+      {
+        "kind": "pdf",
+        "url": "/media/docs/sleep-habits-check-in.pdf",
+        "title": "The check-in page"
+      }
+    ]
   },
   {
     "id": "health-apps-getting-started",
@@ -175,9 +179,9 @@
     "banner": {
       "kind": "image",
       "src": "/media/banners/health-apps-getting-started.jpg",
-      "alt": "Abstract artwork in soft sage green"
+      "alt": "An older man seated on a couch using his phone"
     },
-    "embed": null
+    "embeds": []
   },
   {
     "id": "harbourlight-app",
@@ -194,9 +198,9 @@
     "banner": {
       "kind": "image",
       "src": "/media/banners/harbourlight-app.jpg",
-      "alt": "Abstract artwork in dark ink tones over warm paper"
+      "alt": "A person writing in a journal at home"
     },
-    "embed": null
+    "embeds": []
   },
   {
     "id": "stillbrook-app",
@@ -213,9 +217,9 @@
     "banner": {
       "kind": "image",
       "src": "/media/banners/stillbrook-app.jpg",
-      "alt": "Abstract artwork with deep ink washes and a fine ring"
+      "alt": "A person sitting quietly in a calm room"
     },
-    "embed": null
+    "embeds": []
   },
   {
     "id": "northwood-calm-app",
@@ -232,8 +236,8 @@
     "banner": {
       "kind": "image",
       "src": "/media/banners/northwood-calm-app.jpg",
-      "alt": "Abstract artwork with broad ink-toned washes"
+      "alt": "A teenager using a phone on a couch"
     },
-    "embed": null
+    "embeds": []
   }
 ]

@@ -11,6 +11,18 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// The entry's id, derived from its title: lowercase words joined by dashes.
+function toId(title) {
+  return String(title ?? "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64)
+    .replace(/-+$/, "");
+}
+
 function blankEntry() {
   return {
     id: "",
@@ -25,15 +37,27 @@ function blankEntry() {
     published_date: null,
     added_date: today(),
     banner: null,
-    embed: null,
+    embeds: [],
   };
 }
 
 function EntryForm({ mode, initial, busy, error, onCancel, onSave }) {
   const [draft, setDraft] = useState(() => structuredClone(initial));
   const [tagsText, setTagsText] = useState(() => initial.tags.join(", "));
+  const [manualId, setManualId] = useState(mode === "edit");
+  const [pathOpen, setPathOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   const set = (field, value) => setDraft((previous) => ({ ...previous, [field]: value }));
+
+  const onTitleChange = (value) => {
+    setDraft((previous) => ({
+      ...previous,
+      title: value,
+      id: manualId ? previous.id : toId(value),
+    }));
+  };
 
   const onTagsChange = (text) => {
     setTagsText(text);
@@ -48,17 +72,44 @@ function EntryForm({ mode, initial, busy, error, onCancel, onSave }) {
 
   const onBannerKind = (kind) => {
     if (kind === "none") set("banner", null);
-    else if (kind === "image") set("banner", { kind: "image", src: "", alt: "" });
-    else set("banner", { kind: "video", src: "", poster: "", alt: "" });
+    else if (kind === "image") set("banner", { kind: "image", src: "" });
+    else set("banner", { kind: "video", src: "", poster: "" });
+    setPathOpen(false);
+    setUploadError("");
   };
 
-  const onEmbedKind = (kind) => {
-    if (kind === "none") set("embed", null);
-    else set("embed", { kind, url: "", title: "" });
+  const onUpload = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !draft.banner) return;
+    setUploading(true);
+    setUploadError("");
+    try {
+      const result = await api.upload(file);
+      set("banner", { ...draft.banner, src: result.src });
+    } catch (uploadFailure) {
+      setUploadError(uploadFailure.message);
+    } finally {
+      setUploading(false);
+    }
   };
+
+  const setEmbed = (index, patch) => {
+    setDraft((previous) => ({
+      ...previous,
+      embeds: previous.embeds.map((media, at) => (at === index ? { ...media, ...patch } : media)),
+    }));
+  };
+
+  const addEmbed = () => set("embeds", [...draft.embeds, { kind: "video", url: "", title: "" }]);
+
+  const removeEmbed = (index) =>
+    set(
+      "embeds",
+      draft.embeds.filter((_, at) => at !== index),
+    );
 
   const bannerKind = draft.banner?.kind ?? "none";
-  const embedKind = draft.embed?.kind ?? "none";
 
   const submit = (event) => {
     event.preventDefault();
@@ -67,9 +118,12 @@ function EntryForm({ mode, initial, busy, error, onCancel, onSave }) {
           kind: draft.banner.kind,
           src: draft.banner.src.trim(),
           poster: draft.banner.kind === "video" ? (draft.banner.poster ?? "").trim() : undefined,
-          alt: draft.banner.alt.trim(),
+          alt: draft.banner.alt ?? "",
         }
       : null;
+    const embeds = draft.embeds
+      .map((media) => ({ kind: media.kind, url: media.url.trim(), title: media.title.trim() }))
+      .filter((media) => media.url !== "" || media.title !== "");
     const payload = {
       ...draft,
       id: draft.id.trim(),
@@ -80,9 +134,7 @@ function EntryForm({ mode, initial, busy, error, onCancel, onSave }) {
       published_date: draft.published_date || null,
       added_date: draft.added_date || today(),
       banner,
-      embed: draft.embed
-        ? { ...draft.embed, url: draft.embed.url.trim(), title: draft.embed.title.trim() }
-        : null,
+      embeds,
     };
     onSave(payload);
   };
@@ -108,22 +160,44 @@ function EntryForm({ mode, initial, busy, error, onCancel, onSave }) {
 
       <div className="admin-fields">
         <label className="admin-field">
-          <span className="admin-label">Id</span>
-          <input
-            className="admin-input"
-            value={draft.id}
-            readOnly={mode === "edit"}
-            onChange={(event) => set("id", event.target.value)}
-          />
-        </label>
-        <label className="admin-field">
           <span className="admin-label">Title</span>
           <input
             className="admin-input"
             value={draft.title}
-            onChange={(event) => set("title", event.target.value)}
+            onChange={(event) => onTitleChange(event.target.value)}
           />
         </label>
+        <div className="admin-field">
+          <span className="admin-label">Id</span>
+          {mode === "edit" ? (
+            <input className="admin-input" value={draft.id} readOnly aria-label="Id" />
+          ) : (
+            <div className="admin-id-row">
+              <input
+                className="admin-input"
+                value={draft.id}
+                readOnly={!manualId}
+                placeholder="Generated from the title"
+                aria-label="Id"
+                onChange={(event) => set("id", event.target.value)}
+              />
+              <button
+                type="button"
+                className="link-button"
+                onClick={() => {
+                  if (manualId) {
+                    setManualId(false);
+                    set("id", toId(draft.title));
+                  } else {
+                    setManualId(true);
+                  }
+                }}
+              >
+                {manualId ? "Generate from title" : "Set manually"}
+              </button>
+            </div>
+          )}
+        </div>
         <label className="admin-field">
           <span className="admin-label">Format</span>
           <select
@@ -253,35 +327,72 @@ function EntryForm({ mode, initial, busy, error, onCancel, onSave }) {
           </label>
           {draft.banner && (
             <>
-              <label className="admin-field">
-                <span className="admin-label">Source</span>
-                <input
-                  className="admin-input"
-                  value={draft.banner.src}
-                  placeholder="/media/banners/… or https://…"
-                  onChange={(event) => set("banner", { ...draft.banner, src: event.target.value })}
-                />
-              </label>
+              <div className="admin-field">
+                <span className="admin-label">
+                  {draft.banner.kind === "video" ? "Video file" : "Image file"}
+                </span>
+                <div className="admin-upload">
+                  <label className="button-secondary admin-upload-button">
+                    {uploading ? "Uploading…" : draft.banner.src ? "Replace file" : "Upload file"}
+                    <input
+                      type="file"
+                      className="visually-hidden"
+                      accept={
+                        draft.banner.kind === "video"
+                          ? "video/mp4,video/webm"
+                          : "image/jpeg,image/png,image/webp,image/gif"
+                      }
+                      onChange={onUpload}
+                      disabled={uploading}
+                    />
+                  </label>
+                  {draft.banner.src && (
+                    <span className="admin-upload-name" title={draft.banner.src}>
+                      {draft.banner.src.split("/").pop()}
+                    </span>
+                  )}
+                </div>
+                {!pathOpen && (
+                  <button type="button" className="link-button" onClick={() => setPathOpen(true)}>
+                    Use a path instead
+                  </button>
+                )}
+                {pathOpen && (
+                  <input
+                    className="admin-input"
+                    aria-label="File path"
+                    value={draft.banner.src}
+                    placeholder="/media/banners/… or /uploads/…"
+                    onChange={(event) =>
+                      set("banner", { ...draft.banner, src: event.target.value })
+                    }
+                  />
+                )}
+                {uploadError && (
+                  <p className="admin-error" role="alert">
+                    {uploadError}
+                  </p>
+                )}
+              </div>
               {draft.banner.kind === "video" && (
                 <label className="admin-field">
-                  <span className="admin-label">Poster</span>
+                  <span className="admin-label">Poster path</span>
                   <input
                     className="admin-input"
                     value={draft.banner.poster ?? ""}
+                    placeholder="/media/video/…-poster.jpg"
                     onChange={(event) =>
                       set("banner", { ...draft.banner, poster: event.target.value })
                     }
                   />
                 </label>
               )}
-              <label className="admin-field">
-                <span className="admin-label">Alt text</span>
-                <input
-                  className="admin-input"
-                  value={draft.banner.alt}
-                  onChange={(event) => set("banner", { ...draft.banner, alt: event.target.value })}
-                />
-              </label>
+              {draft.banner.kind === "image" && draft.banner.src && (
+                <div className="admin-field admin-upload-preview">
+                  <span className="admin-label">Preview</span>
+                  <img src={draft.banner.src} alt="" />
+                </div>
+              )}
             </>
           )}
         </div>
@@ -289,41 +400,51 @@ function EntryForm({ mode, initial, busy, error, onCancel, onSave }) {
 
       <fieldset className="admin-group">
         <legend>Embedded media</legend>
-        <div className="admin-fields">
-          <label className="admin-field">
-            <span className="admin-label">Kind</span>
-            <select
-              className="admin-input"
-              value={embedKind}
-              onChange={(event) => onEmbedKind(event.target.value)}
+        {draft.embeds.length === 0 && (
+          <p className="admin-line">No embedded media yet. Add videos or documents below.</p>
+        )}
+        {draft.embeds.map((media, index) => (
+          <div className="admin-media-row" key={index}>
+            <label className="admin-field">
+              <span className="admin-label">Kind</span>
+              <select
+                className="admin-input"
+                value={media.kind}
+                onChange={(event) => setEmbed(index, { kind: event.target.value })}
+              >
+                <option value="video">Video</option>
+                <option value="pdf">PDF</option>
+              </select>
+            </label>
+            <label className="admin-field admin-media-link">
+              <span className="admin-label">Link</span>
+              <input
+                className="admin-input"
+                value={media.url}
+                placeholder="/media/… or a video link"
+                onChange={(event) => setEmbed(index, { url: event.target.value })}
+              />
+            </label>
+            <label className="admin-field admin-media-title">
+              <span className="admin-label">Caption</span>
+              <input
+                className="admin-input"
+                value={media.title}
+                onChange={(event) => setEmbed(index, { title: event.target.value })}
+              />
+            </label>
+            <button
+              type="button"
+              className="link-button admin-media-remove"
+              onClick={() => removeEmbed(index)}
             >
-              <option value="none">None</option>
-              <option value="video">Video</option>
-              <option value="pdf">PDF</option>
-            </select>
-          </label>
-          {draft.embed && (
-            <>
-              <label className="admin-field">
-                <span className="admin-label">Link</span>
-                <input
-                  className="admin-input"
-                  value={draft.embed.url}
-                  placeholder="/media/… or a video link"
-                  onChange={(event) => set("embed", { ...draft.embed, url: event.target.value })}
-                />
-              </label>
-              <label className="admin-field">
-                <span className="admin-label">Caption</span>
-                <input
-                  className="admin-input"
-                  value={draft.embed.title}
-                  onChange={(event) => set("embed", { ...draft.embed, title: event.target.value })}
-                />
-              </label>
-            </>
-          )}
-        </div>
+              Remove
+            </button>
+          </div>
+        ))}
+        <button type="button" className="button-secondary admin-add-media" onClick={addEmbed}>
+          Add media
+        </button>
       </fieldset>
     </form>
   );
@@ -352,7 +473,7 @@ export default function AdminPage() {
   const [confirmId, setConfirmId] = useState(null);
 
   useEffect(() => {
-    document.title = "Manage · Resources & tools";
+    document.title = "Manage entries · Resources & tools";
   }, []);
 
   const apply = useCallback((result) => {
@@ -444,7 +565,7 @@ export default function AdminPage() {
   if (phase === "loading") {
     return (
       <div className="admin">
-        <h1>Manage resources</h1>
+        <h1>Manage entries</h1>
         <p className="admin-line">Checking the management server…</p>
       </div>
     );
@@ -453,7 +574,7 @@ export default function AdminPage() {
   if (phase === "offline") {
     return (
       <div className="admin">
-        <h1>Manage resources</h1>
+        <h1>Manage entries</h1>
         <p className="admin-line">
           The management server is not running, so entries cannot be edited right now. Start it with{" "}
           <code>npm run server</code> and reload.
@@ -465,7 +586,7 @@ export default function AdminPage() {
   if (phase === "unconfigured") {
     return (
       <div className="admin">
-        <h1>Manage resources</h1>
+        <h1>Manage entries</h1>
         <p className="admin-line">
           The management server is running without an admin password. Set{" "}
           <code>ADMIN_PASSWORD</code> and restart it to enable editing.
@@ -477,7 +598,7 @@ export default function AdminPage() {
   if (phase === "login") {
     return (
       <div className="admin admin-narrow">
-        <h1>Manage resources</h1>
+        <h1>Manage entries</h1>
         <p className="admin-line">Sign in to add, edit, and remove entries.</p>
         <form className="admin-login" onSubmit={onLogin}>
           <label className="admin-field">
@@ -522,7 +643,7 @@ export default function AdminPage() {
   return (
     <div className="admin">
       <div className="admin-head">
-        <h1>Manage resources</h1>
+        <h1>Manage entries</h1>
         <div className="admin-actions">
           <button
             type="button"

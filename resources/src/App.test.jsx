@@ -1,8 +1,10 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
-import { MemoryRouter, useLocation } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { expect, test, vi } from "vitest";
 import App from "./App.jsx";
+import EntryPage from "./pages/EntryPage.jsx";
 import { ENTRIES } from "./lib/entries.js";
+import { EntriesContext } from "./lib/useEntries.js";
 
 const TOTAL = ENTRIES.length;
 
@@ -103,9 +105,12 @@ test("browse opens the list directly", () => {
   expect(headings[TOTAL - 1]).toHaveTextContent("Northwood Calm for Teens");
 });
 
-test("the header carries the sample marker", () => {
+test("the header carries a visible way into managing entries", () => {
   renderAt("/");
-  expect(screen.getByText("Sample content", { selector: ".sample-pill" })).toBeInTheDocument();
+  const manage = document.querySelector(".app-header .manage-button");
+  expect(manage).toHaveAttribute("href", "/admin");
+  expect(manage).toHaveTextContent("Manage entries");
+  expect(document.querySelector(".sample-pill")).toBeNull();
 });
 
 // Searching, filters, sorting
@@ -191,7 +196,7 @@ test("a card opens its details in place", () => {
   expect(card.textContent).not.toContain("Sample entry");
 });
 
-test("a two-second hover opens the card, and closing turns hover off", () => {
+test("a half-second hover opens the card, and closing turns hover off", () => {
   vi.useFakeTimers();
   try {
     renderAt("/browse");
@@ -199,10 +204,10 @@ test("a two-second hover opens the card, and closing turns hover off", () => {
       .getByRole("heading", { level: 2, name: /Sleep Habits Check-In/ })
       .closest(".card");
 
-    // A hover shorter than two seconds leaves the card closed.
+    // A hover shorter than half a second leaves the card closed.
     fireEvent.mouseEnter(card);
     act(() => {
-      vi.advanceTimersByTime(1500);
+      vi.advanceTimersByTime(300);
     });
     fireEvent.mouseLeave(card);
     act(() => {
@@ -213,10 +218,10 @@ test("a two-second hover opens the card, and closing turns hover off", () => {
       "false",
     );
 
-    // Two full seconds open it, and it stays open.
+    // Half a second opens it, and it stays open.
     fireEvent.mouseEnter(card);
     act(() => {
-      vi.advanceTimersByTime(2100);
+      vi.advanceTimersByTime(600);
     });
     fireEvent.mouseLeave(card);
     expect(within(card).getByRole("button", { name: "Hide details" })).toHaveAttribute(
@@ -258,11 +263,10 @@ test("an entry page carries the way back to the search", () => {
   expect(
     screen.getByRole("heading", { level: 1, name: "Sleep Habits Check-In" }),
   ).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "Back to the list" })).toHaveAttribute(
-    "href",
-    "/?q=sleep",
-  );
-  expect(document.querySelector(".sample-note").textContent).toContain("Sample content.");
+  const back = screen.getByRole("link", { name: "Back to the list" });
+  expect(back).toHaveAttribute("href", "/?q=sleep");
+  expect(back).toHaveClass("back-button");
+  expect(document.querySelector(".sample-note")).toBeNull();
 });
 
 test("an entry with a clip embeds the player and its banner", () => {
@@ -272,6 +276,43 @@ test("an entry with a clip embeds the player and its banner", () => {
   expect(view.container.querySelector(".embed-video")).toBeTruthy();
   expect(view.container.querySelector(".entry-hero video")).toBeTruthy();
   expect(screen.getByText("The full explainer")).toBeInTheDocument();
+});
+
+test("an entry with several media items renders each one in order", () => {
+  const multi = {
+    id: "multi",
+    title: "Multi Media Entry",
+    format: "video",
+    collection: null,
+    source: "Test Source",
+    url: null,
+    description: "An entry with more than one piece of media.",
+    age_groups: ["all-ages"],
+    tags: ["media"],
+    published_date: null,
+    added_date: "2025-01-01",
+    banner: null,
+    embeds: [
+      { kind: "video", url: "/media/video/one.mp4", title: "The clip" },
+      { kind: "pdf", url: "/media/docs/two.pdf", title: "The document" },
+    ],
+  };
+  const view = render(
+    <MemoryRouter initialEntries={["/entry/multi"]}>
+      <EntriesContext.Provider value={[multi]}>
+        <Routes>
+          <Route path="/entry/:id" element={<EntryPage />} />
+        </Routes>
+      </EntriesContext.Provider>
+    </MemoryRouter>,
+  );
+  const items = view.container.querySelectorAll(".embed-item");
+  expect(items).toHaveLength(2);
+  expect(items[0].querySelector(".embed-video")).toBeTruthy();
+  expect(items[0].textContent).toContain("The clip");
+  expect(items[1].querySelector(".embed-frame-doc")).toBeTruthy();
+  expect(items[1].textContent).toContain("The document");
+  expect(view.container.querySelector(".entry-hero .entry-media-plain")).toBeTruthy();
 });
 
 test("an entry with a document embeds the viewer", () => {
@@ -285,12 +326,15 @@ test("an entry with a document embeds the viewer", () => {
   );
 });
 
-test("entry meta shows age, dates, and topics", () => {
+test("entry quick banner shows age, dates, and topics", () => {
   renderAt("/entry/sleep-habits-check-in");
-  expect(screen.getByText("Who it’s for")).toBeInTheDocument();
-  expect(screen.getByText("All ages")).toBeInTheDocument();
-  expect(screen.getByText("Aug 2025")).toBeInTheDocument();
-  expect(screen.queryByText("Published")).toBeNull();
+  const quick = document.querySelector(".entry-quick");
+  expect(quick).toBeTruthy();
+  expect(quick).toHaveTextContent("All ages");
+  expect(quick).toHaveTextContent("Aug 2025");
+  expect(quick).toHaveTextContent("sleep");
+  expect(quick).not.toHaveTextContent("Published");
+  expect(document.querySelector(".entry-meta")).toBeNull();
 });
 
 test("apps show the collection they are listed in", () => {
@@ -311,12 +355,7 @@ test("unknown route shows the not-found page", () => {
 
 // Management
 
-test("the admin page says plainly when the server is away", async () => {
-  renderAt("/admin");
-  expect(await screen.findByText(/management server is not running/i)).toBeInTheDocument();
-});
-
-test("the admin page signs in, lists entries, and opens the editor", async () => {
+function mockAdminApi(overrides = {}) {
   let authed = false;
   const respond = (data, status = 200) => ({
     ok: status < 400,
@@ -343,19 +382,82 @@ test("the admin page signs in, lists entries, and opens the editor", async () =>
         ],
       });
     }
+    if (path === "/api/uploads" && options.method === "POST") {
+      return respond(overrides.upload ?? { src: "/uploads/shot-abc.png" }, 201);
+    }
     return respond({ error: "not mocked" }, 404);
   };
+}
 
-  const view = renderAt("/admin");
+async function signIn() {
   const password = await screen.findByLabelText("Password");
   fireEvent.change(password, { target: { value: "hunter-two" } });
   fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
-  expect(await screen.findByText("Alpha Entry")).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Add entry" })).toBeInTheDocument();
+  await screen.findByRole("button", { name: "Add entry" });
+}
+
+test("the admin page says plainly when the server is away", async () => {
+  renderAt("/admin");
+  expect(await screen.findByText(/management server is not running/i)).toBeInTheDocument();
+});
+
+test("the admin page signs in, lists entries, and opens the editor", async () => {
+  mockAdminApi();
+  const view = renderAt("/admin");
+  await signIn();
+  expect(screen.getByText("Alpha Entry")).toBeInTheDocument();
 
   fireEvent.click(screen.getByRole("button", { name: "Add entry" }));
   expect(screen.getByLabelText("Title")).toBeInTheDocument();
   expect(screen.getByText("Banner media")).toBeInTheDocument();
   expect(screen.getByText("Embedded media")).toBeInTheDocument();
   expect(view.container.querySelector(".admin-fields")).toBeTruthy();
+});
+
+test("the editor derives the id from the title, with a manual override", async () => {
+  mockAdminApi();
+  renderAt("/admin");
+  await signIn();
+  fireEvent.click(screen.getByRole("button", { name: "Add entry" }));
+
+  fireEvent.change(screen.getByLabelText("Title"), {
+    target: { value: "Sleep and Screen Time" },
+  });
+  const id = screen.getByLabelText("Id");
+  expect(id).toHaveValue("sleep-and-screen-time");
+  expect(id).toHaveAttribute("readonly");
+
+  fireEvent.click(screen.getByRole("button", { name: "Set manually" }));
+  expect(id).not.toHaveAttribute("readonly");
+  fireEvent.change(id, { target: { value: "custom-id" } });
+  fireEvent.change(screen.getByLabelText("Title"), { target: { value: "Something else" } });
+  expect(id).toHaveValue("custom-id");
+});
+
+test("the editor uploads a banner image to the server", async () => {
+  mockAdminApi();
+  renderAt("/admin");
+  await signIn();
+  fireEvent.click(screen.getByRole("button", { name: "Add entry" }));
+
+  fireEvent.change(screen.getByLabelText("Kind"), { target: { value: "image" } });
+  const file = new File(["png-bytes"], "shot.png", { type: "image/png" });
+  fireEvent.change(document.querySelector("input[type='file']"), {
+    target: { files: [file] },
+  });
+  expect(await screen.findByText("shot-abc.png")).toBeInTheDocument();
+});
+
+test("embedded media is a list the editor can keep adding to", async () => {
+  mockAdminApi();
+  renderAt("/admin");
+  await signIn();
+  fireEvent.click(screen.getByRole("button", { name: "Add entry" }));
+
+  expect(screen.getByText(/No embedded media yet/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Add media" }));
+  fireEvent.click(screen.getByRole("button", { name: "Add media" }));
+  expect(document.querySelectorAll(".admin-media-row")).toHaveLength(2);
+  fireEvent.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+  expect(document.querySelectorAll(".admin-media-row")).toHaveLength(1);
 });

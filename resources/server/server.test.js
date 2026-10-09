@@ -25,7 +25,7 @@ const SEED = [
     published_date: null,
     added_date: "2025-01-01",
     banner: null,
-    embed: null,
+    embeds: [],
   },
 ];
 
@@ -42,7 +42,7 @@ const DRAFT = {
   published_date: "2025-02-02",
   added_date: "2025-02-02",
   banner: { kind: "image", src: "/media/banners/two.jpg", alt: "Artwork" },
-  embed: null,
+  embeds: [{ kind: "video", url: "/media/video/two.mp4", title: "Clip" }],
 };
 
 beforeAll(async () => {
@@ -58,6 +58,7 @@ beforeAll(async () => {
     dataFile,
     seedFile,
     staticDir,
+    uploadsDir: join(dir, "uploads"),
     password: "test-password",
     sessionSecret: "test-secret",
     log: () => {},
@@ -148,6 +149,9 @@ test("runs the full create, edit, remove round trip", async () => {
   const createdEntry = (await created.json()).entry;
   expect(createdEntry.id).toBe("two");
   expect(createdEntry.updated_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  expect(createdEntry.embeds).toEqual([
+    { kind: "video", url: "/media/video/two.mp4", title: "Clip" },
+  ]);
 
   const afterCreate = await (await fetch(`${base}/api/entries`)).json();
   expect(afterCreate.entries.map((entry) => entry.id)).toEqual(["one", "two"]);
@@ -207,6 +211,82 @@ test("validates entries and refuses duplicates", async () => {
     body: "nope",
   });
   expect(wrongType.status).toBe(415);
+});
+
+test("validates the embeds list", async () => {
+  const { cookie } = await login();
+  const withSession = {
+    headers: { "content-type": "application/json", cookie },
+  };
+
+  const notAList = await fetch(`${base}/api/entries`, {
+    method: "POST",
+    ...withSession,
+    body: JSON.stringify({ ...DRAFT, id: "three-a", embeds: "nope" }),
+  });
+  expect(notAList.status).toBe(400);
+
+  const badKind = await fetch(`${base}/api/entries`, {
+    method: "POST",
+    ...withSession,
+    body: JSON.stringify({ ...DRAFT, id: "three-b", embeds: [{ kind: "audio", url: "/x.mp3" }] }),
+  });
+  expect(badKind.status).toBe(400);
+
+  const noUrl = await fetch(`${base}/api/entries`, {
+    method: "POST",
+    ...withSession,
+    body: JSON.stringify({ ...DRAFT, id: "three-c", embeds: [{ kind: "pdf", url: "" }] }),
+  });
+  expect(noUrl.status).toBe(400);
+
+  const emptyList = await fetch(`${base}/api/entries`, {
+    method: "POST",
+    ...withSession,
+    body: JSON.stringify({ ...DRAFT, id: "three-d", embeds: [] }),
+  });
+  expect(emptyList.status).toBe(201);
+  expect((await emptyList.json()).entry.embeds).toEqual([]);
+
+  const removed = await fetch(`${base}/api/entries/three-d`, {
+    method: "DELETE",
+    headers: { cookie },
+  });
+  expect(removed.status).toBe(200);
+});
+
+test("uploads store files and serve them back", async () => {
+  const { cookie } = await login();
+
+  const noSession = await fetch(`${base}/api/uploads`, {
+    method: "POST",
+    headers: { "content-type": "image/png" },
+    body: Buffer.from([1, 2, 3]),
+  });
+  expect(noSession.status).toBe(401);
+
+  const wrongType = await fetch(`${base}/api/uploads`, {
+    method: "POST",
+    headers: { "content-type": "text/plain", cookie },
+    body: Buffer.from("not a file"),
+  });
+  expect(wrongType.status).toBe(415);
+
+  const png = Buffer.from("89504e470d0a1a0a0001020304050607", "hex");
+  const uploaded = await fetch(`${base}/api/uploads`, {
+    method: "POST",
+    headers: { "content-type": "image/png", "x-file-name": "My Shot.PNG", cookie },
+    body: png,
+  });
+  expect(uploaded.status).toBe(201);
+  const { src } = await uploaded.json();
+  expect(src).toMatch(/^\/uploads\/my-shot-[0-9a-z]+-[0-9a-f]{6}\.png$/);
+
+  const served = await fetch(`${base}${src}`);
+  expect(served.status).toBe(200);
+  expect(served.headers.get("content-type")).toBe("image/png");
+  const bytes = Buffer.from(await served.arrayBuffer());
+  expect(bytes.equals(png)).toBe(true);
 });
 
 test("signing out clears the session cookie", async () => {

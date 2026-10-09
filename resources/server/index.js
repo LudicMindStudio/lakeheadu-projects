@@ -19,6 +19,7 @@ const SERVER_DIR = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_DATA_FILE = join(SERVER_DIR, "data", "entries.json");
 const DEFAULT_SEED_FILE = join(SERVER_DIR, "..", "src", "data", "entries.json");
 const DEFAULT_STATIC_DIR = join(SERVER_DIR, "..", "dist");
+const DEFAULT_UPLOADS_DIR = join(SERVER_DIR, "uploads");
 
 const SESSION_COOKIE = "resources_session";
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
@@ -57,6 +58,15 @@ const CONTENT_TYPES = {
   ".txt": "text/plain; charset=utf-8",
 };
 
+const UPLOAD_TYPES = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+  "video/mp4": ".mp4",
+  "video/webm": ".webm",
+};
+
 function send(res, status, data, headers = {}) {
   const body = JSON.stringify(data);
   res.writeHead(status, {
@@ -83,6 +93,38 @@ function readBody(req, limit = 1_000_000) {
     req.on("end", () => ok(Buffer.concat(chunks).toString("utf8")));
     req.on("error", fail);
   });
+}
+
+// The same read, kept as bytes, for uploaded files.
+function readBodyBuffer(req, limit = 16_000_000) {
+  return new Promise((ok, fail) => {
+    let size = 0;
+    const chunks = [];
+    req.on("data", (chunk) => {
+      size += chunk.length;
+      if (size > limit) {
+        fail(new Error("too large"));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("end", () => ok(Buffer.concat(chunks)));
+    req.on("error", fail);
+  });
+}
+
+// A safe stored name for an upload: the file's own name, slugged, plus a
+// short unique tail so repeats never collide.
+function uploadName(headerName, ext) {
+  const base =
+    String(headerName ?? "")
+      .toLowerCase()
+      .replace(/\.[a-z0-9]+$/, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 48) || "upload";
+  return `${base}-${Date.now().toString(36)}-${randomBytes(3).toString("hex")}${ext}`;
 }
 
 function parseCookies(header) {
@@ -232,16 +274,21 @@ function validateEntry(input) {
     }
   }
 
-  if (input.embed == null) {
-    entry.embed = null;
+  if (input.embeds == null) {
+    entry.embeds = [];
   } else {
-    const embed = input.embed;
-    if (!["video", "pdf"].includes(embed.kind)) {
-      return { error: "Embed kind must be video or pdf." };
+    if (!Array.isArray(input.embeds)) return { error: "Embeds must be a list." };
+    if (input.embeds.length > 20) return { error: "Too many media items (max 20)." };
+    entry.embeds = [];
+    for (const item of input.embeds) {
+      if (!item || typeof item !== "object") return { error: "Each media item must be an object." };
+      if (!["video", "pdf"].includes(item.kind)) {
+        return { error: "Media kind must be video or pdf." };
+      }
+      const url = String(item.url ?? "").trim();
+      if (!url) return { error: "Each media item needs a link." };
+      entry.embeds.push({ kind: item.kind, url, title: String(item.title ?? "").trim() });
     }
-    const url = String(embed.url ?? "").trim();
-    if (!url) return { error: "Embed needs a link." };
-    entry.embed = { kind: embed.kind, url, title: String(embed.title ?? "").trim() };
   }
 
   return { entry };
@@ -253,6 +300,7 @@ export function createServer(options = {}) {
   const sessions = createSessions(options.sessionSecret ?? process.env.SESSION_SECRET);
   const password = options.password ?? process.env.ADMIN_PASSWORD ?? "";
   const staticDir = options.staticDir ?? DEFAULT_STATIC_DIR;
+  const uploadsDir = options.uploadsDir ?? process.env.UPLOADS_DIR ?? DEFAULT_UPLOADS_DIR;
   const log = options.log ?? ((...args) => console.error(...args));
 
   function authed(req) {
@@ -360,6 +408,42 @@ export function createServer(options = {}) {
       return;
     }
 
+    // Uploads: an image or video file straight in the body, stored on disk,
+    // and answered with the path the entry's media fields can use.
+    if (pathname === "/api/uploads" && req.method === "POST") {
+      if (!authed(req)) {
+        send(res, 401, { error: "Sign in required." });
+        return;
+      }
+      const type = String(req.headers["content-type"] ?? "")
+        .split(";")[0]
+        .trim()
+        .toLowerCase();
+      const ext = UPLOAD_TYPES[type];
+      if (!ext) {
+        send(res, 415, {
+          error: "Upload an image or video file (jpg, png, webp, gif, mp4, or webm).",
+        });
+        return;
+      }
+      let body;
+      try {
+        body = await readBodyBuffer(req);
+      } catch {
+        send(res, 413, { error: "That file is too large (16 MB maximum)." });
+        return;
+      }
+      if (body.length === 0) {
+        send(res, 400, { error: "The file was empty." });
+        return;
+      }
+      mkdirSync(uploadsDir, { recursive: true });
+      const name = uploadName(req.headers["x-file-name"], ext);
+      writeFileSync(join(uploadsDir, name), body);
+      send(res, 201, { src: `/uploads/${name}` });
+      return;
+    }
+
     if (pathname === "/api/entries" && req.method === "POST") {
       if (!authed(req)) {
         send(res, 401, { error: "Sign in required." });
@@ -449,6 +533,22 @@ export function createServer(options = {}) {
     // Static files
 
     if (req.method === "GET" || req.method === "HEAD") {
+      if (pathname.startsWith("/uploads/")) {
+        const relative = pathname.slice("/uploads/".length);
+        const filePath = normalize(join(uploadsDir, relative));
+        if (
+          filePath.startsWith(uploadsDir + sep) &&
+          existsSync(filePath) &&
+          statSync(filePath).isFile()
+        ) {
+          serveFile(req, res, filePath);
+          return;
+        }
+        res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+        res.end("Not found.");
+        return;
+      }
+
       if (!existsSync(staticDir)) {
         res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
         res.end("Not built yet. Run npm run build, then start the server again.");

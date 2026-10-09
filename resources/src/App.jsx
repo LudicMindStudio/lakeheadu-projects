@@ -20,7 +20,11 @@ export default function App() {
           <Link className="app-title" to="/">
             Resources &amp; tools
           </Link>
-          <span className="sample-pill">Sample content</span>
+          {pathname !== "/admin" && (
+            <Link className="manage-button" to="/admin">
+              Manage entries
+            </Link>
+          )}
         </header>
         <main className="app-main" key={pathname}>
           <Routes>
@@ -33,7 +37,7 @@ export default function App() {
         </main>
         <footer className="app-footer">
           <Link className="app-footer-link" to="/admin">
-            Manage resources
+            Manage entries
           </Link>
         </footer>
       </div>

@@ -6,8 +6,8 @@ import { resolveEmbed } from "../lib/embed.js";
 import { supportsViewTransitions, useReducedMotion } from "../lib/motion.js";
 import { useEntries } from "../lib/useEntries.js";
 
-// One entry, everything: the hero banner, the description, embedded media
-// when the entry carries it, and the meta table. Back returns the list.
+// One entry, everything: the hero banner, a quick facts banner, the
+// description, and each embedded media item. Back returns the list.
 export default function EntryPage() {
   const { id } = useParams();
   const [params] = useSearchParams();
@@ -37,22 +37,34 @@ export default function EntryPage() {
     );
   }
 
-  const embed = resolveEmbed(entry.embed);
-  const vtName = entry.banner && viewTransition ? `entry-${entry.id}` : undefined;
+  const vtName = viewTransition ? `entry-${entry.id}` : undefined;
+  const embeds = (entry.embeds ?? []).filter((media) => resolveEmbed(media));
 
   return (
     <article className="entry-detail">
       <p className="back-row">
-        <Link className="back-link" to={backHref} viewTransition={viewTransition}>
-          Back to the list
+        <Link
+          className="back-button"
+          to={backHref}
+          viewTransition={viewTransition}
+          aria-label="Back to the list"
+        >
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+            <path
+              d="M10 3.75L5.75 8 10 12.25"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </Link>
       </p>
 
-      {entry.banner && (
-        <div className="entry-hero" style={{ viewTransitionName: vtName }}>
-          <EntryMedia entry={entry} className="entry-hero-media" />
-        </div>
-      )}
+      <div className="entry-hero" style={{ viewTransitionName: vtName }}>
+        <EntryMedia entry={entry} className="entry-hero-media" />
+      </div>
 
       <header className="entry-head">
         <span className={`badge badge-${familyFor(entry.format)}`}>{badgeFor(entry.format)}</span>
@@ -61,90 +73,90 @@ export default function EntryPage() {
       </header>
 
       <div className="entry-body">
+        <div className="entry-quick">
+          <span className="quick-item">
+            <span className="quick-key">For</span> {ageLabels(entry.age_groups)}
+          </span>
+          {entry.collection && (
+            <span className="quick-item">
+              <span className="quick-key">Listed in</span> {collectionLabel(entry.collection)}
+            </span>
+          )}
+          {entry.published_date && (
+            <span className="quick-item">
+              <span className="quick-key">Published</span> {formatDate(entry.published_date)}
+            </span>
+          )}
+          <span className="quick-item">
+            <span className="quick-key">Added</span> {formatDate(entry.added_date)}
+          </span>
+          {entry.tags.length > 0 && (
+            <span className="quick-tags">
+              {entry.tags.map((tag) => (
+                <span className="tag" key={tag}>
+                  {tag}
+                </span>
+              ))}
+            </span>
+          )}
+        </div>
+
         <p className="entry-description">{entry.description}</p>
 
-        {embed && (
+        {embeds.length > 0 && (
           <section className="entry-embed" aria-label="Embedded media">
-            {embed.mode === "video" && (
-              <video className="embed-video" src={embed.src} controls preload="auto" />
-            )}
-            {embed.mode === "iframe" && (
-              <iframe
-                className="embed-frame"
-                src={embed.src}
-                title={entry.embed.title || entry.title}
-              />
-            )}
-            {embed.mode === "pdf" && (
-              <object
-                className="embed-frame embed-frame-doc"
-                data={embed.src}
-                type="application/pdf"
-                title={entry.embed.title || entry.title}
-              >
-                <p className="embed-fallback">
-                  <a href={embed.src} target="_blank" rel="noreferrer">
-                    Open the document
-                  </a>
-                </p>
-              </object>
-            )}
-            {embed.mode === "link" && (
-              <a className="button-secondary" href={embed.src} target="_blank" rel="noreferrer">
-                Open the media
-              </a>
-            )}
-            {entry.embed.title && <p className="embed-caption">{entry.embed.title}</p>}
+            {embeds.map((media, index) => {
+              const embed = resolveEmbed(media);
+              return (
+                <figure className="embed-item" key={`${media.kind}-${index}`}>
+                  {embed.mode === "video" && (
+                    <video className="embed-video" src={embed.src} controls preload="auto" />
+                  )}
+                  {embed.mode === "iframe" && (
+                    <iframe
+                      className="embed-frame"
+                      src={embed.src}
+                      title={media.title || entry.title}
+                    />
+                  )}
+                  {embed.mode === "pdf" && (
+                    <object
+                      className="embed-frame embed-frame-doc"
+                      data={embed.src}
+                      type="application/pdf"
+                      title={media.title || entry.title}
+                    >
+                      <p className="embed-fallback">
+                        <a href={embed.src} target="_blank" rel="noreferrer">
+                          Open the document
+                        </a>
+                      </p>
+                    </object>
+                  )}
+                  {embed.mode === "link" && (
+                    <a
+                      className="button-secondary"
+                      href={embed.src}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open the media
+                    </a>
+                  )}
+                  {media.title && <figcaption className="embed-caption">{media.title}</figcaption>}
+                </figure>
+              );
+            })}
           </section>
         )}
 
-        {entry.url ? (
+        {entry.url && (
           <p className="entry-action">
             <a className="button" href={entry.url} target="_blank" rel="noreferrer">
               Open resource
             </a>
           </p>
-        ) : (
-          <p className="sample-note">
-            <strong>Sample content.</strong> In the finished library, this entry links to the
-            resource.
-          </p>
         )}
-
-        <dl className="entry-meta">
-          <div>
-            <dt>Who it’s for</dt>
-            <dd>{ageLabels(entry.age_groups)}</dd>
-          </div>
-          {entry.published_date && (
-            <div>
-              <dt>Published</dt>
-              <dd>{formatDate(entry.published_date)}</dd>
-            </div>
-          )}
-          {entry.collection && (
-            <div>
-              <dt>Listed in</dt>
-              <dd>{collectionLabel(entry.collection)}</dd>
-            </div>
-          )}
-          <div>
-            <dt>Added</dt>
-            <dd>{formatDate(entry.added_date)}</dd>
-          </div>
-          {entry.tags.length > 0 && (
-            <div>
-              <dt>Topics</dt>
-              <dd className="tags">
-                {entry.tags.map((tag) => (
-                  <span className="tag" key={tag}>
-                    {tag}
-                  </span>
-                ))}
-              </dd>
-            </div>
-          )}
-        </dl>
       </div>
     </article>
   );
