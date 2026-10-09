@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { flushSync } from "react-dom";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import EntryCard from "../components/EntryCard.jsx";
 import FilterPanel from "../components/FilterPanel.jsx";
 import { AGE_GROUPS, COLLECTIONS, FORMATS } from "../lib/entries.js";
@@ -21,12 +21,11 @@ import {
 } from "../lib/browse.js";
 
 // The grid surface. A fresh arrival at / opens the ring: a center panel boxed
-// in by the eight latest cards. Typing, or the browse link, swaps it into the
-// list, and clearing the search brings the ring back. Both swaps run through
-// one animated morph. /browse opens the list directly.
+// in by the eight latest cards. Typing swaps it into the list, and clearing
+// the search brings the ring back. Both swaps run through one animated morph.
+// /browse opens the list directly.
 export default function GridPage() {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
   const entries = useEntries();
   const [params, setParams] = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -152,11 +151,6 @@ export default function GridPage() {
     else apply();
   };
 
-  const onBrowseAll = (event) => {
-    event.preventDefault();
-    morph(() => navigate("/browse"));
-  };
-
   const linkParams = new URLSearchParams(params);
   linkParams.delete("intro");
   const browseSearch = linkParams.toString() ? `?${linkParams.toString()}` : "";
@@ -202,17 +196,6 @@ export default function GridPage() {
             </button>
           )}
         </div>
-        {ring && (
-          <div className="masthead-notes">
-            <p>Type to search, or browse the shelf around you.</p>
-            <p>Filters for kind, age, and app directory appear with the results.</p>
-            <p className="masthead-browse">
-              <a href="/browse" onClick={onBrowseAll}>
-                Browse everything
-              </a>
-            </p>
-          </div>
-        )}
       </div>
 
       <div className="controls">

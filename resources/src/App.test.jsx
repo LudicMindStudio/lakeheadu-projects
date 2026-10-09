@@ -39,7 +39,7 @@ test("the grid opens as a ring on a fresh visit", () => {
   expect(screen.getByRole("heading", { level: 1, name: "Resources & tools" })).toBeInTheDocument();
   expect(screen.getByText(/in one searchable place/)).toBeInTheDocument();
   expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(8);
-  expect(screen.getByRole("link", { name: "Browse everything" })).toBeInTheDocument();
+  expect(view.container.querySelector(".masthead-notes")).toBeNull();
   expect(screen.getByLabelText("Search resources")).toBeInTheDocument();
 });
 
@@ -85,14 +85,6 @@ test("a fresh arrival opens the ring again", () => {
 
   const second = renderAt("/");
   expect(stage(second).dataset.state).toBe("ring");
-});
-
-test("the ring's browse link opens the list at /browse", () => {
-  const view = renderAt("/");
-  fireEvent.click(screen.getByRole("link", { name: "Browse everything" }));
-  expect(screen.getByTestId("location")).toHaveTextContent("/browse");
-  expect(stage(view).dataset.state).toBe("list");
-  expect(screen.getByRole("status")).toHaveTextContent(`${TOTAL} resources`);
 });
 
 test("browse opens the list directly", () => {

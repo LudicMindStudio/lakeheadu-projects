@@ -325,31 +325,12 @@ a {
 }
 
 .masthead-promise {
-  max-width: 35ch;
+  max-width: 46ch;
   margin: 0 auto;
   font-size: 15.5px;
   line-height: 1.5;
   color: var(--muted);
-}
-
-.masthead-notes {
-  display: grid;
-  gap: 6px;
-  font-size: 13.5px;
-  line-height: 1.45;
-  color: var(--faint);
-}
-
-.masthead-browse a {
-  font-weight: 600;
-  color: var(--ink);
-  text-decoration: underline;
-  text-decoration-color: var(--line);
-  text-underline-offset: 3px;
-}
-
-.masthead-browse a:hover {
-  text-decoration-color: currentColor;
+  text-wrap: balance;
 }
 
 /* The search field */
