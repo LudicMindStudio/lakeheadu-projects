@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { ENTRIES } from "./entries.js";
 import { EntriesContext } from "./useEntries.js";
 
-// The bundled data renders immediately; when the management server answers,
-// its copy of the data replaces it so edits show without a rebuild.
+// The bundled data renders immediately. When the management server answers,
+// its copy replaces it so edits show without a rebuild.
 export default function EntriesProvider({ children }) {
   const [entries, setEntries] = useState(ENTRIES);
 
@@ -18,7 +18,7 @@ export default function EntriesProvider({ children }) {
         const data = await response.json();
         if (!cancelled && Array.isArray(data?.entries)) setEntries(data.entries);
       } catch {
-        // No server running; the bundled data stands.
+        // No server is running, so the bundled data stands.
       }
     };
 

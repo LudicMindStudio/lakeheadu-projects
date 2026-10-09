@@ -34,14 +34,13 @@ function markEntered() {
   try {
     window.sessionStorage.setItem(ENTERED_KEY, "1");
   } catch {
-    // Storage unavailable; the ring simply returns on the next visit.
+    // Storage is unavailable, so the ring returns on the next visit.
   }
 }
 
-// The grid surface. A fresh arrival at / opens the ring: a center panel with
-// the promise, search, and instructions, boxed in by the eight latest cards.
-// The first characters typed (or the browse link) morph it into the list.
-// /browse opens the list directly.
+// The grid surface. A fresh arrival at / opens the ring: a center panel boxed
+// in by the eight latest cards. Typing, or the browse link, morphs it into the
+// list. /browse opens the list directly.
 export default function GridPage() {
   const { pathname } = useLocation();
   const entries = useEntries();
@@ -106,7 +105,7 @@ export default function GridPage() {
     [setParams],
   );
 
-  // Entering the list from the ring: the signature morph, played once.
+  // Entering the list from the ring: the morph is one-shot.
   const enterList = useCallback(
     (next) => {
       const apply = () => {

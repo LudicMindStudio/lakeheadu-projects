@@ -1,10 +1,4 @@
-// The resources management server: plain node:http, no dependencies.
-// Serves the built app, a small JSON API, and the admin session.
-//
-// Usage:   ADMIN_PASSWORD=… npm run server
-// Env:     PORT (default 5210), HOST (default 127.0.0.1),
-//          ADMIN_PASSWORD (required to sign in), SESSION_SECRET (optional),
-//          DATA_FILE (storage path, default server/data/entries.json)
+// The resources management server: the built app, a small JSON API, and the admin session. No dependencies.
 
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import {
@@ -253,8 +247,7 @@ function validateEntry(input) {
   return { entry };
 }
 
-// The request handler. Options make the server testable; the npm script
-// passes nothing and everything comes from the environment.
+// The request handler. Options make it testable. Without options, everything comes from the environment.
 export function createServer(options = {}) {
   const store = createStore(options);
   const sessions = createSessions(options.sessionSecret ?? process.env.SESSION_SECRET);
@@ -453,7 +446,7 @@ export function createServer(options = {}) {
       return;
     }
 
-    // Static files, with a fallback to the app shell
+    // Static files
 
     if (req.method === "GET" || req.method === "HEAD") {
       if (!existsSync(staticDir)) {

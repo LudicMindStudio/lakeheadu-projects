@@ -11,9 +11,8 @@ function Highlighted({ text, terms }) {
   );
 }
 
-// One entry as a media-led card: it fills a cell in the ring, and runs as a
-// wide band in the list. "More" opens the details in place; the full page
-// stays one click away.
+// One entry as a media-led card: it fills a cell in the ring, runs as a wide
+// band in the list, and opens its details in place.
 export default function EntryCard({ entry, terms, browseSearch, style }) {
   const [open, setOpen] = useState(false);
   const reduced = useReducedMotion();

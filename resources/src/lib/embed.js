@@ -1,4 +1,4 @@
-// Embed resolution for entry media. Sample entries point at local files; the
+// Embed resolution for entry media. Sample entries point at local files. The
 // same fields can carry a pasted link to a file or a common video host.
 
 export function resolveEmbed(embed) {

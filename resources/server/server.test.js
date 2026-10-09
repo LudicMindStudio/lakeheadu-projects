@@ -169,7 +169,6 @@ test("runs the full create, edit, remove round trip", async () => {
   const afterRemove = await (await fetch(`${base}/api/entries`)).json();
   expect(afterRemove.entries.map((entry) => entry.id)).toEqual(["one"]);
 
-  // The write-through storage keeps one backup generation.
   expect(existsSync(`${dataFile}.bak`)).toBe(true);
   const stored = JSON.parse(await readFile(dataFile, "utf8"));
   expect(stored.map((entry) => entry.id)).toEqual(["one"]);

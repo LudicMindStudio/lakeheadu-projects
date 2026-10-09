@@ -28,7 +28,7 @@ if (inBrowser) {
   // jsdom does not implement scrolling. The app resets scroll on navigation.
   window.scrollTo = () => {};
 
-  // jsdom does not implement matchMedia; default to no motion preference.
+  // jsdom does not implement matchMedia, so the default is no motion preference.
   if (typeof window.matchMedia !== "function") {
     window.matchMedia = (query) => ({
       matches: false,

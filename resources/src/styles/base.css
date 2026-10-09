@@ -1,6 +1,4 @@
-/* Resources app styles.
-   Warm paper, ink, and one color family per resource kind. Soft depth,
-   hairlines inside surfaces, motion that yields to reduced motion. */
+/* Resources app styles: warm paper, ink, and one color family per resource kind. */
 
 :root {
   --bg: #f4f2ee;
@@ -258,7 +256,7 @@ a {
   cursor: default;
 }
 
-/* The stage: one surface, two shapes — the ring and the list */
+/* The stage: one surface, two shapes */
 
 .stage {
   width: 100%;
@@ -1348,7 +1346,7 @@ mark {
   margin-top: 20px;
 }
 
-/* Motion entrances (the fallback when view transitions do not run) */
+/* Entrance animations used when view transitions do not run */
 
 @keyframes rise-in {
   from {

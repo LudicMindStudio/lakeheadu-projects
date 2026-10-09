@@ -1,5 +1,5 @@
-// Motion helpers: the reduced-motion preference and view transitions.
-// All motion is CSS and platform APIs; these helpers only guard the edges.
+// Motion helpers for the reduced-motion preference and view transitions.
+// All motion is CSS and platform APIs.
 
 import { useEffect, useState } from "react";
 
@@ -30,7 +30,7 @@ export function supportsViewTransitions() {
 }
 
 // Run a state change inside a view transition when the browser supports one.
-// The update callback is expected to apply its state synchronously.
+// The update callback must apply its state synchronously.
 export function morphWithTransition(update) {
   if (!supportsViewTransitions() || prefersReducedMotion()) {
     update();
@@ -39,7 +39,7 @@ export function morphWithTransition(update) {
   document.startViewTransition(() => update());
 }
 
-// Whether the tab is visible, so ambient motion can pause politely.
+// Whether the tab is visible, so ambient motion can pause when hidden.
 export function useDocumentVisible() {
   const [visible, setVisible] = useState(true);
 

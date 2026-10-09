@@ -341,7 +341,7 @@ async function fetchStatus() {
 }
 
 // Managing entries: a sign-in, a table, and one form that covers every field.
-// Works only while the bundled server is running; says so plainly when not.
+// Works only while the bundled server is running, and says so plainly when not.
 export default function AdminPage() {
   const [phase, setPhase] = useState("loading");
   const [error, setError] = useState("");
@@ -393,7 +393,7 @@ export default function AdminPage() {
     try {
       await api.logout();
     } catch {
-      // The session may already be gone; fall through to a fresh check.
+      // The session may already be gone, so fall through to a fresh check.
     }
     setEntries([]);
     setForm(null);
