@@ -17,7 +17,7 @@
             {
               "label": "mHealth app",
               "slug": "mhealth-app",
-              "note": "A phone app that supports health or well-being — mood tracking, meditation, symptom journals, and similar. It may collect personal information as it works."
+              "note": "A phone app that supports health or well-being: mood tracking, meditation, symptom journals, and similar. It may collect personal information as it works."
             },
             {
               "label": "Chatbot",
@@ -37,7 +37,7 @@
             {
               "label": "Something else",
               "slug": "something-else",
-              "note": "A game, a wearable, a website, or something different. The questions ahead still apply — note anything specific as you go."
+              "note": "A game, a wearable, a website, or something different. The questions ahead still apply. Note anything specific as you go."
             }
           ]
         }
@@ -57,7 +57,7 @@
             },
             {
               "label": "Not sure",
-              "note": "Spend a few minutes looking into who is behind it — an about page, the company name, a news search — before going further."
+              "note": "Before going further, spend a few minutes looking into who is behind it: an about page, the company name, a news search."
             },
             {
               "label": "No",
@@ -89,7 +89,7 @@
           "options": [
             {
               "label": "Yes",
-              "note": "Check that the path to help is easy to find — reachable from the main screens, not buried in a corner."
+              "note": "Check that the path to help is easy to find: reachable from the main screens, not buried in a corner."
             },
             {
               "label": "Not sure",
@@ -125,7 +125,7 @@
           "options": [
             {
               "label": "Yes",
-              "note": "Streaks, constant reminders, and rewards for returning are built to hold attention. Ask whether that pull fits the person using it — and how it would feel to set it down."
+              "note": "Streaks, constant reminders, and rewards for returning are built to hold attention. Ask whether that pull fits the person using it, and how it would feel to set it down."
             },
             {
               "label": "Not sure",
@@ -149,17 +149,17 @@
             },
             {
               "label": "No",
-              "note": "If you cannot tell whether a person takes over, treat it as a no for now. Without a person in the loop, a chatbot cannot catch it when things go wrong — consider an MHCC-certified chatbot instead."
+              "note": "If you cannot tell whether a person takes over, treat it as a no for now. Without a person in the loop, a chatbot cannot catch it when things go wrong. Consider a chatbot with a certification you can verify instead."
             }
           ]
         }
       ],
-      "guidance": "Look at the pattern across your answers, not any single one. A technology with clear accountability, real evidence, and a safety net is easier to trust. Where the picture is mixed, decide which gaps matter most in your situation — and what would need to change before you would rely on it."
+      "guidance": "Look at the pattern across your answers, not any single one. A technology with clear accountability, real evidence, and a safety net is easier to trust. Where the picture is mixed, decide which gaps matter most in your situation, and what would need to change before you would rely on it."
     },
     {
       "key": "user-considerations",
       "name": "User considerations",
-      "intro": "Now the person who will use it. Quality is not the whole story — fit, support, and watchfulness matter just as much.",
+      "intro": "Now the person who will use it. Quality is not the whole story: fit, support, and watchfulness matter just as much.",
       "questions": [
         {
           "id": "user-considerations-q1",
@@ -167,7 +167,7 @@
           "options": [
             {
               "label": "Yes",
-              "note": "Good — knowing the risks is what lets someone notice them early."
+              "note": "Good. Knowing the risks is what lets someone notice them early."
             },
             {
               "label": "Not sure",
@@ -185,7 +185,7 @@
           "options": [
             {
               "label": "Yes",
-              "note": "Good — knowing the way back is part of using anything safely."
+              "note": "Good. Knowing the way back is part of using anything safely."
             },
             {
               "label": "Not sure",
@@ -220,7 +220,7 @@
           "options": [
             {
               "label": "Yes",
-              "note": "Good. Agree on what checking in looks like — regular enough to matter, light enough that it does not push the person to hide their use."
+              "note": "Good. Agree on what checking in looks like: regular enough to matter, light enough that it does not push the person to hide their use."
             },
             {
               "label": "Not sure",
@@ -245,7 +245,7 @@
             },
             {
               "label": "A lot",
-              "note": "A lot of time with any technology pushes other things out — sleep, people, getting outside. Look at what it is displacing."
+              "note": "A lot of time with any technology pushes other things out: sleep, people, getting outside. Look at what it is displacing."
             },
             {
               "label": "Not sure",
@@ -254,7 +254,7 @@
           ]
         }
       ],
-      "guidance": "Fit matters as much as quality. The same technology can be a good choice for one person and a poor one for another, depending on age, situation, and the support around them. Where something gives you pause, trust the pause — raise the support, or step back, and talk it over with someone you trust."
+      "guidance": "Fit matters as much as quality. The same technology can be a good choice for one person and a poor one for another, depending on age, situation, and the support around them. Where something gives you pause, trust the pause. Raise the support, or step back, and talk it over with someone you trust."
     }
   ]
 }

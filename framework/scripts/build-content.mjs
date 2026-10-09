@@ -93,7 +93,7 @@ function parseMeta(file, text) {
     }
     const match = line.match(/^([a-z][a-z-]*):\s*(.*)$/);
     if (!match) {
-      fail(file, index + 1, `unrecognized line "${line}" — expected a setting like "sample: true"`);
+      fail(file, index + 1, `unrecognized line "${line}"; expected a setting like "sample: true"`);
       return;
     }
     const [, key, value] = match;
@@ -101,7 +101,7 @@ function parseMeta(file, text) {
       if (value === "true" || value === "false") meta.sample = value === "true";
       else fail(file, index + 1, `sample must be true or false (got "${value}")`);
     } else if (key === "about" || key === "disclaimer") {
-      if (!value) fail(file, index + 1, `${key}: is empty — write a sentence or two after the colon`);
+      if (!value) fail(file, index + 1, `${key}: is empty; write a sentence or two after the colon`);
       else if (meta[key] !== null) fail(file, index + 1, `more than one ${key}: line`);
       else meta[key] = value;
     } else {
@@ -133,7 +133,7 @@ function parseDomain(file, text) {
         fail(
           file,
           note.line,
-          `"### If answered: ${note.label}" does not match any answer — closest is "${suggestion}"`,
+          `"### If answered: ${note.label}" does not match any answer; closest is "${suggestion}"`,
         );
       } else if (option.note) {
         fail(file, note.line, `answer "${note.label}" already has a note`);
@@ -208,7 +208,7 @@ function parseDomain(file, text) {
       fail(
         file,
         lineNo,
-        `unrecognized line — for an answer note, write "### If answered: <answer>"`,
+        `unrecognized line; for an answer note, write "### If answered: <answer>"`,
       );
       return;
     }
@@ -299,7 +299,7 @@ function parseDomain(file, text) {
         fail(
           file,
           lineNo,
-          "answer options are not supported inside ## Guidance — write plain text",
+          "answer options are not supported inside ## Guidance; write plain text",
         );
         return;
       }
@@ -335,7 +335,7 @@ function parseDomain(file, text) {
     fail(
       file,
       lineNo,
-      `unrecognized line — expected a marker (#, ##, ###, types:, intro:, or "- ")`,
+      `unrecognized line; expected a marker (#, ##, ###, types:, intro:, or "- ")`,
     );
   });
 
@@ -348,13 +348,13 @@ function parseDomain(file, text) {
 
 function build() {
   if (!existsSync(contentDir)) {
-    console.error(`✖ content build failed — no content directory at ${contentDir}`);
+    console.error(`✖ content build failed: no content directory at ${contentDir}`);
     process.exit(1);
   }
 
   const metaFile = join(contentDir, "meta.md");
   if (!existsSync(metaFile)) {
-    fail("content/meta.md", 1, 'missing — create it with at least "sample: false"');
+    fail("content/meta.md", 1, 'missing; create it with at least "sample: false"');
   }
   const meta = existsSync(metaFile)
     ? parseMeta("content/meta.md", readFileSync(metaFile, "utf8"))
@@ -389,7 +389,7 @@ function build() {
       fail(
         `content/${entry.name}`,
         1,
-        '"guidance" is reserved for the summary page — rename the file',
+        '"guidance" is reserved for the summary page; rename the file',
       );
       continue;
     }
@@ -404,7 +404,7 @@ function build() {
   }
 
   if (!domains.length) {
-    fail("content/", 1, "no domain files found — expected NN-name.md files");
+    fail("content/", 1, "no domain files found; expected NN-name.md files");
   }
 
   const picker = domains[0]?.questions[0];
@@ -438,7 +438,7 @@ function build() {
       for (const value of question.types) {
         if (!knownTypes.includes(value)) {
           const suggestion = knownTypes.length
-            ? ` — closest is "${closest(value, knownTypes)}"`
+            ? `; closest is "${closest(value, knownTypes)}"`
             : "";
           fail(
             domain.file,
@@ -484,25 +484,25 @@ function build() {
 
   if (errors.length) {
     console.error(
-      `✖ content build failed — ${errors.length} error${errors.length === 1 ? "" : "s"}:`,
+      `✖ content build failed: ${errors.length} error${errors.length === 1 ? "" : "s"}:`,
     );
     for (const error of errors) console.error(`  ${error}`);
     process.exit(1);
   }
 
   if (checkOnly) {
-    console.log(`✓ content check passed — ${summary} (nothing written)`);
+    console.log(`✓ content check passed: ${summary} (nothing written)`);
     return;
   }
 
   const previous = existsSync(outFile) ? readFileSync(outFile, "utf8") : null;
   if (previous === output) {
-    console.log(`✓ content build — ${summary} → src/data/content.json (unchanged)`);
+    console.log(`✓ content build: ${summary} → src/data/content.json (unchanged)`);
     return;
   }
   mkdirSync(dirname(outFile), { recursive: true });
   writeFileSync(outFile, output);
-  console.log(`✓ content build — ${summary} → src/data/content.json (written)`);
+  console.log(`✓ content build: ${summary} → src/data/content.json (written)`);
 }
 
 build();

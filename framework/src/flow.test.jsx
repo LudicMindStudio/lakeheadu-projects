@@ -173,10 +173,10 @@ test("the wheel carries per-part progress in its names", () => {
   renderAt("/");
   const wheel = within(document.querySelector(".wheel-nav"));
   expect(
-    wheel.getByRole("link", { name: /Quality of technology — part 2 of 3, 2 of 5 answered/ }),
+    wheel.getByRole("link", { name: /Quality of technology, part 2 of 3, 2 of 5 answered/ }),
   ).toBeInTheDocument();
   expect(
-    wheel.getByRole("link", { name: /User considerations — part 3 of 3, 1 of 5 answered/ }),
+    wheel.getByRole("link", { name: /User considerations, part 3 of 3, 1 of 5 answered/ }),
   ).toBeInTheDocument();
 });
 

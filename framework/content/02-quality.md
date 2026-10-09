@@ -6,7 +6,7 @@ intro: Look at what stands behind the technology: who made it, what supports it,
 - Not sure
 - No
 ### If answered: Not sure
-Spend a few minutes looking into who is behind it — an about page, the company name, a news search — before going further.
+Before going further, spend a few minutes looking into who is behind it: an about page, the company name, a news search.
 ### If answered: No
 Treat its claims with extra caution. When it is unclear who is behind a product, there is no one to hold accountable if something goes wrong.
 
@@ -26,7 +26,7 @@ If nothing backs up its claims, its promises may not hold up in practice. Weigh 
 - Not sure
 - No
 ### If answered: Yes
-Check that the path to help is easy to find — reachable from the main screens, not buried in a corner.
+Check that the path to help is easy to find: reachable from the main screens, not buried in a corner.
 ### If answered: Not sure
 Open it and picture a hard moment: where would someone go? If you cannot find a path, assume there is not one.
 ### If answered: No
@@ -48,7 +48,7 @@ If it does not say what happens to your information, assume it collects and shar
 - Not sure
 - No
 ### If answered: Yes
-Streaks, constant reminders, and rewards for returning are built to hold attention. Ask whether that pull fits the person using it — and how it would feel to set it down.
+Streaks, constant reminders, and rewards for returning are built to hold attention. Ask whether that pull fits the person using it, and how it would feel to set it down.
 ### If answered: Not sure
 Watch for the usual signals: notifications, streak counters, rewards for checking in. If you spot any of them, weigh it as a yes for now.
 
@@ -59,7 +59,7 @@ types: chatbot
 ### If answered: Yes
 Proceed with caution: a human safeguard is a good sign, but keep working through the other questions.
 ### If answered: No
-If you cannot tell whether a person takes over, treat it as a no for now. Without a person in the loop, a chatbot cannot catch it when things go wrong — consider an MHCC-certified chatbot instead.
+If you cannot tell whether a person takes over, treat it as a no for now. Without a person in the loop, a chatbot cannot catch it when things go wrong. Consider a chatbot with a certification you can verify instead.
 
 ## Guidance
-Look at the pattern across your answers, not any single one. A technology with clear accountability, real evidence, and a safety net is easier to trust. Where the picture is mixed, decide which gaps matter most in your situation — and what would need to change before you would rely on it.
+Look at the pattern across your answers, not any single one. A technology with clear accountability, real evidence, and a safety net is easier to trust. Where the picture is mixed, decide which gaps matter most in your situation, and what would need to change before you would rely on it.

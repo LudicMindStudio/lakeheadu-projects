@@ -48,7 +48,7 @@ function sliceVarsFor(index) {
 }
 
 function partLabel(domain, count) {
-  const base = `${domain.name} — part ${partNumberFor(domain)} of ${domains.length}`;
+  const base = `${domain.name}, part ${partNumberFor(domain)} of ${domains.length}`;
   if (count.total === 0 || count.answered === 0) return base;
   if (count.answered >= count.total) return `${base}, all ${count.total} answered`;
   return `${base}, ${count.answered} of ${count.total} answered`;

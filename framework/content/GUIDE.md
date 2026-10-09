@@ -6,11 +6,11 @@ command, and the app updates.
 
 ## Files
 
-- `meta.md` — app-level settings. `sample: true` marks the content as
+- `meta.md`: app-level settings. `sample: true` marks the content as
   sample drafts (kept in the data for the team, never shown on the page);
   set it to `false` when real content ships. `about:` and `disclaimer:`
   are one paragraph each and feed the About popup on the landing page.
-- `NN-name.md` — one file per domain, in the order they appear (`01-`,
+- `NN-name.md`: one file per domain, in the order they appear (`01-`,
   `02-`, `03-`). The number controls the order; the rest of the file name is
   the domain's key, used in links and saved answers, so rename files with
   care.
@@ -22,7 +22,7 @@ command, and the app updates.
 | `# Name` | The domain's name. Must be the first line of the file. |
 | `intro: ...` | One or two sentences that open the domain's page. |
 | `## Question` | A question, written in plain language. |
-| `types: chatbot` | Optional. Shows the question only for the listed technology types. Values are the picker answers, lowercased with dashes — "Forum or group chat" becomes `forum-or-group-chat`. |
+| `types: chatbot` | Optional. Shows the question only for the listed technology types. Values are the picker answers, lowercased with dashes: "Forum or group chat" becomes `forum-or-group-chat`. |
 | `- Answer` | An answer choice. Put them right under the question, in order. |
 | `### If answered: Answer` | A note shown under the question when that answer is chosen, and gathered into the end-of-step guidance. The text after the colon must match an answer exactly. |
 | `## Guidance` | The last section of the file. Shown at the end of the step and in the summary. |
@@ -50,7 +50,7 @@ types: chatbot
 - Yes
 - No
 ### If answered: No
-Look for an MHCC-certified chatbot instead.
+Consider a chatbot with a certification you can verify instead.
 
 ## Guidance
 Look at the pattern across your answers, not any single one.
@@ -76,9 +76,9 @@ latest content.
 
 The build names the file, the line, and what it expected. For example:
 
-    ✖ content build failed — 2 errors:
-      content/02-quality.md:24: "### If answered: Nope" does not match any answer — closest is "No"
-      content/02-quality.md:31: unknown technology type "chatpot" — closest is "chatbot". Known types: mhealth-app, chatbot, social-media, forum-or-group-chat, something-else
+    ✖ content build failed: 2 errors:
+      content/02-quality.md:24: "### If answered: Nope" does not match any answer; closest is "No"
+      content/02-quality.md:31: unknown technology type "chatpot"; closest is "chatbot". Known types: mhealth-app, chatbot, social-media, forum-or-group-chat, something-else
 
 Fix the line the message names and run it again. Nothing is written until
 every file passes.

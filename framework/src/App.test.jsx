@@ -72,7 +72,7 @@ test("a wedge click before a name opens that part", () => {
   renderAt("/");
   advance(2300);
   const link = within(document.querySelector(".wheel-nav")).getByRole("link", {
-    name: /Quality of technology — part 2 of 3/,
+    name: /Quality of technology, part 2 of 3/,
   });
   fireEvent.click(link);
   expect(stageOf()).toBe("handoff");
