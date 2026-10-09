@@ -29,9 +29,6 @@ export default function LandingIntro({
       <h1 className="intro-title">
         Find services across Northwestern Ontario, and the first step to get started.
       </h1>
-      <p className="intro-lede">
-        Browse the map for what fits — what each service offers, what it costs, and how to start.
-      </p>
       <div className="intro-search-wrap">
         <label className="sr-only" htmlFor="intro-search">
           Search services

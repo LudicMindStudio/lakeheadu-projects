@@ -48,9 +48,8 @@ The map fills the viewport and stays under the whole browsing experience, edge t
 On first arrival, over the live map:
 
 1. The heading, stating the promise.
-2. A one-line description.
-3. A large search field — the primary action, sized as intro text, not chrome.
-4. A category row: **"I want help with:"** — the seven categories as counted chips (counts come from the current data), each carrying its category color. An "All services" text link sits at the end of the row.
+2. A large search field — the primary action, sized as intro text, not chrome.
+3. A category row: **"I want help with:"** — the seven categories as counted chips (counts come from the current data), each carrying its category color. An "All services" text link sits at the end of the row.
 
 The intro block is generous (up to ~720 px wide, upper third of the view) and reads as part of the map, not as a page section. Behind it, the whole region is already visible with every pin placed.
 
