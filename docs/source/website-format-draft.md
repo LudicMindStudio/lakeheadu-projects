@@ -1,7 +1,6 @@
 # Website format draft (client notes)
 
 Transcribed from "Website format draft.docx", received from the client, September 2026.
-Original file: ~/Downloads/Website format draft.docx
 Formatting normalized for readability; wording unchanged.
 
 ---
