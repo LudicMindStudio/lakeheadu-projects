@@ -1,4 +1,4 @@
-/* Resources — first design pass.
+/* Resources app styles.
    Calm and content-first: quiet chrome, hairlines over shadows, one accent. */
 
 :root {
@@ -197,7 +197,7 @@ h1 {
   margin-top: 28px;
 }
 
-/* Browse — search */
+/* Browse: search */
 
 .search-row {
   margin-top: 24px;
@@ -226,7 +226,7 @@ h1 {
   border-color: var(--accent);
 }
 
-/* Browse — results bar */
+/* Browse: results bar */
 
 .results-bar {
   display: flex;
@@ -297,7 +297,7 @@ h1 {
   border-color: var(--muted);
 }
 
-/* Browse — active filter chips */
+/* Browse: active filter chips */
 
 .chips {
   display: flex;
@@ -344,7 +344,7 @@ h1 {
   margin-left: 4px;
 }
 
-/* Browse — filters panel */
+/* Browse: filters panel */
 
 .filters-panel {
   margin-top: 14px;
@@ -412,7 +412,7 @@ h1 {
   margin-top: 20px;
 }
 
-/* Browse — results */
+/* Browse: results */
 
 .entry-list {
   display: grid;
@@ -494,7 +494,7 @@ mark {
   border-radius: 2px;
 }
 
-/* Browse — empty state */
+/* Browse: empty state */
 
 .empty-state {
   margin-top: 18px;

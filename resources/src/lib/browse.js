@@ -1,6 +1,4 @@
-// Browse logic for the resources app: search matching, filter predicates,
-// sorting, facet counts, and the URL state helpers. All pure functions, kept
-// apart from the components so the behaviour stays testable.
+// Browse logic: search matching, filters, sorting, facet counts, and URL state helpers.
 
 import { AGE_GROUPS, COLLECTIONS, FORMATS } from "./entries.js";
 
@@ -10,8 +8,7 @@ function boundaryPattern(source) {
   return new RegExp(`(?<![\\p{L}\\p{N}])${source}(?![\\p{L}\\p{N}])`, "iu");
 }
 
-// Simple plural handling so "app" finds "apps" and vice versa — common
-// searches should not die on a trailing s.
+// Simple plural handling so "app" finds "apps" and vice versa.
 function termVariants(term) {
   if (term.length < 3) return [term];
   if (term.endsWith("s")) {
@@ -33,8 +30,7 @@ function termIn(value, term) {
   return termVariants(term).some((variant) => boundaryPattern(escapeRegExp(variant)).test(value));
 }
 
-// A term matches an entry when it appears in the title, tags, description, or
-// source; all terms must match somewhere.
+// All terms must match somewhere in the title, tags, description, or source.
 export function entryMatches(entry, terms) {
   if (terms.length === 0) return true;
   const tags = (entry.tags ?? []).join(" ");
@@ -47,8 +43,7 @@ export function entryMatches(entry, terms) {
   );
 }
 
-// Relevance weights (from the design note): title ×3, tags ×2,
-// description ×1, source ×1.
+// Relevance weights: title ×3, tags ×2, description ×1, source ×1.
 export function matchScore(entry, terms) {
   const tags = (entry.tags ?? []).join(" ");
   let score = 0;
@@ -110,7 +105,7 @@ export function sortEntries(entries, sort, terms) {
     : sortNewest(entries);
 }
 
-// The predicate for one filter option, used by facet counts.
+// The predicate for one filter option, used by countForOption.
 export function optionPredicate(group, key) {
   switch (group) {
     case "kind":

@@ -8,8 +8,7 @@ function Highlighted({ text, terms }) {
   );
 }
 
-// One entry in the results list. The whole card is clickable; the title link
-// is the real link, stretched over the card.
+// One entry in the results list. The whole card is clickable: the title link stretches over it.
 export default function EntryCard({ entry, terms, browseSearch }) {
   const meta = [entry.source, ageLabels(entry.age_groups), formatDate(recencyKey(entry))]
     .filter(Boolean)

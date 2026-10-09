@@ -1,8 +1,4 @@
-// Entry data and vocabulary for the resources app.
-//
-// Entries are editable data: everything comes from src/data/entries.json, and
-// components read it only through this module, so the sample set can be
-// replaced without touching any component.
+// Entry data and vocabulary for the resources app. Entries live in src/data/entries.json.
 
 import entries from "../data/entries.json";
 
@@ -65,8 +61,7 @@ export function formatDate(iso) {
   return `${MONTHS[index]} ${year}`;
 }
 
-// The date an entry sorts and reads by: when it was published, or when it was
-// added if there is no publication date.
+// The date an entry shows and sorts by: published date, or added date when there is none.
 export function recencyKey(entry) {
   return entry.published_date || entry.added_date || "";
 }

@@ -6,5 +6,5 @@ afterEach(() => {
   cleanup();
 });
 
-// jsdom does not implement scrolling; the app resets scroll on navigation.
+// jsdom does not implement scrolling. The app resets scroll on navigation.
 window.scrollTo = () => {};
