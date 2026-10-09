@@ -11,7 +11,6 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// The entry's id, derived from its title: lowercase words joined by dashes.
 function toId(title) {
   return String(title ?? "")
     .toLowerCase()
@@ -462,7 +461,7 @@ async function fetchStatus() {
 }
 
 // Managing entries: a sign-in, a table, and one form that covers every field.
-// Works only while the bundled server is running, and says so plainly when not.
+// Editing needs the bundled server.
 export default function AdminPage() {
   const [phase, setPhase] = useState("loading");
   const [error, setError] = useState("");

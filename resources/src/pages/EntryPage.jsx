@@ -6,8 +6,8 @@ import { resolveEmbed } from "../lib/embed.js";
 import { supportsViewTransitions, useReducedMotion } from "../lib/motion.js";
 import { useEntries } from "../lib/useEntries.js";
 
-// One entry, everything: the hero banner, a quick facts banner, the
-// description, and each embedded media item. Back returns the list.
+// One entry: the hero, the quick facts banner, the description, and any
+// embedded media.
 export default function EntryPage() {
   const { id } = useParams();
   const [params] = useSearchParams();

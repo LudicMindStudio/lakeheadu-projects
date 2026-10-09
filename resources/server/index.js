@@ -95,7 +95,6 @@ function readBody(req, limit = 1_000_000) {
   });
 }
 
-// The same read, kept as bytes, for uploaded files.
 function readBodyBuffer(req, limit = 16_000_000) {
   return new Promise((ok, fail) => {
     let size = 0;
@@ -114,8 +113,7 @@ function readBodyBuffer(req, limit = 16_000_000) {
   });
 }
 
-// A safe stored name for an upload: the file's own name, slugged, plus a
-// short unique tail so repeats never collide.
+// The stored name for an upload: the file's name slugged, plus a unique tail so repeats never collide.
 function uploadName(headerName, ext) {
   const base =
     String(headerName ?? "")
@@ -408,8 +406,7 @@ export function createServer(options = {}) {
       return;
     }
 
-    // Uploads: an image or video file straight in the body, stored on disk,
-    // and answered with the path the entry's media fields can use.
+    // Uploads: raw file in the body, stored on disk, answered as a src path.
     if (pathname === "/api/uploads" && req.method === "POST") {
       if (!authed(req)) {
         send(res, 401, { error: "Sign in required." });
