@@ -1,7 +1,16 @@
+# dependencies and build output
 node_modules/
 dist/
 coverage/
 .vite/
+
+# logs and machine-local files
 *.log
 *.local
 .DS_Store
+
+# local-only workspaces (never part of the repo)
+/internal/
+.aider*
+.claude/
+.cursor/
