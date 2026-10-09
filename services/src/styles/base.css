@@ -1,4 +1,4 @@
-/* Services — base stylesheet. Tokens first, then layout, then components. */
+/* Services base stylesheet: tokens, layout, components. */
 
 :root {
   --color-bg: #ffffff;

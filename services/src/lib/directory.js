@@ -106,7 +106,7 @@ export function sortEntries(entries, { sort = "relevance", town = "", query = ""
     });
   }
 
-  // Relevance: name hits rank above description hits; ties alphabetical.
+  // Relevance: name hits rank above description hits. Ties break alphabetically.
   const words = tokenize(query);
   if (words.length === 0) {
     return list.sort(byProgram);
@@ -125,7 +125,6 @@ export function sortEntries(entries, { sort = "relevance", town = "", query = ""
   });
 }
 
-// Search, then filter, then sort. The one call the directory page needs.
 export function selectEntries(
   entries,
   { query = "", filters = {}, sort = "relevance", town = "" } = {},

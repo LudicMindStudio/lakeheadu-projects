@@ -1,6 +1,5 @@
-// Sample service listings. Every organization here is fictional, and every
-// detail (numbers, availability) is written for the sample set only. Real
-// place names are used for location. The lab's content replaces all of this.
+// Sample listings. Organizations are fictional, and contact details and
+// availability are invented for the sample set only. Place names are real.
 
 export const ENTRIES = [
   {

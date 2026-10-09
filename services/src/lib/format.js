@@ -13,7 +13,6 @@ const MONTHS = [
   "December",
 ];
 
-// "2026-09-18" -> "September 18, 2026"
 export function formatDate(iso) {
   const [year, month, day] = iso.split("-").map(Number);
   return `${MONTHS[month - 1]} ${day}, ${year}`;

@@ -1,6 +1,3 @@
-// Filter vocabulary. Values match the project notes; labels are the
-// proposed on-screen wording.
-
 export const FILTER_GROUPS = [
   {
     id: "cost",

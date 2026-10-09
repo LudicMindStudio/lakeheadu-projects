@@ -77,7 +77,7 @@ describe("sample entries", () => {
   });
 });
 
-// The coverage check: every filter value appears on at least one entry.
+// Every filter value appears on at least one entry.
 for (const group of FILTER_GROUPS) {
   describe(`coverage: ${group.id}`, () => {
     for (const option of group.options) {
