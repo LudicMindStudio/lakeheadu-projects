@@ -11,11 +11,12 @@ import {
   stepNumberFor,
 } from "../content.js";
 import { useAnswers } from "../state/answers-context.js";
+import { useWheel } from "../state/wheel-context.js";
 import Prose from "../components/Prose.jsx";
-import PartNav from "../components/PartNav.jsx";
 
 export default function GuidancePage() {
   const { subject, answers, clearAll } = useAnswers();
+  const { resetArrival } = useWheel();
   const navigate = useNavigate();
 
   if (!hasAnyAnswers(answers)) {
@@ -23,9 +24,7 @@ export default function GuidancePage() {
       <div className="page page--assessment">
         <article className="sheet summary summary--empty">
           <h1>Your assessment</h1>
-          <p className="lead">
-            Nothing here yet — work through the parts and your guidance will gather here.
-          </p>
+          <p className="lead">Nothing here yet.</p>
           <p className="cta">
             <Link className="button" to="/evaluate">
               Start the evaluation
@@ -42,19 +41,16 @@ export default function GuidancePage() {
 
   const startOver = () => {
     clearAll();
+    resetArrival();
     navigate("/");
   };
 
   return (
     <div className="page page--assessment">
-      <header className="assessment-head">
-        <h1>{subject ? `Your assessment of ${subject}` : "Your assessment"}</h1>
-        <p className="lead">Everything the walkthrough surfaced, in one place.</p>
-        <div className="assessment-wheel">
-          <PartNav />
-        </div>
-      </header>
       <article className="sheet summary">
+        <header className="assessment-head">
+          <h1>{subject ? `Your assessment of ${subject}` : "Your assessment"}</h1>
+        </header>
         <section className="summary-part">
           <h2>What was evaluated</h2>
           {type ? (
@@ -70,11 +66,7 @@ export default function GuidancePage() {
           const count = countsFor(domain, answers);
           const findings = findingsFor(domain, answers, typeSlug);
           return (
-            <section
-              key={domain.key}
-              className="summary-part"
-              data-part={partNumberFor(domain)}
-            >
+            <section key={domain.key} className="summary-part" data-part={partNumberFor(domain)}>
               <div className="summary-part-head">
                 <h2>
                   Part {stepNumberFor(domain)} · {domain.name}

@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { expect, test } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import App from "./App.jsx";
 import { domains, pickerQuestion, visibleQuestions } from "./content.js";
 import { LEGACY_KEY, STORAGE_KEY } from "./state/answers-context.js";
@@ -15,6 +15,16 @@ function renderAt(path) {
       <App />
     </MemoryRouter>,
   );
+}
+
+function advance(ms) {
+  act(() => {
+    vi.advanceTimersByTime(ms);
+  });
+}
+
+function frameHeading() {
+  return within(document.querySelector(".page-frame")).getByRole("heading", { level: 1 });
 }
 
 function seedRecord(answers, subject = "") {
@@ -32,6 +42,14 @@ function storedRecord() {
 function questionGroup(text) {
   return screen.getByRole("group", { name: text });
 }
+
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 test("picking a technology shows its note under the question", () => {
   const chatbot = pickerQuestion.options.find((o) => o.label === "Chatbot");
@@ -59,7 +77,8 @@ test("switching the technology hides gated questions without discarding answers"
   renderAt("/evaluate");
   fireEvent.click(screen.getByRole("radio", { name: "Social media" }));
   fireEvent.click(screen.getByRole("link", { name: "Next part" }));
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(quality.name);
+  advance(200);
+  expect(frameHeading()).toHaveTextContent(quality.name);
   expect(screen.queryByRole("group", { name: gatedQuestion.text })).not.toBeInTheDocument();
   expect(storedRecord().answers[gatedQuestion.id]).toBe("Yes");
 });
@@ -141,39 +160,49 @@ test("the landing offers Continue once there are answers", () => {
   renderAt("/");
   expect(screen.queryByRole("button", { name: "Begin" })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(quality.name);
+  advance(400);
+  expect(frameHeading()).toHaveTextContent(quality.name);
 });
 
-test("the landing shows per-part progress", () => {
+test("the wheel carries per-part progress in its names", () => {
   seedRecord({
     [quality.questions[0].id]: "Yes",
     [quality.questions[1].id]: "No",
     [userConsiderations.questions[0].id]: "Yes",
   });
-  const { container } = renderAt("/");
-  const wheel = within(container.querySelector('[data-variant="wheel"]'));
+  renderAt("/");
+  const wheel = within(document.querySelector(".wheel-nav"));
   expect(
     wheel.getByRole("link", { name: /Quality of technology — part 2 of 3, 2 of 5 answered/ }),
   ).toBeInTheDocument();
-  expect(screen.getByText("2 of 5 answered")).toBeInTheDocument();
-  expect(screen.getByText("1 of 5 answered")).toBeInTheDocument();
+  expect(
+    wheel.getByRole("link", { name: /User considerations — part 3 of 3, 1 of 5 answered/ }),
+  ).toBeInTheDocument();
 });
 
 test("naming the technology carries it into the walkthrough", () => {
   renderAt("/");
+  advance(2300);
   fireEvent.change(screen.getByLabelText("What are you evaluating?"), {
     target: { value: "Calm Harbour" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Begin" }));
-  expect(screen.getAllByText("Calm Harbour").length).toBeGreaterThan(0);
+  advance(400);
+  expect(screen.getByText("Calm Harbour")).toBeInTheDocument();
+  advance(650);
+  expect(document.querySelector(".wheel-stage").getAttribute("data-stage")).toBe("dock");
+});
+
+test("an empty name reads Your evaluation on the banner", () => {
+  seedRecord({ [pickerQuestion.id]: "Chatbot" });
+  renderAt("/evaluate/quality");
+  expect(screen.getByText("Your evaluation")).toBeInTheDocument();
 });
 
 test("the assessment is titled with the subject", () => {
   seedRecord({ [pickerQuestion.id]: "Chatbot" }, "Calm Harbour");
   renderAt("/evaluate/guidance");
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-    "Your assessment of Calm Harbour",
-  );
+  expect(frameHeading()).toHaveTextContent("Your assessment of Calm Harbour");
 });
 
 test("the assessment gathers guidance and findings with their questions", () => {
@@ -187,11 +216,9 @@ test("the assessment gathers guidance and findings with their questions", () => 
     [userConsiderations.questions[0].id]: "No",
   });
   renderAt("/evaluate/guidance");
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Your assessment");
+  expect(frameHeading()).toHaveTextContent("Your assessment");
   expect(screen.getByRole("heading", { name: "What was evaluated" })).toBeInTheDocument();
-  expect(
-    screen.getByRole("heading", { name: `Part 2 · ${quality.name}` }),
-  ).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: `Part 2 · ${quality.name}` })).toBeInTheDocument();
   expect(
     screen.getByRole("heading", { name: `Part 3 · ${userConsiderations.name}` }),
   ).toBeInTheDocument();
@@ -203,12 +230,14 @@ test("the assessment gathers guidance and findings with their questions", () => 
   expect(screen.getByText(gatedQuestion.text)).toBeInTheDocument();
 });
 
-test("Start over clears the walkthrough and returns home", () => {
+test("Start over clears the walkthrough and replays the arrival", () => {
   seedRecord({ [pickerQuestion.id]: "Chatbot" }, "Calm Harbour");
   renderAt("/evaluate/guidance");
   fireEvent.click(screen.getByRole("button", { name: "Start over" }));
-  expect(screen.getByRole("button", { name: "Begin" })).toBeInTheDocument();
   expect(storedRecord()).toEqual({ subject: "", answers: {} });
+  expect(document.querySelector(".wheel-stage").getAttribute("data-stage")).toBe("arrival");
+  advance(2300);
+  expect(screen.getByRole("button", { name: "Begin" })).toBeEnabled();
 });
 
 test("an empty assessment invites the walkthrough", () => {

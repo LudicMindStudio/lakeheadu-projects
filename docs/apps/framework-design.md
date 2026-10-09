@@ -1,10 +1,15 @@
-# Digital Mental Health Technology Decision Framework — app design (v2)
+# Digital Mental Health Technology Decision Framework — app design (v3)
 
 `framework/` · lakeheadu-projects · Design note · October 9, 2026
 
 Sources: client notes (`docs/source/website-format-draft.md`, first section),
 repo decisions (`docs/decisions.md`), and the earlier interactive prototype of
 this tool — the wheel — kept as the feel reference for this pass.
+
+The v3 material is the presentation plan at the end of this document: how the
+wheel assembles on arrival, moves into its dock, and carries navigation while
+the questions run in the center. Where the addendum and the text before it
+differ, the addendum wins.
 
 This revision keeps everything the v1 pass got right and gives the app a
 character of its own: one wheel, three colored parts, movement between them,
@@ -44,8 +49,10 @@ scene. This pass lands the midway.
   walkthrough into the final assessment.
 
 The character: confident, calm, a little warm. Nothing bounces, nothing
-loops, nothing moves without being asked. Motion is allowed now — it is used
-deliberately, in short beats, to make moving between parts feel like moving.
+idles, nothing moves without being asked — and nothing is left to chance.
+Motion is used deliberately: short beats between parts, and two set pieces —
+the wheel's arrival, and its handoff into the dock when the evaluation
+starts. The presentation plan at the end specifies both.
 
 ## Who arrives here
 
@@ -74,25 +81,21 @@ wheel); their own names carry the meaning.
 
 ## The wheel
 
-One component, three sizes, present on every page:
-
-- **The hub (landing, hero):** a large wheel, centered, with the three part
-  names around it and a legend below. Hovering a wedge lifts it slightly and
-  dims its neighbors; clicking a wedge opens that part. A quiet line under
-  the wheel: "Click a part to start — no wrong answers."
-- **The rail (part pages, wide screens):** a smaller wheel, sticky in a left
-  rail, with the subject line and a plain list of the three parts beneath it
-  (name + count). The current part's wedge sits slightly out from the wheel
-  and carries a deeper edge; the others stay clean and clickable.
-- **The bar (part pages, narrow screens):** the wheel unrolled — three
-  segments in a row, each with its part color and count; the current segment
-  is tinted. Still links; still the same three targets.
+One component, one element, present across the app — it lives in the app
+shell and survives navigation, so its moves can span a route change without
+a reset. Its presentation is the addendum at the end: it assembles
+full-screen on arrival, holds the intro and the name in its center, then
+docks to the bottom of the screen with the current part centered at the top
+of its visible half. The three parts, the links, and the arcs below carry
+through unchanged; the earlier rail and narrow-screen bar retire — the dock
+scales to every width.
 
 **Progress, never a score.** Each wedge carries a hairline arc along its
 outer edge that fills as questions are answered — a visible "some of this is
-done" for each part. The same fact appears as quiet text in the legend and
-the rail list ("4 of 6 answered"; "Complete" when a part is finished).
-Nothing is graded, and nothing is ever locked.
+done" for each part. The same fact appears as quiet text where parts are
+named — the open part's eyebrow ("4 of 6 answered") and the other parts'
+protrusion labels ("Complete" when a part is finished). Nothing is graded,
+and nothing is ever locked.
 
 **Behavior notes.**
 
@@ -102,19 +105,18 @@ Nothing is graded, and nothing is ever locked.
   to a wedge, Enter opens it; focus draws a ring on the wedge.
 - Answered counts follow the questions actually visible: when a
   technology-type answer hides a gated question, counts adjust with it.
-- On the assessment page the wheel appears once more as the hero, showing
-  the finished state of all three parts — the evaluation's own map.
+- On the assessment page the dock stays, all three arcs full — the
+  evaluation's own map, one click from any part.
 
 ## The walkthrough
 
-1. **The hub (landing).** The promise line, then the wheel. Under it: "What
-   are you evaluating?" — one optional line to name the technology
-   ("an app, a chatbot, a website — name it if you like") and the note that
-   it stays on this device. Then one primary button. On a fresh visit:
-   **Begin** (opens Part 1). On a return visit: **Continue** (goes to the
-   first unfinished part, or straight to the assessment) plus a quiet
-   **Start over**. Below, the legend of the three parts and one honesty
-   line: "No account needed — your answers stay in your browser."
+1. **Arrival.** The wheel assembles full-screen while a short intro line
+   types itself out in its center, over the name field and one primary
+   button. Enter works, and an empty name is fine. On a fresh visit:
+   **Begin** (opens Part 1). On a return visit the wheel is already
+   assembled: **Continue** (goes to the first unfinished part, or
+   straight to the assessment) plus a quiet **Start over**. The full
+   choreography is in the addendum.
 
 2. **A part page.** A quiet "← All parts" link, then "Part 2 of 3 · Quality
    of technology" as the eyebrow. The part's intro in one or two sentences.
@@ -172,12 +174,14 @@ never depends on an animation completing).
 | Between parts | Same move, new light: backdrop color glides, sheet re-settles, the wheel's current wedge steps out | ~420ms |
 | Choosing an answer | The note expands in place under the question; the option row tints | ~240ms |
 | Wrap-up settles | When a part completes, its guidance panel lifts and deepens; the wheel arc closes | ~320ms, quiet |
-| First load (landing) | The wheel settles in once (a small rise and fade); never repeats | ~600ms, one-shot |
+| First load (landing) | The full arrival: slices fly in and lock, labels appear, the intro line types; a gentle spin settles out | ~2.3s one-shot — see the addendum |
 
-**Budget:** each transition finishes in under half a second; at most one
-"cinematic" beat (a part change) per interaction; no parallax, no scroll
-effects, no idle motion. With `prefers-reduced-motion`, every transition
-collapses to an instant state change (colors still change; nothing moves).
+**Budget:** everyday transitions finish in under half a second; the set
+pieces are one-shot and bounded — the arrival runs about 2.3 seconds to
+interactive, the handoff about 1.1, a part-to-part turn about 0.8. No
+parallax, no scroll effects, no idle motion once the arrival settles. With
+`prefers-reduced-motion`, every beat collapses to an instant state change
+(colors still change; nothing moves).
 
 ## Design language — v2
 
@@ -217,10 +221,10 @@ font stack, plain language. What's added is warmth and light.
   the reading measure widens from 640px to about 860px on wide screens so
   the app fills the screen instead of hugging a column. Long prose still
   caps near 65 characters where it matters.
-- **Chrome.** The quiet top bar stays, plus two small things: on part pages
-  a subject chip ("Assessing: [name]", linking back to the hub) when a name
-  exists, and the "← All parts" link above the part heading. The sample
-  footer line stays exactly as it is.
+- **Chrome.** The quiet top bar stays, plus two things: on part pages the
+  subject rides as a centered top banner (per the addendum; previously a
+  small chip), and the "← All parts" link above the part heading. The
+  sample footer line stays.
 
 ## Content and data shape — unchanged pipeline
 
@@ -290,19 +294,19 @@ Unchanged from v1, plus one small note:
 ## Open questions — each with a current default
 
 1. **Subject naming.** Name the technology you're evaluating?
-   Default: yes — one optional line on the hub, stored on the device, shown
-   as a quiet chip and in the assessment title. If dropped, only the field,
-   chip, and title change.
+   Default: yes — one optional field on the hub, stored on the device, shown
+   as a top banner (v3) and in the assessment title. If dropped, only the
+   field, banner, and title change.
 2. **The wheel as navigation.** Clickable parts everywhere it appears?
-   Default: yes — wheel on wide screens, a three-segment bar on narrow ones;
-   parts can be opened in any order. The alternative is a wheel that only
-   shows state.
+   Default: yes — the wheel is the navigation at every width (v3: the
+   docked wheel; see the addendum); parts can be opened in any order. The
+   alternative is a wheel that only shows state.
 3. **Part colors.** The three-hue system carried from the earlier prototype
    (quiet blue / soft green / warm amber)?
    Default: yes, tuned for contrast. Alternative if it reads as too much on
    review: monochrome surfaces with a single accent.
-4. **Motion budget.** The set in §Motion (~160–420ms beats, one-shot load,
-   reduced-motion path)?
+4. **Motion budget.** The set in §Motion plus the v3 set pieces (arrival,
+   handoff, part turn — see the addendum)?
    Default: as designed. Character check: calm confidence, never bouncy.
 5. **The completion settle.** When a part's last question is answered, the
    guidance panel settles and the arc closes?
@@ -322,8 +326,9 @@ Unchanged from v1, plus one small note:
 - No 3D, no canvas, no WebGL, no scene: no camera, no physics, no voronoi
   partitions, no springs, no fog, no dev-hook forest. The wheel is a
   diagram. (This line is the midway's guardrail.)
-- No looping or idle animation; no scroll effects; nothing that moves
-  without being asked.
+- No idle animation after the arrival settles; no scroll effects; nothing
+  that moves without being asked (the arrival and the handoff are one-shot
+  set pieces, specified in the addendum).
 - Export, print, or sharing an evaluation.
 - Accounts or any backend. The app is static and nothing leaves the browser.
 - Links to the resources or services apps. The apps stay fully separate.
@@ -332,6 +337,9 @@ Unchanged from v1, plus one small note:
 - No content-pipeline changes and no new dependencies.
 
 ## Build plan
+
+*(v2, as built. The v3 build plan at the end of this document supersedes
+this section.)*
 
 Constraints: React + JavaScript with the existing dependencies only (no new
 packages). Static build, no runtime network calls. System font stack.
@@ -356,3 +364,302 @@ packages). Static build, no runtime network calls. System font stack.
    console-clean captures of every surface (including mobile widths, the
    reduced-motion path, and a keyboard pass) into `internal/captures/`; a
    contrast receipt for every new text/background pair.
+
+---
+
+## The presentation plan (v3 addendum)
+
+The guided tour stands; this plan is the presentation around it. The wheel
+now assembles full-screen when the app opens, holds the intro line and the
+name in its center, hands off into a dock at the bottom of the screen, and
+stays there as the navigation while the questions run in the center.
+
+Nothing else moves: routes, content pipeline, part colors, copy register,
+and accessibility standards are untouched. No new dependencies; still no
+canvas, no 3D.
+
+### Coverage, point by point
+
+| # | What was asked | Where it stands |
+| --- | --- | --- |
+| A | The wheel assembles full-screen on load; slices fly in from off screen and lock one by one; each gets its label and a soft glow; a slight spin runs through it; the wheel takes the screen height with a thin margin. | **New.** The part colors, arcs, and links carry over; the earlier single "settle" is replaced by the full arrival. |
+| B | In the wheel's center, the intro text types itself in character by character — shorter and punchier — with the name line in the middle. | **New.** The intro copy and the subject line move from around the wheel into its center; the copy shortens. |
+| C | On name submit or empty Enter: the center fades, the name becomes a top banner, and the wheel grows, stops spinning, and slides down until its center anchors to the bottom edge — only the top half shows. | **New.** The stored name and the resume logic carry; the chip is replaced by the banner. |
+| D | The current part sits centered at the top of the visible half; the other parts are clickable at their small protrusions at the bottom edge (as in the earlier prototype); starting a part rotates the wheel so that part is on top. | **New.** Wedges-as-links and the accessible naming carry; the rail and the bar retire; dock, protrusions, and rotation are new. |
+| E | The walkthrough continues in the center of the screen — questions, guidance, next section — per part, as it does now. | **Already true — built as the guided tour.** New: it runs in the center with the dock behind it, and the rail is gone. |
+| F | Remove the explanation chrome ("Click a part to start — no wrong answers.", "Optional, and it stays on this device", similar lines); show, don't tell; icons and tooltips instead of text. | **New.** The copy trim — a full pass, below. |
+| G | The name placeholder: three words at most, and it must fit the field. | **New.** The placeholder becomes "App, chatbot, site…"; the full wording moves to the accessible name. |
+
+### One wheel element, four states
+
+The wheel lives in the app shell, not inside any page, so it survives
+navigation — its moves can span a route change without a reset or a flash.
+Presentation states:
+
+- **Arrival** — full-screen wheel, assembling; the center card holds the
+  typed intro and the name line (`/`, fresh visit).
+- **At rest** — assembled, centered, still; the card offers Begin or
+  Continue (`/`; also where Start over returns).
+- **Handoff** — the move between the two: grow, slide, stop, align.
+- **Docked** — the bottom half-wheel; the walkthrough runs in the center
+  (part pages and the assessment).
+
+Flights, spin, and glow are a one-shot sequence inside the wheel component.
+The handoff and the part-to-part turn are driven by the route context in
+the shell.
+
+### Geometry
+
+```
+arrival:  a centered wheel — diameter min(82vh, 90vw), capped near 1100px,
+          the card in its middle
+docked:   the wheel's center pinned to the bottom edge; only the top half
+          shows — the current part spans ±60° at the top, and each other
+          part keeps a 30° sliver at a bottom corner (the protrusions)
+```
+
+- **Arrival.** The wheel takes the screen height with a thin margin: it is
+  centered between the header and the footer, about 2.5vh of margin each
+  side. The hub disc is about 0.45 of the wheel's radius; the center card
+  floats over it. Card width: `min(460px, 64% of the wheel)`; on narrow
+  screens the card is sized to the viewport (88vw) so its line wraps
+  cleanly.
+- **Docked.** Radius `min(60vh, 48vw)`; the center point is pinned to the
+  bottom edge of the screen and stays there while the content scrolls
+  above it. Only the top half shows, by construction.
+- **Clearance.** The dock is fixed; the content column keeps about 160px
+  of bottom padding so nothing sits under the protrusion zone.
+
+### Arrival, beat by beat
+
+Values are starting points; the build tunes constants against captures.
+
+| t | Beat | What happens | Time / easing |
+| --- | --- | --- | --- |
+| 0.00s | Ground | The part's light and a hairline track circle — the wheel's own outline — fade in: an empty wheel, waiting. | 250ms, ease-out |
+| 0.15s | First slice | Slice 1 flies in from fully off screen along its own bisector (first from above, then from lower right, then lower left), fading in over the first half of the flight, decelerating into place. | 520ms, ease-out |
+| +0.00s | Lock | The slice settles its last two percent — a crisp snap into the wheel. | 110ms |
+| +0.12s | Label | The part's name fades in and rises 4px, seated on the slice. | 240ms, ease-out |
+| +0.12s | Glow | A soft radial light in the slice's color blooms from the slice outward past the rim, then relaxes to nothing. | bloom 300ms, relax 650ms |
+| 0.41s / 0.67s | Slices 2 and 3 | The same flight, lock, label, glow — one at a time, 260ms apart. | as above |
+| throughout | The spin | The whole wheel drifts clockwise, easing from about 2.2°/s toward 0.8°/s; the total drift stays small (a few degrees). Landed slices ride the spin. | continuous, decelerating |
+| ~1.45s | The line types | The intro line writes itself: one character at a time, each popping in — fading in as it rises 4px and scales in 6%. The full text is present from the start for screen readers; this is visual only. | per character 120ms, 27ms apart |
+| ~1.95s | Card at rest | The name line, the button, and the honesty line fade in together; the spin eases out; the wheel goes still. | 280ms, ease-out |
+| any | Skip | The first user input — key, click, or touch — jumps straight to the resting state. | instant |
+
+About 2.3 seconds to interactive; one-shot; it never repeats mid-session.
+
+### The center card (the intro line and the name)
+
+A white card sits in the wheel's center — text on white, as everywhere.
+
+- **The typed line** (the page's h1): default copy **"Is it safe and
+  useful?"** — alternates: "Let's look, part by part." / "Weigh it before
+  you trust it." Five or six words, one or two lines at the card's width;
+  1.5–2rem, weight 600.
+- **The name field:** placeholder only, three words — **"App, chatbot,
+  site…"** — sized to fit the field at every width; the accessible name
+  carries the full wording. One line, stored on the device as today.
+- **The button:** **Begin** — a real form submit, so Enter in the field
+  works; an empty name submits fine. On a return visit the card offers
+  **Continue**, with a quiet **Start over** beside it.
+- **The device note:** one small hairline icon beside the field carries
+  "Your answers stay on this device" as a tooltip — on hover and on
+  focus, tied by `aria-describedby`. No sentence.
+- **Focus:** when the card settles, focus moves to the name field unless
+  the person has already interacted. Nothing about the animation gates
+  input.
+
+### The handoff (submit into the dock)
+
+| t | Beat | What happens | Time |
+| --- | --- | --- | --- |
+| 0.00s | The center bows out | The card fades — opacity and a 2% scale. | 240ms |
+| 0.15s | The move | One continuous move, 900ms: the wheel grows (arrival → dock radius, about 1.4×), slides until its center lands on the bottom edge, the spin comes to a full stop, and the target part rotates up to the top. Gentle ease-in-out. | 900ms |
+| ~0.40s | The route commits | Under the move, the target part's page takes over; the wheel is shell-level, so nothing resets or flashes. | — |
+| 0.25s | The banner | The name fades in, centered at the top, rising 8px. An empty or whitespace name reads **"Your evaluation"**. Long names truncate with an ellipsis; the full name stays in the accessible text. | 320ms |
+| 0.55s | The content settles | The part's sheet fades in and rises into place beneath the moving wheel. | 420ms |
+| 1.05s | At rest | Docked; the walkthrough is live. | — |
+
+### The dock (protrusions and the turn)
+
+- **Anatomy.** The dome is the current part, ±60° around the top, filled
+  with the part's soft tone, with the hairline progress arc along its rim
+  (the arc sits on a thin light separation so its deep tone holds against
+  both the fill and the page). The two other parts keep their 30° corner
+  slivers; each carries a small pill at the bottom edge — name and count
+  ("User considerations · 4 of 6"; "Complete" when the part is finished).
+  Sliver plus pill is one link.
+- **Hit targets.** The whole sliver and its pill click together; the
+  target never drops below 48px, at any width. At narrow widths the
+  slivers may extend past the viewport — the pills carry the interaction
+  from their fixed bottom corners.
+- **Hover and focus.** The sliver lifts 3px along its own bisector and its
+  label brightens — 160ms, ease-out. Focus draws a ring around the sliver
+  and pill. Same semantics as today: real links, named for assistive
+  tech, `aria-current` on the open part.
+- **The turn.** Activating a protrusion rotates the wheel 120° so that
+  part's bisector lands at the top — clicking the right protrusion turns
+  the wheel counterclockwise (that part rises up the right side), the
+  left protrusion clockwise — 700ms gentle ease-in-out plus a 120ms
+  settle. The pills fade out as the turn starts and the new pair fades in
+  as it lands; the current part's arc becomes the visible arc; the
+  content crossfades (out 180ms, in 420ms) and the route commits under
+  the turn. Clicks are ignored while a turn runs. **Next part** in the
+  flow runs the same turn; **See your assessment** just swaps the content
+  — the dock already shows the finished map. **← All parts** returns to
+  the hub: the wheel glides back to center on a quick 420ms reverse, the
+  card offering Continue.
+- **The assessment** keeps the dock: all three arcs full, any part one
+  click away.
+
+### The walkthrough in the center — what changes, what doesn't
+
+- **Unchanged (already built):** the three parts as real routes; the
+  question flow with notes that reveal under the question; the per-part
+  guidance panel — base guidance plus "Based on your answers"; the
+  wrap-up settle; Next; browser persistence and Start over; type gating
+  and count behavior; the not-found page.
+- **Changed:** the left rail and the narrow-screen bar retire — the dock
+  is the navigation everywhere, scaled to the viewport. The content
+  column centers over the dome, and the part's light gains a second
+  voice: the quiet wash at the top stays, and the docked wheel adds the
+  part's stronger light below. The eyebrow gains the quiet count
+  ("Part 2 of 3 · 4 of 6 answered") since the rail's list is gone.
+- **Narrow screens:** the dock takes `min(52vh, 62vw)`; the pills carry
+  the navigation at full target size; the slivers stay as tint. The same
+  links, the same behaviors.
+
+### The copy trim — show, don't tell
+
+A pass over every string in the app, landing together with the
+presentation work. The rule: interface chrome never explains itself in
+sentences. If a fact has to survive, an icon carries it and a tooltip
+says it on hover or focus. If it only reassures, it goes.
+
+What goes:
+
+- The wheel hint ("Click a part to start — no wrong answers.") — the
+  slices show they are clickable: they lift on hover, ring on focus, and
+  the pointer changes. No line.
+- The line under the name field ("Optional, and it stays on this
+  device.") — replaced by one small icon beside the field, its tooltip
+  reading "Your answers stay on this device."
+- The landing honesty line ("No account needed — your answers stay in
+  your browser.") — same fact, same icon; the sentence goes.
+- Any line that explains what a control does or reassures the person
+  ("no wrong answers"; "name it if you like"). The flow itself shows it.
+
+What stays:
+
+- Functional labels and navigation: buttons, "← All parts", the eyebrow
+  ("Part 2 of 3"), counts, part names, question text, notes, guidance,
+  "Based on your answers".
+- The sample footer line — it is a marking, not an explanation.
+- Authored content: part intros, questions, notes, guidance — the trim
+  does not touch what the lab writes.
+
+Mechanics: hairline icons drawn inline (no icon library), muted tone,
+about 16px; tooltips appear on hover and keyboard focus, tied by
+`aria-describedby`, never the only home for a fact. The name field's
+placeholder is three words and is sized to fit the field at every width.
+
+At the end of the build, one sweep across all surfaces for stragglers —
+any sentence that explains the interface instead of being part of it.
+
+### Motion summary — and the reduced-motion path
+
+| Beat | Standard | Reduced motion |
+| --- | --- | --- |
+| Arrival: flights, locks, labels, glow | per the table above | assembled wheel and full text at once — a 150ms fade |
+| The spin | eases out as the card settles | none |
+| The typed line | character by character | the full line, no typing |
+| The handoff | the 900ms move | the docked state, instantly |
+| The part turn | 120° in 700ms + settle | instant reframe |
+| Protrusion hover | 3px lift, 160ms | none |
+| The earlier beats (note reveal, wrap-up settle, sheet settle) | as built | as built |
+
+**The reduced-motion path, in full.** With `prefers-reduced-motion:
+reduce`, nothing in the arrival moves — no flight, no lock, no glow, no
+spin — and the typed line is simply present; the skip-on-input behavior
+is moot because the resting state is immediate. Submitting produces an
+instant state change: the wheel is docked, the banner and content are in
+place, and every element still announces itself the same way. Part
+changes reframe instantly. All state changes — color, position, current
+marking — survive; only movement goes.
+
+### Copy defaults
+
+| Slot | Default |
+| --- | --- |
+| Typed line | "Is it safe and useful?" (alternates above) |
+| Name placeholder | "App, chatbot, site…" — three words, sized to the field; full wording in the accessible name |
+| Device note | icon + tooltip: "Your answers stay on this device" |
+| Button | "Begin" — "Continue" on returns |
+| Banner, empty name | "Your evaluation" |
+| Protrusion pill | "[Part name] · 4 of 6" — "Complete" at full |
+
+### Open questions — each with a default
+
+1. **Replaying the arrival.** Default: the full arrival on a fresh visit
+   (no saved answers) and after Start over; a return visit shows the
+   assembled wheel. (Replay-every-visit is a one-flag flip.)
+2. **The spin at rest.** Default: the spin eases out when the intro line
+   finishes — the wheel is still while the person reads and types. (The
+   alternative is a very slow drift, about 0.5°/s, while waiting.)
+3. **Dock anchoring.** Default: pinned to the bottom of the screen —
+   always reachable while the content scrolls. (A page-end anchor would
+   scroll the navigation away; not recommended.)
+4. **The banner.** Default: the name, centered, on every evaluate surface
+   and the assessment; empty falls back to "Your evaluation".
+5. **Pre-name part clicks.** Default: once the assembly finishes, a wedge
+   click still opens that part directly — the handoff plays, the banner
+   falls back.
+6. **Protrusion labels carry counts.** Default: yes ("4 of 6";
+   "Complete").
+7. **Narrow screens.** Default: the scaled dock; the bar stays retired.
+   (If it reads cramped around 390px, the bar returns for ≤640px.)
+8. **The assessment keeps the dock.** Default: yes, all three arcs full.
+9. **Sizing and fill tuning.** Default: arrival capped near 1100px; dock
+   radius `min(60vh, 48vw)`; the dome fill is the part's soft tone —
+   lightened toward the wash if it ever reads heavy behind content.
+10. **Tooltips.** Default: one lightweight in-app tooltip (hover and
+    focus, `aria-describedby`) for the device note and any later icon
+    notes; no tooltip library. Native `title` only as a fallback.
+
+### Out of scope
+
+- No canvas, WebGL, or 3D — the wheel stays inline SVG with CSS and JS
+  transforms (the midway guardrail holds).
+- No new dependencies, no backend, no content-pipeline changes; the
+  routes and their direct-link behavior are untouched.
+- No audio; no second animation style — one character, applied
+  consistently.
+
+### Build plan (v3)
+
+1. **The wheel surface + state machine.** Move the wheel into the app
+   shell (it survives navigation); add geometry tokens (arrival radius,
+   dock radius, anchoring); make the sequence an explicit state machine —
+   arrival → at rest → handoff → docked — with skip and reduced-motion as
+   first-class inputs.
+2. **The arrival.** Flights, locks, labels, glow, spin; skip on first
+   input; reduced-motion shows the assembled state at once.
+3. **The center card.** The typed line, the name field (three-word
+   placeholder, the icon note), Begin/Continue, and the focus rules.
+4. **The handoff and the banner.** The 900ms move; the route commit
+   beneath it; the banner fade; the empty-name fallback.
+5. **The dock, protrusions, and the turn.** Dome geometry and fills;
+   arcs; pills and hover; the 120° turn; the content crossfade; Next and
+   back integration; the rail and bar retired; the narrow-screen dock.
+6. **The copy trim.** The pass across every surface — the flagged lines
+   out, an icon and tooltip where a fact survives, the placeholder sized
+   — plus a sweep for stragglers at the end.
+7. **Verification.** Lint, tests, and build green — with tests for the
+   state machine (arrival completes and skips; the handoff lands docked;
+   the turn aligns and reframes; reduced-motion equivalents; answer and
+   subject carry-over kept). Headless, console-clean captures of the new
+   surfaces: mid-flight, assembled at rest, the handoff mid-move, a
+   docked part, a turned part, the assessment, a narrow screen, and the
+   reduced-motion set. A contrast receipt for the new pairs: the banner,
+   the pills on the part tones, the arc against the fill.

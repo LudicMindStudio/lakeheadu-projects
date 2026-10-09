@@ -24,6 +24,18 @@ export function pathForDomain(domain) {
   return domains.indexOf(domain) === 0 ? "/evaluate" : `/evaluate/${domain.key}`;
 }
 
+// The wheel angle that seats a part at the top of the docked half wheel.
+// Each part spans 120 degrees, so the turn between parts is 120.
+export function rotationForDomain(domain) {
+  return -(partNumberFor(domain) - 1) * 120;
+}
+
+// Which part's bisector sits at the top for a given wheel angle.
+export function centeredIndexFor(rotor) {
+  const raw = Math.round(-rotor / 120) % 3;
+  return ((raw % 3) + 3) % 3;
+}
+
 export function nextPathFor(domain) {
   const index = domains.indexOf(domain);
   const next = domains[index + 1];

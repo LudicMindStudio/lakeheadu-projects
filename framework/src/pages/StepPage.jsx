@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import {
+  countsFor,
   currentTypeSlug,
+  domains,
   isDomainComplete,
   nextPathFor,
   partNumberFor,
@@ -9,45 +11,45 @@ import {
   visibleQuestions,
 } from "../content.js";
 import { useAnswers } from "../state/answers-context.js";
+import { useWheel } from "../state/wheel-context.js";
 import QuestionBlock from "../components/QuestionBlock.jsx";
 import GuidancePanel from "../components/GuidancePanel.jsx";
-import PartNav from "../components/PartNav.jsx";
-import PartsList from "../components/PartsList.jsx";
-
-function SubjectLine({ subject, variant }) {
-  if (!subject) return null;
-  return (
-    <p className={`subject-line subject-line--${variant}`}>
-      Assessing: <Link to="/">{subject}</Link>
-    </p>
-  );
-}
 
 // One part of the walkthrough. Parts are real routes, so back, refresh,
 // and direct links behave.
 export default function StepPage({ domain }) {
-  const { subject, answers } = useAnswers();
+  const { answers } = useAnswers();
+  const { stage, turnTo } = useWheel();
   const questions = visibleQuestions(domain, currentTypeSlug(answers));
   const complete = isDomainComplete(domain, answers);
-  const isLast = stepNumberFor(domain) === stepCount;
+  const count = countsFor(domain, answers);
+  const index = domains.indexOf(domain);
+  const isLast = index === domains.length - 1;
+
+  // The Next control runs the wheel's turn, so the part swap arrives with the rotation.
+  const onNext = (event) => {
+    if (stage === "dock" && !isLast) {
+      event.preventDefault();
+      turnTo(index + 1);
+    }
+  };
 
   return (
     <div className="page page--step">
-      <aside className="rail">
-        <PartNav currentKey={domain.key} showBar />
-        <SubjectLine subject={subject} variant="rail" />
-        <PartsList answers={answers} currentKey={domain.key} />
-      </aside>
       <article className="sheet step" data-part={partNumberFor(domain)}>
         <div className="step-top">
           <Link to="/" className="back-link">
             ← All parts
           </Link>
           <p className="eyebrow">
-            Part {stepNumberFor(domain)} of {stepCount}
+            <span>
+              Part {stepNumberFor(domain)} of {stepCount}
+            </span>
+            <span className="eyebrow-count">
+              {count.answered} of {count.total} answered
+            </span>
           </p>
         </div>
-        <SubjectLine subject={subject} variant="inline" />
         <h1>{domain.name}</h1>
         {domain.intro ? <p className="lead">{domain.intro}</p> : null}
         <div className="questions">
@@ -57,7 +59,7 @@ export default function StepPage({ domain }) {
         </div>
         {domain.guidance ? <GuidancePanel domain={domain} settled={complete} /> : null}
         <div className="step-actions">
-          <Link className="button" to={nextPathFor(domain)}>
+          <Link className="button" to={nextPathFor(domain)} onClick={onNext}>
             {isLast ? "See your assessment" : "Next part"}
           </Link>
         </div>
