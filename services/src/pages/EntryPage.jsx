@@ -1,12 +1,12 @@
 import { useParams } from "react-router-dom";
 
 export default function EntryPage() {
-  const { id } = useParams();
+  const { slug } = useParams();
 
   return (
     <>
       <h1>Service entry</h1>
-      <p className="muted">Entry: {id}</p>
+      <p className="muted">Entry: {slug}</p>
     </>
   );
 }

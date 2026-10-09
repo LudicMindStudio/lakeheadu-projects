@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
-import HomePage from "./pages/HomePage.jsx";
+import LandingPage from "./pages/LandingPage.jsx";
+import EvaluatePage from "./pages/EvaluatePage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 
 export default function App() {
@@ -10,7 +11,8 @@ export default function App() {
       </header>
       <main className="app-main">
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/evaluate" element={<EvaluatePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
