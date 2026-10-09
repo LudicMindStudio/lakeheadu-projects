@@ -73,6 +73,43 @@ describe("sample data", () => {
   });
 });
 
+describe("sample media", () => {
+  test("every entry carries a banner with local media and alt text", () => {
+    for (const entry of ENTRIES) {
+      expect(entry.banner, entry.id).toBeTruthy();
+      expect(["image", "video"], entry.id).toContain(entry.banner.kind);
+      expect(entry.banner.src.startsWith("/media/"), entry.id).toBe(true);
+      expect(typeof entry.banner.alt).toBe("string");
+      expect(entry.banner.alt.length).toBeGreaterThan(0);
+      if (entry.banner.kind === "video") {
+        expect(entry.banner.poster.startsWith("/media/"), entry.id).toBe(true);
+      }
+    }
+  });
+
+  test("one video banner and two embeds prove both media paths", () => {
+    expect(ENTRIES.filter((entry) => entry.banner.kind === "video")).toHaveLength(1);
+    const embeds = ENTRIES.filter((entry) => entry.embed);
+    expect(embeds).toHaveLength(2);
+    expect(embeds.filter((entry) => entry.embed.kind === "video")).toHaveLength(1);
+    expect(embeds.filter((entry) => entry.embed.kind === "pdf")).toHaveLength(1);
+    for (const entry of embeds) {
+      expect(entry.embed.url.startsWith("/media/"), entry.id).toBe(true);
+      expect(entry.embed.title.length).toBeGreaterThan(0);
+    }
+  });
+
+  test("nothing in the sample data points at an external address", () => {
+    for (const entry of ENTRIES) {
+      const urls = [entry.url, entry.banner?.src, entry.banner?.poster, entry.embed?.url];
+      for (const url of urls) {
+        if (url == null) continue;
+        expect(url.startsWith("/"), `${entry.id}: ${url}`).toBe(true);
+      }
+    }
+  });
+});
+
 describe("vocabulary helpers", () => {
   test("badgeFor maps formats, including apps", () => {
     expect(badgeFor("video")).toBe("Video");

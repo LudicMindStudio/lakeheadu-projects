@@ -10,7 +10,13 @@
     "age_groups": ["all-ages"],
     "tags": ["overview", "guides"],
     "published_date": "2025-03-10",
-    "added_date": "2025-06-02"
+    "added_date": "2025-06-02",
+    "banner": {
+      "kind": "image",
+      "src": "/media/banners/digital-health-reading-room.jpg",
+      "alt": "Abstract artwork with soft grey washes and a fine ring"
+    },
+    "embed": null
   },
   {
     "id": "screen-time-classroom-lab",
@@ -23,7 +29,13 @@
     "age_groups": ["under-18"],
     "tags": ["screen-time", "education"],
     "published_date": "2025-01-22",
-    "added_date": "2025-06-02"
+    "added_date": "2025-06-02",
+    "banner": {
+      "kind": "image",
+      "src": "/media/banners/screen-time-classroom-lab.jpg",
+      "alt": "Abstract artwork with soft green washes"
+    },
+    "embed": null
   },
   {
     "id": "how-apps-track-mood",
@@ -36,7 +48,18 @@
     "age_groups": ["all-ages"],
     "tags": ["mood", "privacy", "apps"],
     "published_date": "2024-11-08",
-    "added_date": "2025-06-02"
+    "added_date": "2025-06-02",
+    "banner": {
+      "kind": "video",
+      "src": "/media/video/mood-loop.mp4",
+      "poster": "/media/video/mood-loop-poster.jpg",
+      "alt": "A slow blue gradient drifting across warm paper"
+    },
+    "embed": {
+      "kind": "video",
+      "url": "/media/video/mood-explainer.mp4",
+      "title": "The full explainer"
+    }
   },
   {
     "id": "talking-tech-and-feelings",
@@ -49,7 +72,13 @@
     "age_groups": ["18-65"],
     "tags": ["apps", "family"],
     "published_date": "2025-04-15",
-    "added_date": "2025-06-02"
+    "added_date": "2025-06-02",
+    "banner": {
+      "kind": "image",
+      "src": "/media/banners/talking-tech-and-feelings.jpg",
+      "alt": "Abstract artwork in layered blue tones"
+    },
+    "embed": null
   },
   {
     "id": "northshore-wellbeing-network",
@@ -62,7 +91,13 @@
     "age_groups": ["all-ages"],
     "tags": ["community"],
     "published_date": "2024-09-19",
-    "added_date": "2025-06-02"
+    "added_date": "2025-06-02",
+    "banner": {
+      "kind": "image",
+      "src": "/media/banners/northshore-wellbeing-network.jpg",
+      "alt": "Abstract artwork with quiet grey tones and a faint ring"
+    },
+    "embed": null
   },
   {
     "id": "five-questions-choosing-an-app",
@@ -75,7 +110,13 @@
     "age_groups": ["all-ages"],
     "tags": ["apps", "privacy"],
     "published_date": "2024-06-03",
-    "added_date": "2025-06-02"
+    "added_date": "2025-06-02",
+    "banner": {
+      "kind": "image",
+      "src": "/media/banners/five-questions-choosing-an-app.jpg",
+      "alt": "Abstract artwork with a warm amber wash"
+    },
+    "embed": null
   },
   {
     "id": "smartphone-anxiety-review",
@@ -88,7 +129,13 @@
     "age_groups": ["18-65"],
     "tags": ["anxiety", "research"],
     "published_date": "2025-02-27",
-    "added_date": "2025-06-02"
+    "added_date": "2025-06-02",
+    "banner": {
+      "kind": "image",
+      "src": "/media/banners/smartphone-anxiety-review.jpg",
+      "alt": "Abstract artwork in layered amber tones"
+    },
+    "embed": null
   },
   {
     "id": "sleep-habits-check-in",
@@ -101,7 +148,17 @@
     "age_groups": ["all-ages"],
     "tags": ["sleep", "checklists"],
     "published_date": null,
-    "added_date": "2025-08-12"
+    "added_date": "2025-08-12",
+    "banner": {
+      "kind": "image",
+      "src": "/media/banners/sleep-habits-check-in.jpg",
+      "alt": "Abstract artwork with a calm green wash"
+    },
+    "embed": {
+      "kind": "pdf",
+      "url": "/media/docs/sleep-habits-check-in.pdf",
+      "title": "The check-in page"
+    }
   },
   {
     "id": "health-apps-getting-started",
@@ -114,7 +171,13 @@
     "age_groups": ["65-plus"],
     "tags": ["getting-started", "apps"],
     "published_date": "2025-05-06",
-    "added_date": "2025-07-01"
+    "added_date": "2025-07-01",
+    "banner": {
+      "kind": "image",
+      "src": "/media/banners/health-apps-getting-started.jpg",
+      "alt": "Abstract artwork in soft sage green"
+    },
+    "embed": null
   },
   {
     "id": "harbourlight-app",
@@ -127,7 +190,13 @@
     "age_groups": ["all-ages"],
     "tags": ["mood", "sleep", "journaling"],
     "published_date": "2024-02-14",
-    "added_date": "2025-06-02"
+    "added_date": "2025-06-02",
+    "banner": {
+      "kind": "image",
+      "src": "/media/banners/harbourlight-app.jpg",
+      "alt": "Abstract artwork in dark ink tones over warm paper"
+    },
+    "embed": null
   },
   {
     "id": "stillbrook-app",
@@ -140,7 +209,13 @@
     "age_groups": ["18-65"],
     "tags": ["stress", "mindfulness"],
     "published_date": "2023-10-02",
-    "added_date": "2025-06-02"
+    "added_date": "2025-06-02",
+    "banner": {
+      "kind": "image",
+      "src": "/media/banners/stillbrook-app.jpg",
+      "alt": "Abstract artwork with deep ink washes and a fine ring"
+    },
+    "embed": null
   },
   {
     "id": "northwood-calm-app",
@@ -153,6 +228,12 @@
     "age_groups": ["under-18"],
     "tags": ["anxiety", "teens"],
     "published_date": "2023-05-18",
-    "added_date": "2025-06-02"
+    "added_date": "2025-06-02",
+    "banner": {
+      "kind": "image",
+      "src": "/media/banners/northwood-calm-app.jpg",
+      "alt": "Abstract artwork with broad ink-toned washes"
+    },
+    "embed": null
   }
 ]

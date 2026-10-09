@@ -1,0 +1,8 @@
+The fonts in this folder are licensed under the SIL Open Font License 1.1.
+
+- Space Grotesk (variable, 500-700), by Florian Karsten
+  https://github.com/floriankarsten/space-grotesk
+- Source Sans 3 (variable, 400-600), by Adobe
+  https://github.com/adobe-fonts/source-sans
+
+They are self-hosted here so the app makes no external font requests.

@@ -41,6 +41,23 @@ export function badgeFor(format) {
   return BADGES[format] ?? format;
 }
 
+// The color family behind each format's badge and artwork.
+export const FORMAT_FAMILY = {
+  library: "neutral",
+  "lesson-plan": "green",
+  video: "blue",
+  podcast: "blue",
+  "organization-website": "neutral",
+  "article-nonresearch": "amber",
+  "article-research": "amber",
+  tool: "green",
+  app: "ink",
+};
+
+export function familyFor(format) {
+  return FORMAT_FAMILY[format] ?? "neutral";
+}
+
 export function ageLabels(keys) {
   return AGE_GROUPS.filter((group) => keys.includes(group.key))
     .map((group) => group.label)

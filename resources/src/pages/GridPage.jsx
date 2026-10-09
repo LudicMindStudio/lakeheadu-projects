@@ -1,0 +1,318 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
+import EntryCard from "../components/EntryCard.jsx";
+import FilterPanel from "../components/FilterPanel.jsx";
+import { AGE_GROUPS, COLLECTIONS, FORMATS } from "../lib/entries.js";
+import { useEntries } from "../lib/useEntries.js";
+import { morphWithTransition, useDocumentVisible } from "../lib/motion.js";
+import {
+  activeFilterEntries,
+  countForOption,
+  describeCount,
+  effectiveSort,
+  filterEntries,
+  parseFilters,
+  parseQuery,
+  parseSort,
+  searchTerms,
+  sortEntries,
+  sortNewest,
+} from "../lib/browse.js";
+
+const ENTERED_KEY = "resources.ring-entered";
+
+function readEntered() {
+  try {
+    return window.sessionStorage.getItem(ENTERED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markEntered() {
+  try {
+    window.sessionStorage.setItem(ENTERED_KEY, "1");
+  } catch {
+    // Storage unavailable; the ring simply returns on the next visit.
+  }
+}
+
+// The grid surface. A fresh arrival at / opens the ring: a center panel with
+// the promise, search, and instructions, boxed in by the eight latest cards.
+// The first characters typed (or the browse link) morph it into the list.
+// /browse opens the list directly.
+export default function GridPage() {
+  const { pathname } = useLocation();
+  const entries = useEntries();
+  const [params, setParams] = useSearchParams();
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [entered, setEntered] = useState(readEntered);
+  const morphing = useRef(false);
+  const visible = useDocumentVisible();
+
+  const query = parseQuery(params);
+  const terms = searchTerms(query);
+  const { kind, who, apps } = parseFilters(params);
+  const sortParam = parseSort(params, query);
+  const sort = effectiveSort(sortParam, terms);
+
+  const state = { terms, kind, who, apps };
+  const results = sortEntries(filterEntries(entries, state), sort, terms);
+  const chips = activeFilterEntries({ kind, who, apps });
+  const activeCount = chips.length;
+  const narrowed = terms.length > 0 || activeCount > 0;
+
+  const atRoot = pathname === "/";
+  const intro = params.get("intro") === "1";
+  const hasState =
+    terms.length > 0 || kind.size > 0 || who.size > 0 || apps.size > 0 || sortParam !== null;
+  const ring = atRoot && !hasState && (intro || !entered);
+
+  useEffect(() => {
+    if (pathname === "/browse") markEntered();
+  }, [pathname]);
+
+  useEffect(() => {
+    document.title = ring ? "Resources & tools" : "Browse · Resources & tools";
+  }, [ring]);
+
+  const counts = {
+    kind: Object.fromEntries(
+      FORMATS.map((format) => [format.key, countForOption(entries, state, "kind", format.key)]),
+    ),
+    who: Object.fromEntries(
+      AGE_GROUPS.map((group) => [group.key, countForOption(entries, state, "who", group.key)]),
+    ),
+    apps: Object.fromEntries(
+      COLLECTIONS.map((collection) => [
+        collection.key,
+        countForOption(entries, state, "apps", collection.key),
+      ]),
+    ),
+  };
+
+  const update = useCallback(
+    (mutate) => {
+      setParams(
+        (previous) => {
+          const next = new URLSearchParams(previous);
+          mutate(next);
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setParams],
+  );
+
+  // Entering the list from the ring: the signature morph, played once.
+  const enterList = useCallback(
+    (next) => {
+      const apply = () => {
+        markEntered();
+        setEntered(true);
+        if (next) setParams(next, { replace: true });
+      };
+      if (ring && !morphing.current) {
+        morphing.current = true;
+        morphWithTransition(() => flushSync(apply));
+      } else {
+        apply();
+      }
+    },
+    [ring, setParams],
+  );
+
+  const onQueryChange = (value) => {
+    if (ring && value !== "") {
+      const next = new URLSearchParams(params);
+      next.set("q", value);
+      enterList(next);
+      return;
+    }
+    update((next) => {
+      if (value === "") {
+        next.delete("q");
+        // Clearing the query also ends an explicit sort choice.
+        next.delete("sort");
+      } else {
+        next.set("q", value);
+      }
+    });
+  };
+
+  const onSortChange = (value) => update((next) => next.set("sort", value));
+
+  const onToggleFilter = (group, key) =>
+    update((next) => {
+      const values = next.getAll(group);
+      next.delete(group);
+      const nextValues = values.includes(key)
+        ? values.filter((value) => value !== key)
+        : [...values, key];
+      for (const value of nextValues) next.append(group, value);
+    });
+
+  const clearFilters = () =>
+    update((next) => {
+      next.delete("kind");
+      next.delete("who");
+      next.delete("apps");
+    });
+
+  const onBrowseAll = (event) => {
+    event.preventDefault();
+    enterList();
+  };
+
+  const linkParams = new URLSearchParams(params);
+  linkParams.delete("intro");
+  const browseSearch = linkParams.toString() ? `?${linkParams.toString()}` : "";
+  const ringCards = sortNewest(entries).slice(0, 8);
+  const cards = ring ? ringCards : results;
+
+  return (
+    <section
+      className="stage"
+      data-state={ring ? "ring" : "list"}
+      data-away={visible ? undefined : "true"}
+    >
+      <div className="masthead">
+        <h1 className={ring ? "masthead-title" : "visually-hidden"}>Resources &amp; tools</h1>
+        {ring && (
+          <p className="masthead-promise">
+            Find trusted resources and tools on digital mental health technology, in one searchable
+            place.
+          </p>
+        )}
+        <div className="searchbar">
+          <label className="visually-hidden" htmlFor="search-input">
+            Search resources
+          </label>
+          <input
+            id="search-input"
+            className="search-input"
+            type="search"
+            value={query}
+            placeholder="Search by title, topic, or source"
+            autoComplete="off"
+            spellCheck="false"
+            onChange={(event) => onQueryChange(event.target.value)}
+          />
+          {query !== "" && (
+            <button
+              type="button"
+              className="search-clear"
+              aria-label="Clear search"
+              onClick={() => onQueryChange("")}
+            >
+              ×
+            </button>
+          )}
+        </div>
+        {ring && (
+          <div className="masthead-notes">
+            <p>Type to search, or browse the shelf around you.</p>
+            <p>Filters for kind, age, and app directory appear with the results.</p>
+            <p className="masthead-browse">
+              <a href="/browse" onClick={onBrowseAll}>
+                Browse everything
+              </a>
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="controls">
+        <p className="results-count" role="status">
+          {describeCount(results.length, entries.length, narrowed)}
+        </p>
+        <div className="results-controls">
+          <button
+            type="button"
+            className="filters-toggle"
+            aria-expanded={filtersOpen}
+            aria-controls="filters-panel"
+            onClick={() => setFiltersOpen((open) => !open)}
+          >
+            {activeCount > 0 ? `Filters (${activeCount})` : "Filters"}
+          </button>
+          <label className="sort-control">
+            <span>Sort</span>
+            <select value={sort} onChange={(event) => onSortChange(event.target.value)}>
+              <option value="newest">Newest first</option>
+              <option value="relevance" disabled={terms.length === 0}>
+                Best match
+              </option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      {chips.length > 0 && (
+        <ul className="chips">
+          {chips.map((chip) => (
+            <li className="chip" key={`${chip.group}-${chip.key}`}>
+              <span>{chip.label}</span>
+              <button
+                type="button"
+                aria-label={`Remove filter: ${chip.label}`}
+                onClick={() => onToggleFilter(chip.group, chip.key)}
+              >
+                ×
+              </button>
+            </li>
+          ))}
+          <li className="chips-clear">
+            <button type="button" className="link-button" onClick={clearFilters}>
+              Clear all
+            </button>
+          </li>
+        </ul>
+      )}
+
+      <FilterPanel
+        open={filtersOpen}
+        counts={counts}
+        selected={{ kind, who, apps }}
+        onToggle={onToggleFilter}
+        onClose={() => setFiltersOpen(false)}
+      />
+
+      {results.length > 0 ? (
+        <div className="cards">
+          {cards.map((entry, index) => (
+            <EntryCard
+              key={entry.id}
+              entry={entry}
+              terms={terms}
+              browseSearch={browseSearch}
+              style={ring ? { "--drift-delay": `${index * 9}s` } : undefined}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="empty-state">
+          <p className="empty-title">No matches yet.</p>
+          <p className="empty-text">
+            Nothing fits all of those together — try removing a filter, or search for something
+            else.
+          </p>
+          <div className="empty-actions">
+            {terms.length > 0 && (
+              <button type="button" className="button-secondary" onClick={() => onQueryChange("")}>
+                Clear search
+              </button>
+            )}
+            {activeCount > 0 && (
+              <button type="button" className="button-secondary" onClick={clearFilters}>
+                Clear all filters
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
