@@ -35,7 +35,7 @@
   --line-strong: #c6ccd2;
   --card: #ffffff;
   --wash: #f5f7f7;
-  --map-bg: #e9e8e4;
+  --map-bg: #f6f1e7;
   --danger-ink: #9d3b3b;
 
   --accent: #0e5a66;
@@ -310,6 +310,31 @@ a {
   color: var(--status-wait-ink);
 }
 
+/* the first-step mark + the quiet status bubble */
+
+.icon-raise {
+  display: block;
+}
+
+.status-bubble {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.status-bubble.status-accepting {
+  background: var(--status-accepting-ink);
+}
+
+.status-bubble.status-call-first {
+  background: var(--status-call-ink);
+}
+
+.status-bubble.status-waitlist {
+  background: var(--status-wait-ink);
+}
+
 /* ----- the map surface ----- */
 .map-shell {
   position: fixed;
@@ -368,7 +393,7 @@ a {
 .map-zoom {
   position: absolute;
   left: 16px;
-  bottom: 88px;
+  bottom: 60px;
   z-index: 8;
   display: flex;
   flex-direction: column;
@@ -395,34 +420,28 @@ a {
   border-color: var(--line-strong);
 }
 
-.map-info {
+.map-manage {
   position: absolute;
   left: 16px;
   bottom: 16px;
   z-index: 7;
-  display: grid;
-  gap: 2px;
-  max-width: 330px;
-  padding: 7px 12px 8px;
+  padding: 6px 12px 7px;
   background: rgba(255, 255, 255, 0.86);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
 }
 
-.map-info p {
-  margin: 0;
-}
-
-.map-sample {
-  font-size: 11.5px;
+.map-manage a {
+  font-size: 12px;
   font-weight: 600;
-  color: var(--ink);
+  color: var(--muted);
+  text-decoration: none;
+  transition: color var(--motion-fast) ease;
 }
 
-.map-attrib {
-  font-size: 10.5px;
-  color: var(--muted);
+.map-manage a:hover {
+  color: var(--accent-ink);
 }
 
 .map-area-pill {
@@ -526,7 +545,7 @@ a {
 .map-label-water {
   font-size: 10.5px;
   font-style: italic;
-  color: #8a9aa0;
+  color: #5d7a76;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
@@ -665,37 +684,30 @@ a {
   color: var(--ink);
 }
 
+.pin-preview-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
 .pin-preview-org {
   font-size: 11.5px;
   color: var(--muted);
 }
 
-.pin-preview-status {
-  justify-self: start;
-  padding: 1px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
 .pin-preview-step {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   font-size: 12.5px;
-  line-height: 1.45;
+  line-height: 1.35;
   color: var(--ink-soft);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
-.pin-preview-step-label {
-  display: block;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.rail-row-step .icon-raise,
+.pin-preview-step .icon-raise {
+  flex: none;
   color: var(--accent);
-  margin-bottom: 1px;
 }
 
 /* ----- landing intro ----- */
@@ -854,6 +866,12 @@ a {
   cursor: pointer;
 }
 
+.intro-fine {
+  margin: 14px 0 0;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
 /* ----- results rail ----- */
 .rail {
   position: absolute;
@@ -967,6 +985,22 @@ a {
   gap: 6px;
 }
 
+.rail-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rail-cat {
+  padding: 4px 10px;
+  font-size: 12.5px;
+  gap: 6px;
+}
+
+.rail-cat.is-on {
+  border-color: var(--cat-ink, var(--accent));
+}
+
 .rail-list {
   flex: 1;
   overflow-y: auto;
@@ -1008,9 +1042,16 @@ a {
   color: var(--muted);
 }
 
+.rail-row-title-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+}
+
 .rail-row-title {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 0;
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 600;
@@ -1029,30 +1070,14 @@ a {
   color: var(--muted);
 }
 
-.rail-row-status {
-  display: inline-block;
-  margin-bottom: 7px;
-  padding: 1px 9px;
-  border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 600;
-}
-
 .rail-row-step {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 1px;
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.4;
   color: var(--ink);
-}
-
-.rail-row-step-label {
-  display: block;
-  margin-bottom: 2px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
 }
 
 .rail-empty {
@@ -1236,22 +1261,20 @@ a {
   border-radius: var(--radius);
 }
 
-.ec-hero-label {
-  margin: 0 0 8px;
-  font-family: var(--font-display);
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent-ink);
-}
-
-.ec-hero-action {
+.ec-hero-step {
+  display: flex;
+  align-items: center;
+  gap: 11px;
   margin: 0 0 8px;
   font-size: 19px;
   font-weight: 600;
-  line-height: 1.42;
+  line-height: 1.35;
   color: var(--accent-ink);
+}
+
+.ec-hero-step .icon-raise {
+  flex: none;
+  color: var(--accent);
 }
 
 .ec-hero-note {
@@ -1375,12 +1398,6 @@ a {
   font-size: 15px;
 }
 
-.ec-sample {
-  margin: 26px 0 0;
-  font-size: 12px;
-  color: var(--faint);
-}
-
 .entry-card-missing .ec-scroll {
   padding: 20px 28px;
 }
@@ -1401,14 +1418,6 @@ a {
   width: min(1060px, 100% - 48px);
   margin: 0 auto;
   padding: 40px 0 72px;
-}
-
-.page-footer {
-  padding: 14px 24px;
-  border-top: 1px solid var(--line);
-  font-size: 12px;
-  color: var(--faint);
-  text-align: center;
 }
 
 .page h1 {
@@ -1636,6 +1645,56 @@ a {
   align-self: flex-end;
 }
 
+.form-contact-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.form-availability {
+  display: grid;
+  gap: 7px;
+}
+
+.form-map-pick {
+  position: relative;
+  height: 220px;
+  background: var(--wash);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.form-map-pick-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.form-map-pick .maplibregl-canvas {
+  cursor: crosshair;
+}
+
+.form-map-pick-note {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0 18px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.pick-pin {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2.5px solid #fff;
+  box-shadow: 0 1px 5px rgba(23, 32, 36, 0.35);
+}
+
 .form-actions {
   display: flex;
   gap: 12px;
@@ -1684,11 +1743,10 @@ a {
     display: none;
   }
 
-  .map-info {
+  .map-manage {
     top: 62px;
     bottom: auto;
     left: 12px;
-    max-width: calc(100vw - 24px);
   }
 
   .ec-scroll {
@@ -1707,6 +1765,10 @@ a {
 
   .admin-head {
     flex-wrap: wrap;
+  }
+
+  .form-contact-pair {
+    grid-template-columns: 1fr;
   }
 }
 

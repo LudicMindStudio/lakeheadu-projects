@@ -1,6 +1,7 @@
 // One result row in the rail. Descriptions live on the entry view.
 
 import { Link, useLocation } from "react-router-dom";
+import IconRaiseHands from "./IconRaiseHands.jsx";
 import { COST_LABELS, REFERRAL_LABELS, STATUS_LABELS, optionLabel } from "../data/filters.js";
 import { formatDistance } from "../lib/format.js";
 
@@ -19,6 +20,7 @@ export default function EntryRow({ entry, distance, hovered, onHover }) {
   if (distance !== null && distance !== undefined) {
     facts.push(formatDistance(distance, entry.region));
   }
+  const statusLabel = entry.status ? STATUS_LABELS[entry.status] : null;
 
   return (
     <li className={`rail-row${hovered ? " is-active" : ""}`}>
@@ -32,16 +34,22 @@ export default function EntryRow({ entry, distance, hovered, onHover }) {
         onBlur={() => onHover?.(null)}
       >
         <span className="rail-row-org">{entry.org}</span>
-        <span className="rail-row-title">{entry.program}</span>
+        <span className="rail-row-title-row">
+          {statusLabel && (
+            <span
+              className={`status-bubble status-${entry.status}`}
+              role="img"
+              aria-label={statusLabel}
+              title={statusLabel}
+            />
+          )}
+          <span className="rail-row-title">{entry.program}</span>
+        </span>
         <span className="rail-row-facts">{facts.join(" · ")}</span>
-        {entry.status && STATUS_LABELS[entry.status] && (
-          <span className={`rail-row-status status-${entry.status}`}>
-            {STATUS_LABELS[entry.status]}
-          </span>
-        )}
-        <span className="rail-row-step">
-          <span className="rail-row-step-label">First step</span>
-          {entry.firstStep}
+        <span className="rail-row-step" title={entry.firstStep}>
+          <IconRaiseHands size={16} />
+          <span className="sr-only">{"First step: "}</span>
+          {entry.firstStepShort || entry.firstStep}
         </span>
       </Link>
     </li>

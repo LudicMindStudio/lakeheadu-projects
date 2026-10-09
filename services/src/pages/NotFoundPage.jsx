@@ -10,7 +10,6 @@ export default function NotFoundPage() {
           <Link to="/">Back to the map</Link>
         </p>
       </div>
-      <footer className="page-footer">Sample listings, not real services yet.</footer>
     </div>
   );
 }

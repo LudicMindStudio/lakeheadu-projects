@@ -4,7 +4,9 @@
 import { useState } from "react";
 import { FILTER_GROUPS } from "../../data/filters.js";
 import { TOWNS, findTown } from "../../data/towns.js";
+import { composeContact, splitContact } from "../../lib/contact.js";
 import { slugify } from "../../lib/slug.js";
+import LocationPicker from "./LocationPicker.jsx";
 
 const NATURE_OPTIONS = FILTER_GROUPS.find((group) => group.id === "nature").options;
 const CONCERN_OPTIONS = FILTER_GROUPS.find((group) => group.id === "concerns").options;
@@ -28,6 +30,7 @@ const FIELD_LABELS = {
   lat: "Latitude",
   lng: "Longitude",
   firstStep: "First step",
+  firstStepShort: "Short first step",
   availability: "Availability",
   status: "Status",
   lastVerified: "Last verified",
@@ -45,15 +48,25 @@ function emptyDraft() {
     considerations: [],
     ages: [],
     concerns: [],
-    contact: "",
+    contactText: "",
+    contactValue: "",
     region: TOWNS[0].name,
     lat: TOWNS[0].lat,
     lng: TOWNS[0].lon,
     firstStep: "",
+    firstStepShort: "",
     availability: "",
     status: "accepting",
     lastVerified: new Date().toISOString().slice(0, 10),
   };
+}
+
+function draftFrom(initial) {
+  if (!initial) {
+    return emptyDraft();
+  }
+  const { text, value } = splitContact(initial.contact);
+  return { ...initial, contactText: text, contactValue: value };
 }
 
 function CheckGroup({ legend, options, values, onToggle }) {
@@ -77,9 +90,10 @@ function CheckGroup({ legend, options, values, onToggle }) {
 }
 
 export default function EntryForm({ initial, errors, busy, onSubmit, onCancel }) {
-  const [draft, setDraft] = useState(() => (initial ? { ...initial } : emptyDraft()));
+  const [draft, setDraft] = useState(() => draftFrom(initial));
   const [slugTouched, setSlugTouched] = useState(Boolean(initial));
   const isNew = !initial;
+  const townCentre = findTown(draft.region) ?? TOWNS[0];
 
   const set = (key) => (event) => setDraft((prev) => ({ ...prev, [key]: event.target.value }));
 
@@ -107,6 +121,7 @@ export default function EntryForm({ initial, errors, busy, onSubmit, onCancel })
     onSubmit({
       ...draft,
       slug,
+      contact: composeContact(draft.contactText, draft.contactValue),
       lat: Number(draft.lat),
       lng: Number(draft.lng),
     });
@@ -127,7 +142,19 @@ export default function EntryForm({ initial, errors, busy, onSubmit, onCancel })
       <div className="form-row">
         <label className="form-field">
           <span>Program name</span>
-          <input value={draft.program} onChange={set("program")} required maxLength={120} />
+          <input
+            value={draft.program}
+            onChange={(event) => {
+              const value = event.target.value;
+              setDraft((prev) => ({
+                ...prev,
+                program: value,
+                ...(isNew && !slugTouched ? { slug: slugify(value) } : null),
+              }));
+            }}
+            required
+            maxLength={120}
+          />
         </label>
         <label className="form-field">
           <span>Organization</span>
@@ -146,7 +173,11 @@ export default function EntryForm({ initial, errors, busy, onSubmit, onCancel })
             set("slug")(event);
           }}
         />
-        {!isNew && <span className="form-hint">The address stays the same after creation.</span>}
+        <span className="form-hint">
+          {isNew
+            ? "Built from the program name; edit it if you like."
+            : "The address stays the same after creation."}
+        </span>
       </label>
 
       <label className="form-field">
@@ -155,8 +186,18 @@ export default function EntryForm({ initial, errors, busy, onSubmit, onCancel })
       </label>
 
       <label className="form-field">
-        <span>First step — one sentence, including the point of contact</span>
+        <span>First step — what someone does first, in one sentence</span>
         <textarea value={draft.firstStep} onChange={set("firstStep")} rows={2} required />
+      </label>
+
+      <label className="form-field">
+        <span>Short first step — up to five words, for the map and lists</span>
+        <input
+          value={draft.firstStepShort ?? ""}
+          onChange={set("firstStepShort")}
+          maxLength={60}
+          placeholder="e.g. Call 807-555-0121"
+        />
       </label>
 
       <div className="form-row">
@@ -172,15 +213,6 @@ export default function EntryForm({ initial, errors, busy, onSubmit, onCancel })
           <select value={draft.referral} onChange={set("referral")}>
             <option value="self">No referral needed</option>
             <option value="required">A referral is needed</option>
-          </select>
-        </label>
-        <label className="form-field">
-          <span>Status</span>
-          <select value={draft.status ?? ""} onChange={set("status")}>
-            <option value="">No badge</option>
-            <option value="accepting">Accepting new clients</option>
-            <option value="call-first">Call to check</option>
-            <option value="waitlist">Waitlist</option>
           </select>
         </label>
       </div>
@@ -234,14 +266,64 @@ export default function EntryForm({ initial, errors, busy, onSubmit, onCancel })
         </button>
       </div>
 
-      <label className="form-field">
-        <span>Contact — the channel plus the identifier</span>
-        <input value={draft.contact} onChange={set("contact")} required />
-      </label>
-      <label className="form-field">
-        <span>Availability</span>
-        <input value={draft.availability} onChange={set("availability")} required />
-      </label>
+      <div className="form-field">
+        <span>Pin placement</span>
+        <LocationPicker
+          lat={draft.lat}
+          lng={draft.lng}
+          fallback={{ lat: townCentre.lat, lng: townCentre.lon }}
+          onChange={(lat, lng) => setDraft((prev) => ({ ...prev, lat, lng }))}
+        />
+        <span className="form-hint">
+          Click the map to place the pin — the numbers above update as you go.
+        </span>
+      </div>
+
+      <div className="form-field">
+        <span>Contact</span>
+        <div className="form-contact-pair">
+          <input
+            value={draft.contactText ?? ""}
+            onChange={set("contactText")}
+            placeholder="How — e.g. Phone, Text, Email"
+            maxLength={40}
+          />
+          <input
+            value={draft.contactValue ?? ""}
+            onChange={set("contactValue")}
+            placeholder="Number or address"
+            maxLength={80}
+          />
+        </div>
+        <span className="form-hint">
+          One way in: a word or two for the channel, then the number or address.
+        </span>
+      </div>
+
+      <fieldset className="form-group form-availability">
+        <legend>Availability</legend>
+        <div className="form-row">
+          <label className="form-field">
+            <span>Status</span>
+            <select value={draft.status ?? ""} onChange={set("status")}>
+              <option value="">No badge</option>
+              <option value="accepting">Accepting new clients</option>
+              <option value="call-first">Call to check</option>
+              <option value="waitlist">Waitlist</option>
+            </select>
+          </label>
+          <label className="form-field">
+            <span>Anything else worth knowing</span>
+            <input
+              value={draft.availability}
+              onChange={set("availability")}
+              placeholder="Optional — one line"
+            />
+          </label>
+        </div>
+        <span className="form-hint">The badge shows at a glance; the note carries anything more.</span>
+      </fieldset>
+
       <label className="form-field">
         <span>Last verified</span>
         <input type="date" value={draft.lastVerified} onChange={set("lastVerified")} required />

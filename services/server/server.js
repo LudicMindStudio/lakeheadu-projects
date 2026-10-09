@@ -114,7 +114,7 @@ export function createAppServer({
       notFound(res);
       return;
     }
-    const cache = /^(assets|tiles|fonts)\//.test(relative)
+    const cache = /^(assets|fonts)\//.test(relative)
       ? "public, max-age=31536000, immutable"
       : "no-cache";
     if (fs.existsSync(resolved) && fs.statSync(resolved).isFile()) {

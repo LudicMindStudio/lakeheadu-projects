@@ -2,6 +2,7 @@
 // row over the live map. It recedes on the first real interaction.
 
 import { FILTER_GROUPS } from "../data/filters.js";
+import { TILE_ATTRIBUTION } from "../data/mapConfig.js";
 
 const CONCERNS = FILTER_GROUPS.find((group) => group.id === "concerns");
 
@@ -67,6 +68,7 @@ export default function LandingIntro({
           All services
         </button>
       </div>
+      <p className="intro-fine">Map {TILE_ATTRIBUTION}.</p>
     </section>
   );
 }

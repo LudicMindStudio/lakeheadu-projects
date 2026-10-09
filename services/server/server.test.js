@@ -67,6 +67,24 @@ describe("validateEntry", () => {
     });
     expect(errors.slug).toBe("Already used by another entry.");
   });
+
+  it("carries the short first step and holds it to five words", () => {
+    const { entry, errors } = validateEntry({ ...ENTRIES[0] });
+    expect(errors).toBeUndefined();
+    expect(entry.firstStepShort).toBe(ENTRIES[0].firstStepShort);
+
+    const { errors: tooLong } = validateEntry({
+      ...ENTRIES[0],
+      firstStepShort: "This has far too many words",
+    });
+    expect(tooLong.firstStepShort).toBeTruthy();
+  });
+
+  it("accepts an entry without an availability note", () => {
+    const { entry, errors } = validateEntry({ ...ENTRIES[0], availability: "" });
+    expect(errors).toBeUndefined();
+    expect(entry.availability).toBe("");
+  });
 });
 
 describe("auth", () => {

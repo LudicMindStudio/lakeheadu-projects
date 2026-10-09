@@ -29,6 +29,7 @@ describe("sample entries", () => {
       "contact",
       "region",
       "firstStep",
+      "firstStepShort",
       "availability",
       "lastVerified",
     ];
@@ -69,18 +70,30 @@ describe("sample entries", () => {
     }
   });
 
+  it("keep firstStepShort to five words or fewer", () => {
+    for (const entry of ENTRIES) {
+      const words = entry.firstStepShort.trim().split(/\s+/).filter(Boolean);
+      expect(words.length, `${entry.slug}: "${entry.firstStepShort}"`).toBeLessThanOrEqual(5);
+    }
+  });
+
   it("never implies opening hours", () => {
     for (const entry of ENTRIES) {
-      const text = [entry.description, entry.firstStep, entry.availability, entry.contact].join(
-        " ",
-      );
+      const text = [
+        entry.description,
+        entry.firstStep,
+        entry.firstStepShort,
+        entry.availability,
+        entry.contact,
+      ].join(" ");
       expect(text, entry.slug).not.toMatch(/\b\d{1,2}\s*(a\.?m\.?|p\.?m\.?)\b/i);
     }
   });
 
   it("use the reserved-for-fiction 807-555-01xx numbers only", () => {
     const phones = ENTRIES.flatMap(
-      (entry) => `${entry.contact} ${entry.firstStep}`.match(/807-555-\d{4}/g) ?? [],
+      (entry) =>
+        `${entry.contact} ${entry.firstStep} ${entry.firstStepShort}`.match(/807-555-\d{4}/g) ?? [],
     );
     expect(phones.length).toBeGreaterThan(0);
     for (const phone of phones) {

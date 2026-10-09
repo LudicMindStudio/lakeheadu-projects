@@ -8,9 +8,12 @@ import { FILTER_GROUPS, SORTS, optionLabel } from "../data/filters.js";
 import { TOWNS } from "../data/towns.js";
 import { distanceFromTown } from "../lib/directory.js";
 
+const CONCERNS = FILTER_GROUPS.find((group) => group.id === "concerns");
+
 export default function ResultsRail({
   total,
   results,
+  entries,
   query,
   sort,
   town,
@@ -26,6 +29,7 @@ export default function ResultsRail({
   onClearFilters,
   onClearArea,
   onClearAll,
+  onCategory,
   panelOpen,
   onTogglePanel,
 }) {
@@ -37,6 +41,18 @@ export default function ResultsRail({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const categoryCounts = useMemo(() => {
+    const counts = new Map(CONCERNS.options.map((option) => [option.value, 0]));
+    for (const entry of entries ?? []) {
+      for (const value of entry.concerns) {
+        if (counts.has(value)) {
+          counts.set(value, counts.get(value) + 1);
+        }
+      }
+    }
+    return counts;
+  }, [entries]);
 
   const activeCount = FILTER_GROUPS.reduce((sum, group) => sum + filters[group.id].length, 0);
   const narrowed = query.trim() !== "" || activeCount > 0 || areaActive;
@@ -91,6 +107,26 @@ export default function ResultsRail({
           autoComplete="off"
           onChange={(event) => onSearchChange(event.target.value)}
         />
+        <div className="rail-cats" role="group" aria-label="I want help with">
+          {CONCERNS.options.map((option) => {
+            const active = filters.concerns.includes(option.value);
+            return (
+              <button
+                key={option.value}
+                type="button"
+                className={`cat-chip rail-cat${active ? " is-on" : ""}`}
+                data-cat={option.value}
+                aria-pressed={active}
+                aria-label={`${option.label}, ${categoryCounts.get(option.value) ?? 0} services`}
+                onClick={() => onCategory(option.value)}
+              >
+                <span className="cat-dot" aria-hidden="true" />
+                <span>{option.label}</span>
+                <span className="cat-count">{categoryCounts.get(option.value) ?? 0}</span>
+              </button>
+            );
+          })}
+        </div>
         <div className="rail-tools">
           <label className="rail-control">
             <span className="rail-control-label">Sort</span>

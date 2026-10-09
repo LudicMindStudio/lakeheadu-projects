@@ -3,6 +3,7 @@
 // step leads.
 
 import { useEffect, useRef } from "react";
+import IconRaiseHands from "./IconRaiseHands.jsx";
 import { COST_LABELS, REFERRAL_NOTES, STATUS_LABELS, optionLabel } from "../data/filters.js";
 import { formatDate } from "../lib/format.js";
 
@@ -38,8 +39,10 @@ export default function EntrySplit({ entry, onClose }) {
       </header>
       <div className="ec-scroll">
         <section className="ec-hero" aria-label="Your first step">
-          <p className="ec-hero-label">Your first step</p>
-          <p className="ec-hero-action">{entry.firstStep}</p>
+          <p className="ec-hero-step" title={entry.firstStep}>
+            <IconRaiseHands size={22} />
+            <span>{entry.firstStepShort || entry.firstStep}</span>
+          </p>
           <p className="ec-hero-note">{REFERRAL_NOTES[entry.referral]}</p>
         </section>
 
@@ -112,10 +115,12 @@ export default function EntrySplit({ entry, onClose }) {
               <dt>Where</dt>
               <dd>{entry.region}</dd>
             </div>
-            <div className="ec-row">
-              <dt>Availability</dt>
-              <dd>{entry.availability}</dd>
-            </div>
+            {entry.availability && (
+              <div className="ec-row">
+                <dt>Availability</dt>
+                <dd>{entry.availability}</dd>
+              </div>
+            )}
             <div className="ec-row">
               <dt>Last verified</dt>
               <dd>
@@ -129,8 +134,6 @@ export default function EntrySplit({ entry, onClose }) {
           <h2 className="ec-section-title">Contact</h2>
           <p>{entry.contact}</p>
         </section>
-
-        <p className="ec-sample">Sample listing, not a real service yet.</p>
       </div>
     </aside>
   );

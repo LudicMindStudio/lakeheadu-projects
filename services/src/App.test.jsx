@@ -30,6 +30,8 @@ test("lands on the map with the promise, search, and counted categories", async 
   expect(screen.getByLabelText("Search services")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Anxiety, 9 services/ })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "All services" })).toBeInTheDocument();
+  expect(screen.getByText(/OpenStreetMap contributors/)).toBeInTheDocument();
+  expect(screen.queryByText(/Sample listing/i)).toBeNull();
 });
 
 test("typing in the intro search recedes the intro and narrows the rail", async () => {
@@ -86,13 +88,22 @@ test("closest first asks for a town and reports distances", async () => {
 test("opens a service entry with the first step leading", async () => {
   renderAt("/entry/kestrel-app");
   expect(await screen.findByRole("heading", { level: 1, name: "Kestrel App" })).toBeInTheDocument();
-  expect(screen.getByText("Your first step")).toBeInTheDocument();
-  expect(
-    screen.getByText(
-      "Download the Kestrel app and start the first module with no referral needed.",
-    ),
-  ).toBeInTheDocument();
+  expect(screen.getByRole("region", { name: "Your first step" })).toBeInTheDocument();
+  expect(screen.getByText("Download the Kestrel app")).toBeInTheDocument();
   expect(screen.getByText("September 22, 2026")).toBeInTheDocument();
+  expect(screen.queryByText(/Sample listing/i)).toBeNull();
+});
+
+test("the brand control returns to the start", async () => {
+  renderAt("/entry/kestrel-app");
+  await screen.findByRole("heading", { level: 1, name: "Kestrel App" });
+  fireEvent.click(screen.getByRole("link", { name: "Services" }));
+  expect(
+    await screen.findByRole("heading", {
+      level: 1,
+      name: /Find services across Northwestern Ontario/,
+    }),
+  ).toBeInTheDocument();
 });
 
 test("closing the entry returns to the browsed map", async () => {

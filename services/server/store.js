@@ -45,6 +45,7 @@ export function validateEntry(input, { existingSlugs = new Set() } = {}) {
   const contact = asString(data.contact);
   const region = asString(data.region);
   const firstStep = asString(data.firstStep);
+  const firstStepShort = asString(data.firstStepShort);
   const availability = asString(data.availability);
   const lastVerified = asString(data.lastVerified);
   const cost = asString(data.cost);
@@ -69,14 +70,14 @@ export function validateEntry(input, { existingSlugs = new Set() } = {}) {
   if (!firstStep) {
     errors.firstStep = "Required — the precise first action.";
   }
+  if (firstStepShort && firstStepShort.trim().split(/\s+/).length > 5) {
+    errors.firstStepShort = "Keep it to five words or fewer.";
+  }
   if (!contact) {
     errors.contact = "Required.";
   }
   if (!region) {
     errors.region = "Required.";
-  }
-  if (!availability) {
-    errors.availability = "Required.";
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(lastVerified)) {
     errors.lastVerified = "A date, as YYYY-MM-DD.";
@@ -137,6 +138,9 @@ export function validateEntry(input, { existingSlugs = new Set() } = {}) {
     availability,
     lastVerified,
   };
+  if (firstStepShort) {
+    entry.firstStepShort = firstStepShort;
+  }
   if (status) {
     entry.status = status;
   }

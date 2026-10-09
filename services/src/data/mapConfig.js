@@ -9,14 +9,13 @@ export const MAP_CONFIG = {
   minZoom: 6.45,
   maxZoom: 10.6,
   townZoom: 10,
-  maxBounds: [
-    [-95.9, 47.15],
-    [-83.5, 52.4],
-  ],
 };
 
-// Vendored light-gray raster tiles (z6-z9), committed under public/tiles/.
-export const TILE_TEMPLATE = "/tiles/{z}/{x}/{y}.webp";
+// Vendored raster tiles in the app's warm palette (z6-z10 across the region,
+// z11 around the towns), committed under public/tiles/. Bump the version in
+// the URL whenever scripts/fetch-tiles.py rewrites the set, so browsers pick
+// up the new tiles.
+export const TILE_TEMPLATE = "/tiles/{z}/{x}/{y}.webp?v=2";
 
 export const TILE_ATTRIBUTION = "© Esri, HERE, Garmin, © OpenStreetMap contributors";
 

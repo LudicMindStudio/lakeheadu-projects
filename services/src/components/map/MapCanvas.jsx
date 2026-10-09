@@ -3,12 +3,12 @@
 // camera moves that open an entry as a split of the same window.
 
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import * as maplibregl from "maplibre-gl";
 import maplibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   MAP_CONFIG,
-  TILE_ATTRIBUTION,
   TILE_TEMPLATE,
   TOWN_LABEL_EAST_OF,
   TOWN_LABEL_OFFSETS,
@@ -17,6 +17,7 @@ import {
 import { TOWNS } from "../../data/towns.js";
 import { STATUS_LABELS } from "../../data/filters.js";
 import { fanIndices, fanOffset, fanScale } from "../../lib/mapPins.js";
+import { raiseHandsSvg } from "../raiseHandsMarkup.js";
 
 // The map worker ships with the map library. The bundler emits it as an
 // asset and MapLibre is pointed at it here.
@@ -67,6 +68,7 @@ export default function MapCanvas({
   receded = false,
   areaBounds = null,
   preRoll = false,
+  resetSignal = 0,
   onAreaSearch,
   onFirstInteraction,
   onHoverChange,
@@ -156,29 +158,32 @@ export default function MapCanvas({
     preview.className = "pin-preview";
     preview.setAttribute("aria-hidden", "true");
 
+    const title = document.createElement("span");
+    title.className = "pin-preview-title";
+    if (entry.status && STATUS_LABELS[entry.status]) {
+      const bubble = document.createElement("span");
+      bubble.className = `status-bubble status-${entry.status}`;
+      bubble.title = STATUS_LABELS[entry.status];
+      title.append(bubble);
+    }
     const program = document.createElement("span");
     program.className = "pin-preview-program";
     program.textContent = entry.program;
+    title.append(program);
 
     const org = document.createElement("span");
     org.className = "pin-preview-org";
     org.textContent = `${entry.org} · ${entry.region}`;
 
-    preview.append(program, org);
-
-    if (entry.status && STATUS_LABELS[entry.status]) {
-      const status = document.createElement("span");
-      status.className = `pin-preview-status status-${entry.status}`;
-      status.textContent = STATUS_LABELS[entry.status];
-      preview.append(status);
-    }
+    preview.append(title, org);
 
     const step = document.createElement("span");
     step.className = "pin-preview-step";
-    const stepLabel = document.createElement("span");
-    stepLabel.className = "pin-preview-step-label";
-    stepLabel.textContent = "First step";
-    step.append(stepLabel, document.createTextNode(entry.firstStep));
+    step.title = entry.firstStep;
+    const stepIcon = document.createElement("span");
+    stepIcon.className = "pin-preview-step-icon";
+    stepIcon.innerHTML = raiseHandsSvg(15);
+    step.append(stepIcon, document.createTextNode(entry.firstStepShort || entry.firstStep));
     preview.append(step);
 
     const ring = document.createElement("span");
@@ -249,7 +254,7 @@ export default function MapCanvas({
               tiles: [TILE_TEMPLATE],
               tileSize: 256,
               minzoom: 6,
-              maxzoom: 9,
+              maxzoom: 11,
             },
           },
           layers: [{ id: "base", type: "raster", source: "base" }],
@@ -258,7 +263,6 @@ export default function MapCanvas({
         zoom: MAP_CONFIG.zoom,
         minZoom: MAP_CONFIG.minZoom,
         maxZoom: MAP_CONFIG.maxZoom,
-        maxBounds: MAP_CONFIG.maxBounds,
         attributionControl: false,
         dragRotate: false,
         pitchWithRotate: false,
@@ -420,31 +424,23 @@ export default function MapCanvas({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusEntry, ready, failed]);
 
-  // While an entry is open the map is a stage, not a playground.
+  // Brand reset: fly back to the framed region.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !ready || failed) {
+    if (!map || !ready || failed || resetSignal === 0) {
       return;
     }
-    const handlers = [
-      map.dragPan,
-      map.scrollZoom,
-      map.boxZoom,
-      map.doubleClickZoom,
-      map.touchZoomRotate,
-      map.keyboard,
-    ];
-    for (const handler of handlers) {
-      if (!handler) {
-        continue;
-      }
-      if (focusEntry) {
-        handler.disable();
-      } else {
-        handler.enable();
-      }
+    cameraRef.current = null;
+    firstInteractionRef.current = false;
+    if (prefersReducedMotion()) {
+      map.easeTo({ center: MAP_CONFIG.center, zoom: MAP_CONFIG.zoom, duration: 0 });
+    } else {
+      map.flyTo({ center: MAP_CONFIG.center, zoom: MAP_CONFIG.zoom, duration: 700, curve: 1.3 });
     }
-  }, [focusEntry, ready, failed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetSignal, ready, failed]);
+
+  // The map never locks: zoom and pan work while an entry is open.
 
   const zoomBy = (delta) => {
     const map = mapRef.current;
@@ -479,9 +475,8 @@ export default function MapCanvas({
               −
             </button>
           </div>
-          <div className="map-info">
-            <p className="map-sample">Sample listings, not real services yet.</p>
-            <p className="map-attrib">{TILE_ATTRIBUTION}</p>
+          <div className="map-manage">
+            <Link to="/admin">Manage services</Link>
           </div>
           {showPill && (
             <button type="button" className="map-area-pill" onClick={handleAreaSearch}>

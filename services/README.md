@@ -45,11 +45,14 @@ the public site reads.
 
 ## The map
 
-The map is MapLibre GL JS over a small vendored tile set under `public/tiles/`
-(light-gray raster, z6–z9, fitted to the region), so the app renders with no
-external requests at runtime. `scripts/fetch-tiles.py` refreshes the tile set
-from the Esri Light Gray Canvas service; it is a build-time tool that needs
-network access and Pillow. The typefaces under `public/fonts/` are self-hosted
+The map is MapLibre GL JS over a vendored tile set under `public/tiles/`
+(raster, z6–z10 across the region with panning margin, plus z11 around the
+towns; recolored at build time to the app's warm palette with a subtle
+hillshade), so the app renders with no external requests at runtime. The
+tile URL carries a version (`?v=` in `src/data/mapConfig.js`); bump it
+whenever `scripts/fetch-tiles.py` rewrites the tile set so browsers fetch
+the new tiles. The fetcher is a build-time tool that needs network access,
+Pillow, and numpy. The typefaces under `public/fonts/` are self-hosted
 subsets.
 
 Base map © Esri, HERE, Garmin, © OpenStreetMap contributors.
@@ -57,8 +60,8 @@ Base map © Esri, HERE, Garmin, © OpenStreetMap contributors.
 ## Sample content
 
 Listings are sample content: organizations are fictional, place names are real,
-and contact details use reserved-for-fiction numbers (807-555-01xx). Every
-surface carries a visible sample tag. Nothing here describes a real service.
+and contact details use reserved-for-fiction numbers (807-555-01xx). Nothing
+here describes a real service.
 
 ## Tests
 

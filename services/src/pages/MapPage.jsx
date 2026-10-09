@@ -35,6 +35,7 @@ export default function MapPage() {
   const [hoveredSlug, setHoveredSlug] = useState(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [railFocus, setRailFocus] = useState(false);
+  const [resetSignal, setResetSignal] = useState(0);
   const [phase, setPhase] = useState(() =>
     params.toString() !== "" || arrivedAtEntry ? "browse" : "intro",
   );
@@ -131,6 +132,15 @@ export default function MapPage() {
     [updateParams, recede],
   );
 
+  const handleCategoryToggle = useCallback(
+    (value) => {
+      const current = browse.filters.concerns;
+      const isOnly = current.length === 1 && current[0] === value;
+      updateParams({ concerns: isOnly ? null : value });
+    },
+    [browse.filters.concerns, updateParams],
+  );
+
   const toggleFilter = useCallback(
     (groupId, value) => {
       const current = browse.filters[groupId] ?? [];
@@ -199,6 +209,24 @@ export default function MapPage() {
     }
   }, [navigate, location]);
 
+  // Back to the start: clear the state and restore the intro.
+  const resetToStart = useCallback(
+    (event) => {
+      event.preventDefault();
+      setHoveredSlug(null);
+      setPanelOpen(false);
+      setRailFocus(false);
+      setParams(new URLSearchParams(), { replace: true });
+      if (location.pathname !== "/") {
+        navigate("/");
+      }
+      phaseRef.current = "intro";
+      setPhase("intro");
+      setResetSignal((count) => count + 1);
+    },
+    [location.pathname, navigate, setParams],
+  );
+
   const introProps = {
     entries: entries ?? [],
     query: browse.query,
@@ -219,6 +247,7 @@ export default function MapPage() {
         receded={phase !== "intro"}
         areaBounds={browse.area}
         preRoll={arrivedAtEntry}
+        resetSignal={resetSignal}
         onAreaSearch={handleAreaSearch}
         onFirstInteraction={recede}
         onHoverChange={setHoveredSlug}
@@ -226,7 +255,7 @@ export default function MapPage() {
       />
 
       <header className="map-brand">
-        <Link className="map-brand-link" to="/">
+        <Link className="map-brand-link" to="/" onClick={resetToStart}>
           Services
         </Link>
       </header>
@@ -264,6 +293,7 @@ export default function MapPage() {
               <ResultsRail
                 total={entries.length}
                 results={results}
+                entries={entries}
                 query={browse.query}
                 sort={browse.sort}
                 town={browse.town}
@@ -279,6 +309,7 @@ export default function MapPage() {
                 onClearFilters={clearFilters}
                 onClearArea={clearArea}
                 onClearAll={clearAll}
+                onCategory={handleCategoryToggle}
                 panelOpen={panelOpen}
                 onTogglePanel={() => setPanelOpen((open) => !open)}
               />

@@ -187,9 +187,7 @@ export default function AdminPage() {
         {status === "offline" && (
           <div className="admin-note">
             <p>The editor is available when the app runs with its server.</p>
-            <p className="muted">
-              Started statically, the site serves the bundled sample listings.
-            </p>
+            <p className="muted">Started statically, the site serves its bundled listings.</p>
           </div>
         )}
 
@@ -312,7 +310,6 @@ export default function AdminPage() {
           />
         )}
       </div>
-      <footer className="page-footer">Sample listings, not real services yet.</footer>
     </div>
   );
 }
