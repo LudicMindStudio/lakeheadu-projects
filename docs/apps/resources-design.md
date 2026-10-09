@@ -1,6 +1,6 @@
 # Resources: design note
 
-Draft v3, 2026-10-09. Third design pass for the Resources app: the ring fills the window and returns whenever the search clears, with one clean, animated wash between the two states; media-forward cards expand from a quiet arrow that also opens on a long hover; full pages embed video and documents; and the shelf stays editable behind a password. The first pass's search, filters, sorts, and data carry forward.
+Draft v3, 2026-10-09. Third design pass for the Resources app: the ring fills the window and returns whenever the search clears, with one clean, animated wash between the two states; media-forward cards expand from a quiet arrow that also opens on a half-second hover; full pages embed video and documents; and the shelf stays editable behind a password. The first pass's search, filters, sorts, and data carry forward.
 
 **Find trusted resources and tools on digital mental health technology, in one searchable place.**
 
@@ -14,7 +14,7 @@ Entry kinds: libraries, lesson plans, videos, podcasts, organizations & websites
 
 - Landing and browse become one surface: a grid that opens as a ring on arrival and morphs into the list when a search starts.
 - Cards grow up: media leads, titles get large, each card carries an expandable section. Full pages stay.
-- Entries can carry a banner (image or video), and full pages can embed a video or a document.
+- Entries can carry a banner (image or video), and full pages can embed video and document media.
 - The site gains a small server and a single-password management surface at `/admin`.
 - Taste returns: color families, soft depth, a little pop, a proper type pair, carried from the earlier iteration, retuned for calm.
 
@@ -36,13 +36,13 @@ A fresh arrival at `/` with nothing typed opens the grid as a ring:
 
 On desktop the ring fills the window, edge to edge and header to footer, with one consistent gutter, instead of sitting in its own fixed frame.
 
-- **The center.** A quiet panel at the center of the surface carries, in order: the app's one-line promise, the search field, and two lines of instruction ("Type to search, or browse the shelf around you. Filters for kind, age, and app directory appear with the results."). This is the page's single focal point. A small "Browse everything" link goes straight to the list.
+- **The center.** A quiet panel at the center of the surface carries, in order: the app's title, its one-line promise, and the search field. This is the page's single focal point.
 - **The shelf around it.** The eight latest entries sit in the cells of a box around the center: three across, three down, the middle reserved for the panel. Each cell is a full media card (see Cards).
 - **The drift.** The cards keep their boxed formation and translate very slightly along the ring's path on one slow shared cycle: a few pixels, minutes long, staggered per card. It should read as the ring gently turning, never as cards wandering. The drift pauses off-tab and stops entirely under reduced motion.
 
-The ring is the resting state, not a one-time door. It opens on every arrival at `/` with nothing active, and it comes back whenever the search clears, settling into the shelf again. A search, a filter, or the browse link takes it into the list; clearing everything brings it home.
+The ring is the resting state, not a one-time door. It opens on every arrival at `/` with nothing active, and it comes back whenever the search clears, settling into the shelf again. A search or a filter takes it into the list; clearing everything brings it home.
 
-Narrow screens stack the composition: the center panel first (promise, search, instructions), then the cards in a single column beneath it. No drift below the ring width; a soft staggered entrance instead.
+Narrow screens stack the composition: the center panel first (title, promise, search), then the cards in a single column beneath it. No drift below the ring width; a soft staggered entrance instead.
 
 ## The search morph
 
@@ -58,17 +58,17 @@ Typing stays live throughout: matches highlight, the count updates as you type, 
 
 One card anatomy across the app, media first:
 
-- **Media leads.** The entry's banner (image, or a video where one exists) carries the card. In the ring, it fills the cell and the badge and title sit over a soft scrim; in the list, it runs as the left panel of the wide band, with the info panel beside it. Media can lead without shouting: sample art is calm, in the format's color family.
+- **Media leads.** The entry's banner (image, or a video where one exists) carries the card. In the ring, it fills the cell and the badge and title sit over a soft scrim; in the list, it runs as the left panel of the wide band, with the info panel beside it. Media can lead without shouting: banners are professional photographs, or a short clip where the entry has one.
 - **Info in front.** A color-coded format badge, the title in the display face at a generous size, the source, and a quiet meta row (age, dates). While a search is active, a one-line snippet shows under the title with the match highlighted.
-- **Expandable section.** A small arrow opens the card's details in place: the description, topic tags, and a "More" link to the full page. Hovering a card for two full seconds opens it on its own and it stays open; closing it with the arrow turns that hover-open off for the card. Panels animate open and push the grid gently; nothing overlays. The title, the media, and the "More" link all go to the full page, so the full page per entry stays exactly as it should.
+- **Expandable section.** A small arrow opens the card's details in place: the description, topic tags, and a "More" link to the full page. Hovering a card for half a second opens it on its own and it stays open; closing it with the arrow turns that hover-open off for the card. Panels animate open and push the grid gently; nothing overlays. The title, the media, and the "More" link all go to the full page, so the full page per entry stays exactly as it should.
 - **Alive, not jumpy.** Hover lifts the card a few pixels with the pop shadow; the media eases in a hair. That is the whole budget for a card.
 
 ## Full page (`/entry/:id`)
 
-- A wide hero banner (the entry's media; a clip plays muted where the banner is a video), the title, source, and meta (who it is for, published, added), then the description and tags.
-- **Embedded media** when the entry carries one: a video player for clips (native player for files, framed player for common hosts) or a document viewer for PDFs, sized to read, with a calm fallback link. Embedding a video or a PDF is a paste-the-link edit in the admin; nothing to code per entry.
-- An "Open resource" action when a live URL exists. Sample entries show a plain note instead, with no dead links.
-- Back returns to the exact list, search and filters intact.
+- A wide hero banner (the entry's media; a clip plays muted where the banner is a video), the title, and the source, then a quick-facts banner (who it is for, the collection for apps, published and added dates, topic tags), then the description.
+- **Embedded media** when the entry carries it: one or more items, each a video player for clips (native player for files, framed player for common hosts) or a document viewer for PDFs, sized to read, with a calm fallback link. Each item is added in the admin as a row; nothing to code per entry.
+- An "Open resource" action when the entry has a live URL; entries without one carry no action.
+- The back icon returns to the exact list, search and filters intact.
 
 ## Media as data
 
@@ -76,10 +76,10 @@ Entries carry their media as editable fields, in the same single data file as ev
 
 | Field | Shape | Notes |
 |---|---|---|
-| `banner` | `{ kind: "image" \| "video", src, poster?, alt }`, nullable | Card lead and hero. Video banners are muted, looping, inline; the poster replaces the clip under reduced motion or when it cannot play. |
-| `embed` | `{ kind: "video" \| "pdf", url, title }`, nullable | Rendered on the full page only. |
+| `banner` | `{ kind: "image" \| "video", src, poster?, alt? }`, nullable | Card lead and hero. Video banners are muted, looping, inline; the poster replaces the clip under reduced motion or when it cannot play. Where no written description is set, the media announces the entry title. An entry with no banner renders a quiet gradient in the format's color family. |
+| `embeds` | array of `{ kind: "video" \| "pdf", url, title }`, up to 20 | Rendered on the full page, in order. |
 
-Sample media is generated locally (abstract art per format family, plus one short clip), committed with the app, and marked in the same sample language as everything else. No external media references anywhere in the sample data.
+Media is vendored with the app: free-license photographs and clips (credits in `public/media/LICENSES.txt`) and a sample document for the PDF embed; nothing is fetched at runtime and no external media addresses appear in the data.
 
 ## Look, carried from the earlier iteration, retuned
 
@@ -87,7 +87,7 @@ The first pass read a touch synthetic. This one brings back the earlier iteratio
 
 - **Palette.** Warm paper (#f4f2ee), ink (#22261f), white surfaces, hairline interior rules. One accent family per format kind: soft blue for videos and podcasts, green for lesson plans and tools, amber for articles, neutral for libraries and organizations, ink solid for apps. Color appears as tinted badges, media hues, and small accents: meaning-bearing, never decoration. Search matches keep the warm amber highlight.
 - **Depth.** Soft drop shadows where surfaces need to float: cards on a wide low-opacity blur, hover lifting to the pop shadow, fields on their own quiet shadow. Hairlines stay for rules inside surfaces. Not flat, not heavy.
-- **Shape and type.** 18px cards, 16px fields, pill badges. A display face for titles (Space Grotesk) and a humanist body face (Source Sans 3), both self-hosted (about 75 KB, OFL) so no external font requests are made; the system stack stands by as fallback.
+- **Shape and type.** 18px cards, 16px fields, pill badges. A display face for titles (Space Grotesk) and a humanist body face (Source Sans 3), both self-hosted (about 50 KB, OFL) so no external font requests are made; the system stack stands by as fallback.
 - **Desktop fill.** The surface breathes to the window (up to about 1520px wide, generous gutters) instead of hugging a narrow column. The full page keeps a calm reading measure for prose while the banner runs wide.
 - **Pop, budgeted.** Staggered card entrances, springy chips, hover lifts, the morph, the drift. Small moments, all of which yield to `prefers-reduced-motion`.
 
@@ -157,10 +157,10 @@ The person's own choice sticks until they change it or clear the query.
 
 The site keeps working as a static build; with its server running it gains a management surface.
 
-- **Server.** A zero-dependency Node server (`server/`, plain `node:http`, started with `npm run server`, port from `PORT`, default 5210). It serves the built app, a small JSON API, and the admin session. Storage is the app's own JSON file, written through on every change with an atomic swap, one `.bak` generation kept. First run seeds it from the shipped data.
+- **Server.** A zero-dependency Node server (`server/`, plain `node:http`, started with `npm run server`, port from `PORT`, default 5210). It serves the built app, a small JSON API, the admin session, and uploaded media from `/uploads/` (stored under `server/uploads/`). Storage is the app's own JSON file, written through on every change with an atomic swap, one `.bak` generation kept. First run seeds it from the shipped data.
 - **Sign-in.** One admin password from the environment; a signed, http-only session cookie; constant-time comparison; secrets never in the repo (env or a git-ignored file). Sign out clears the session.
-- **`/admin`.** A quiet in-app page. Signed out: one password field. Signed in: a plain table of entries (title, format, source, updated) with add, edit, and remove. The edit form covers every field an entry has, banner and embed included, so the whole database is editable without touching code. When the site runs without its server, `/admin` says so in one plain line instead of pretending.
-- **The way in.** A small "Manage resources" link in the footer of every page. Quiet, standard, always in the same spot.
+- **`/admin`.** A quiet in-app page. Signed out: one password field. Signed in: a plain table of entries (title, format, source, updated) with add, edit, and remove. The edit form covers every field an entry has, banner and embeds included, so the whole database is editable without touching code. Banner media uploads straight to the server from the form, with a pasted path as the secondary option, and the Id generates from the title as it is typed, with manual override available. When the site runs without its server, `/admin` says so in one plain line instead of pretending.
+- **The way in.** A "Manage entries" button in the header of every public page and a matching footer link both open the sign-in; the admin screens carry the same words.
 - **Data flow.** The app renders from its bundled data immediately and refreshes from the API when the server is present, so edits appear on the public site without a rebuild. Without the server, nothing changes for a visitor.
 
 No new dependencies anywhere: the server is plain Node, and motion is CSS and platform APIs.
@@ -183,13 +183,13 @@ Entries are editable data, not component code: one file (`src/data/entries.json`
 | `published_date` | date, nullable | drives Newest first |
 | `added_date` | date | fallback for sorting |
 | `banner` | object, nullable | see Media as data |
-| `embed` | object, nullable | see Media as data |
+| `embeds` | array (empty when none) | see Media as data |
 
 ## Sample content
 
-About 12 entries, every filter value covered at least once. Sources are fictional or neutral (no invented details for real organizations); real place names are fine. Marked as sample everywhere it could be mistaken for real: a small "Sample content" marker in the header, and a plain note instead of any dead link on entry details.
+About 12 entries, every filter value covered at least once. Sources are fictional: no entry names a real organization, product, or certification, and real place names are fine. The UI carries no sample markings; the data itself stays plainly fictional.
 
-Coverage: each of the eight kinds at least once; each app collection at least once; each age value at least once; dates spread so recency sorting reads; a handful of topic tags; a banner for every entry; one video banner; two embeds (one clip, one document) to prove both media paths end to end. All sample media is local and generated; nothing is fetched.
+Coverage: each of the eight kinds at least once; each app collection at least once; each age value at least once; dates spread so recency sorting reads; a handful of topic tags; a banner for every entry; one video banner; two embeds (one clip, one document) to prove both media paths end to end. All media is vendored locally: free-license photographs and clips (credits in `public/media/LICENSES.txt`) plus a sample document for the PDF embed; nothing is fetched at runtime.
 
 ## Open questions
 
@@ -199,8 +199,8 @@ Each with a stated default. The build proceeds on defaults unless corrected.
 2. **Ring contents**: the eight newest entries (default); a featured flag later (alternative).
 3. **List geometry**: wide bands, two per row, two rows landing in the first screen on desktop, one per row below about 1100px (default). Tune on sight.
 4. **Video banners**: muted, looping, inline, poster-first (default); the poster replaces the clip under reduced motion.
-5. **Admin media**: URLs and paths only, no file uploads this pass (default).
-6. **Manage link**: footer, every page, always visible (default); `/admin` explains unavailability when the server is not running.
+5. **Admin media** (resolved): uploads through the server (jpg, png, webp, gif, mp4, webm; 16 MB each) stored under `server/uploads/` and served from `/uploads/`; a pasted path remains as the secondary option.
+6. **Manage link** (resolved): a "Manage entries" button in the header of every public page and a matching footer link; `/admin` explains unavailability when the server is not running.
 7. **Type faces**: vendor Space Grotesk and Source Sans 3 (self-hosted, OFL) as the earlier iteration had them (default); the system stack throughout (alternative).
 8. **"Libraries" meaning**: collections or archives of materials, organized for a purpose, one kind among the eight (default, carried).
 9. **The app trio**: the three mHealth collections filter app entries by collection (default, carried); the data model is unchanged.
