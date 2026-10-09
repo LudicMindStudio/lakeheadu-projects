@@ -1,5 +1,5 @@
 import { Link, Route, Routes, useLocation, useParams } from "react-router-dom";
-import { domainByKey, domains, meta, partNumberFor } from "./content.js";
+import { domainByKey, domains, partNumberFor } from "./content.js";
 import AnswersProvider from "./state/AnswersProvider.jsx";
 import WheelProvider from "./state/WheelProvider.jsx";
 import { useWheel } from "./state/wheel-context.js";
@@ -65,13 +65,6 @@ function Shell() {
         </div>
       </main>
       <WheelStage />
-      {meta.sample ? (
-        <footer className="app-footer">
-          <div className="shell">
-            <p className="sample-line">Sample content: questions and guidance are drafts.</p>
-          </div>
-        </footer>
-      ) : null}
     </div>
   );
 }

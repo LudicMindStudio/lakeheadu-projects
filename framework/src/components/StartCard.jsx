@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import { hasAnyAnswers } from "../content.js";
+import { hasAnyAnswers, meta } from "../content.js";
 import { useAnswers } from "../state/answers-context.js";
 import { useWheel } from "../state/wheel-context.js";
 
-const LINE = "Is it safe and useful?";
+const LINE = "Is your technology safe and useful?";
+const hasAbout = Boolean(meta.about || meta.disclaimer);
 
-// The card in the wheel's center: the intro line, the name field, and the
-// one button. Empty names are fine, and Begin works with the field blank.
+// The card in the wheel's center cutout: the intro line, the name field,
+// the one button, and the About note. Empty names are fine, and Begin works
+// with the field blank.
 export default function StartCard() {
   const { subject, setSubject, answers, clearAll } = useAnswers();
   const { stage, reduced, begin, resetArrival, focusToken } = useWheel();
   const [typed, setTyped] = useState(0);
   const fieldRef = useRef(null);
+  const dialogRef = useRef(null);
   const focusShown = useRef(0);
   const returning = hasAnyAnswers(answers);
   const arriving = stage === "arrival";
@@ -28,7 +31,7 @@ export default function StartCard() {
         setTyped(count);
         if (count >= LINE.length) window.clearInterval(interval);
       }, 27);
-    }, 1450);
+    }, 1250);
     return () => {
       window.clearTimeout(start);
       window.clearInterval(interval);
@@ -51,6 +54,20 @@ export default function StartCard() {
   const startOver = () => {
     clearAll();
     resetArrival();
+  };
+
+  const openAbout = () => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.setAttribute("open", "");
+  };
+
+  const closeAbout = () => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (typeof dialog.close === "function") dialog.close();
+    else dialog.removeAttribute("open");
   };
 
   return (
@@ -76,7 +93,7 @@ export default function StartCard() {
             type="text"
             value={subject}
             onChange={(event) => setSubject(event.target.value)}
-            placeholder="App, chatbot, site…"
+            placeholder="Technology name..."
             aria-label="What are you evaluating?"
             autoComplete="off"
             disabled={arriving}
@@ -105,8 +122,34 @@ export default function StartCard() {
               Start over
             </button>
           ) : null}
+          {hasAbout ? (
+            <button
+              type="button"
+              className="device-note about-note"
+              onClick={openAbout}
+              disabled={arriving}
+              aria-label="About this framework"
+              aria-haspopup="dialog"
+              aria-describedby="about-note-tip"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true" className="device-icon">
+                <circle cx="8" cy="8" r="6.4" />
+                <path d="M8 7.3v4.2M8 4.9v.2" />
+              </svg>
+            </button>
+          ) : null}
         </div>
       </div>
+      {hasAbout ? (
+        <dialog ref={dialogRef} className="about-dialog" aria-labelledby="about-title">
+          <h2 id="about-title">About this framework</h2>
+          {meta.about ? <p>{meta.about}</p> : null}
+          {meta.disclaimer ? <p className="about-disclaimer">{meta.disclaimer}</p> : null}
+          <button type="button" className="button button-quiet" onClick={closeAbout}>
+            Close
+          </button>
+        </dialog>
+      ) : null}
     </form>
   );
 }

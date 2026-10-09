@@ -25,6 +25,7 @@ export default function StepPage({ domain }) {
   const count = countsFor(domain, answers);
   const index = domains.indexOf(domain);
   const isLast = index === domains.length - 1;
+  const nextDomain = isLast ? null : domains[index + 1];
 
   // The Next control runs the wheel's turn, so the part swap arrives with the rotation.
   const onNext = (event) => {
@@ -59,7 +60,16 @@ export default function StepPage({ domain }) {
         </div>
         {domain.guidance ? <GuidancePanel domain={domain} settled={complete} /> : null}
         <div className="step-actions">
-          <Link className="button" to={nextPathFor(domain)} onClick={onNext}>
+          {/* The button wears the next slice's color, so the way on reads at a glance. */}
+          <Link
+            className={
+              isLast
+                ? "button button--finish"
+                : `button button--next button--next-${partNumberFor(nextDomain)}`
+            }
+            to={nextPathFor(domain)}
+            onClick={onNext}
+          >
             {isLast ? "See your assessment" : "Next part"}
           </Link>
         </div>

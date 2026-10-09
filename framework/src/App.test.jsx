@@ -39,7 +39,9 @@ afterEach(() => {
 test("the wheel assembles on a fresh visit and settles into rest", () => {
   const { container } = renderAt("/");
   expect(stageOf()).toBe("arrival");
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Is it safe and useful?");
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+    "Is your technology safe and useful?",
+  );
   expect(container.querySelectorAll(".wedge-link")).toHaveLength(3);
   advance(2300);
   expect(stageOf()).toBe("rest");
@@ -97,7 +99,7 @@ test("clicking a protrusion turns the wheel and swaps the part", () => {
   advance(820);
   expect(document.querySelector(".wheel-rotor").style.transform).toContain("rotate(-120deg)");
   expect(frameHeading()).toHaveTextContent(quality.name);
-  expect(container.querySelector(".protrusion--left .pill-name")).toHaveTextContent(
+  expect(container.querySelector(".protrusion--left .protrusion-label")).toHaveTextContent(
     domains[0].name,
   );
 });
@@ -140,8 +142,29 @@ test("interface chrome no longer explains itself", () => {
   expect(screen.queryByText(/optional, and it stays/i)).not.toBeInTheDocument();
   expect(screen.queryByText(/no account needed/i)).not.toBeInTheDocument();
   const input = screen.getByLabelText("What are you evaluating?");
-  expect(input).toHaveAttribute("placeholder", "App, chatbot, site…");
+  expect(input).toHaveAttribute("placeholder", "Technology name...");
   expect(screen.getByText("Your answers stay on this device")).toBeInTheDocument();
+});
+
+test("the About note explains the tool and carries the disclaimer", () => {
+  renderAt("/");
+  advance(2300);
+  fireEvent.click(screen.getByRole("button", { name: "About this framework" }));
+  const dialog = screen.getByRole("dialog", { name: "About this framework" });
+  expect(dialog).toHaveTextContent(/guided way to look at a digital mental health technology/);
+  expect(dialog).toHaveTextContent(/general information, not medical advice/);
+  fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
+  expect(dialog.open).toBe(false);
+});
+
+test("the Next control wears the next part's tone", () => {
+  const first = renderAt("/evaluate");
+  expect(first.getByRole("link", { name: "Next part" }).className).toContain("button--next-2");
+  first.unmount();
+  const last = renderAt("/evaluate/user-considerations");
+  expect(last.getByRole("link", { name: "See your assessment" }).className).toContain(
+    "button--finish",
+  );
 });
 
 test("the part eyebrow carries the quiet count", () => {

@@ -83,7 +83,7 @@ function joinParagraphs(lines) {
 }
 
 function parseMeta(file, text) {
-  const meta = { sample: false };
+  const meta = { sample: false, about: null, disclaimer: null };
   splitLines(text).forEach((raw, index) => {
     const line = raw.trim();
     if (!line || /^<!--.*-->$/.test(line)) return;
@@ -100,6 +100,10 @@ function parseMeta(file, text) {
     if (key === "sample") {
       if (value === "true" || value === "false") meta.sample = value === "true";
       else fail(file, index + 1, `sample must be true or false (got "${value}")`);
+    } else if (key === "about" || key === "disclaimer") {
+      if (!value) fail(file, index + 1, `${key}: is empty — write a sentence or two after the colon`);
+      else if (meta[key] !== null) fail(file, index + 1, `more than one ${key}: line`);
+      else meta[key] = value;
     } else {
       fail(file, index + 1, `unknown setting "${key}"`);
     }
@@ -447,7 +451,11 @@ function build() {
   }
 
   const payload = {
-    meta: { sample: meta.sample },
+    meta: {
+      sample: meta.sample,
+      ...(meta.about ? { about: meta.about } : {}),
+      ...(meta.disclaimer ? { disclaimer: meta.disclaimer } : {}),
+    },
     domains: domains.map((domain) => ({
       key: domain.key,
       name: domain.name,

@@ -1,16 +1,10 @@
-import { centeredIndexFor, countsFor, domains, pathForDomain } from "../content.js";
-import { useAnswers } from "../state/answers-context.js";
+import { centeredIndexFor, domains, pathForDomain } from "../content.js";
 import { useWheel } from "../state/wheel-context.js";
 
-// The docked wheel's corner protrusions: each is one link covering the part's
-// sliver and its pill. The pill carries the name and the quiet count.
-function countText(count) {
-  if (count.total > 0 && count.answered >= count.total) return "Complete";
-  return `${count.answered} of ${count.total}`;
-}
-
-export default function DockLinks({ hot, setHot }) {
-  const { answers } = useAnswers();
+// The docked wheel's corner labels: the other parts' names ride their wheel
+// slivers, quiet by default, and grow into clear buttons on hover. The
+// corner hit zones and the wedge links both lead here.
+export default function DockLinks({ hot, setHot, geometry }) {
   const { stage, rotor, turning, route, turnTo } = useWheel();
 
   if (stage !== "dock" && stage !== "handoff") return null;
@@ -27,10 +21,10 @@ export default function DockLinks({ hot, setHot }) {
       data-state={stage}
       data-turning={turning ? "true" : undefined}
       aria-hidden="true"
+      style={{ "--dock-scale": String(geometry.scale), "--wheel-px": `${geometry.wheelPx}px` }}
     >
       {entries.map(({ side, index }) => {
         const domain = domains[index];
-        const count = countsFor(domain, answers);
         return (
           <a
             key={side}
@@ -46,11 +40,7 @@ export default function DockLinks({ hot, setHot }) {
             data-hot={hot === index ? "true" : undefined}
             data-turning={turning ? "true" : undefined}
           >
-            <span className="protrusion-pill">
-              <span className="pill-name">{domain.name}</span>
-              <span className="pill-sep">·</span>
-              <span className="pill-count">{countText(count)}</span>
-            </span>
+            <span className="protrusion-label">{domain.name}</span>
           </a>
         );
       })}

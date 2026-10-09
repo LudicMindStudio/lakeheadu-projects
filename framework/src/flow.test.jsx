@@ -230,6 +230,20 @@ test("the assessment gathers guidance and findings with their questions", () => 
   expect(screen.getByText(gatedQuestion.text)).toBeInTheDocument();
 });
 
+test("Export to PDF hands the assessment to the browser printer", () => {
+  seedRecord({ [pickerQuestion.id]: "Chatbot" });
+  const printSpy = vi.fn();
+  const original = window.print;
+  window.print = printSpy;
+  try {
+    renderAt("/evaluate/guidance");
+    fireEvent.click(screen.getByRole("button", { name: "Export to PDF" }));
+    expect(printSpy).toHaveBeenCalledTimes(1);
+  } finally {
+    window.print = original;
+  }
+});
+
 test("Start over clears the walkthrough and replays the arrival", () => {
   seedRecord({ [pickerQuestion.id]: "Chatbot" }, "Calm Harbour");
   renderAt("/evaluate/guidance");

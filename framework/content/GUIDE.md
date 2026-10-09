@@ -6,9 +6,10 @@ command, and the app updates.
 
 ## Files
 
-- `meta.md` — app-level settings. `sample: true` adds the sample-content
-  line at the bottom of every page; set it to `false` when real content
-  ships.
+- `meta.md` — app-level settings. `sample: true` marks the content as
+  sample drafts (kept in the data for the team, never shown on the page);
+  set it to `false` when real content ships. `about:` and `disclaimer:`
+  are one paragraph each and feed the About popup on the landing page.
 - `NN-name.md` — one file per domain, in the order they appear (`01-`,
   `02-`, `03-`). The number controls the order; the rest of the file name is
   the domain's key, used in links and saved answers, so rename files with

@@ -14,6 +14,9 @@ import { useAnswers } from "../state/answers-context.js";
 import { useWheel } from "../state/wheel-context.js";
 import Prose from "../components/Prose.jsx";
 
+// The date rides the printed copy, read once when the app loads.
+const PRINTED_ON = new Date().toLocaleDateString();
+
 export default function GuidancePage() {
   const { subject, answers, clearAll } = useAnswers();
   const { resetArrival } = useWheel();
@@ -45,9 +48,20 @@ export default function GuidancePage() {
     navigate("/");
   };
 
+  // Print to PDF keeps the record on this device: no files, no accounts.
+  const onExport = () => {
+    if (typeof window.print === "function") window.print();
+  };
+
   return (
     <div className="page page--assessment">
       <article className="sheet summary">
+        <div className="print-head">
+          <p className="print-title">Technology Decision Framework</p>
+          <p className="print-meta">
+            {subject ? `Assessment of ${subject}` : "Assessment"} · {PRINTED_ON}
+          </p>
+        </div>
         <header className="assessment-head">
           <h1>{subject ? `Your assessment of ${subject}` : "Your assessment"}</h1>
         </header>
@@ -93,6 +107,9 @@ export default function GuidancePage() {
           );
         })}
         <div className="summary-actions">
+          <button type="button" className="button" onClick={onExport}>
+            Export to PDF
+          </button>
           <button type="button" className="button button-quiet" onClick={startOver}>
             Start over
           </button>

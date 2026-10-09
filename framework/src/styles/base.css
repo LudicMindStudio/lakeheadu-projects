@@ -39,13 +39,14 @@
 
   --shadow-sheet: 0 1px 2px rgba(26, 26, 26, 0.04), 0 12px 32px -14px rgba(26, 26, 26, 0.16);
   --shadow-lift: 0 2px 4px rgba(26, 26, 26, 0.05), 0 18px 44px -16px rgba(26, 26, 26, 0.22);
+  --shadow-raise: 0 1px 2px rgba(26, 26, 26, 0.06), 0 10px 24px -12px rgba(26, 26, 26, 0.22);
 
   --dur-quick: 160ms;
   --dur-settle: 240ms;
   --dur-move: 420ms;
   --dur-flight: 520ms;
   --dur-lock: 110ms;
-  --dur-drift: 2400ms;
+  --dur-spin: 72s;
   --dur-handoff: 900ms;
   --dur-turn: 700ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -53,9 +54,13 @@
 
   /* One wheel, two presentations: full screen on the hub, half dock on the
      walkthrough. The wrapper keeps its arrival size and the dock is a
-     transform, so the move between them is one beat. */
-  --wheel-size: min(82vh, 90vw, 1100px);
+     transform, so the move between them is one beat. Kept in step with
+     computeDockGeometry in src/components/WheelStage.jsx. */
+  --wheel-size: min(86vh, 90vw, 1120px);
   --wheel-dock-y: 50vh;
+
+  /* Page surfaces stay a touch translucent, so the wheel reads behind them. */
+  --sheet-bg: rgba(255, 255, 255, 0.85);
   --lift: 2.4px; /* a wedge's outward step on hover, viewBox units */
 }
 
@@ -141,6 +146,7 @@ a {
 .app-header .shell {
   display: flex;
   align-items: center;
+  justify-content: center;
   height: 56px;
 }
 
@@ -193,25 +199,6 @@ a {
 .page-frame--leaving {
   opacity: 0;
   transition: opacity 180ms var(--ease-out);
-}
-
-.app-footer {
-  position: relative;
-  z-index: 20;
-  background: var(--color-bg);
-  border-top: 1px solid var(--color-line);
-  pointer-events: none;
-}
-
-.app-footer .shell {
-  padding-top: 16px;
-  padding-bottom: 20px;
-}
-
-.sample-line {
-  margin: 0;
-  font-size: var(--text-small);
-  color: var(--color-muted);
 }
 
 /* ----- The field: one soft wash per part, behind everything ----- */
@@ -275,10 +262,10 @@ a {
 
 .subject-name {
   margin: 0 auto;
-  max-width: min(72vw, 560px);
-  font-size: 0.9375rem;
+  max-width: min(78vw, 640px);
+  font-size: clamp(1.15rem, 2.2vw, 1.4rem);
   font-weight: 600;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.005em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -304,6 +291,7 @@ a {
   border-radius: var(--radius);
   text-decoration: none;
   cursor: pointer;
+  box-shadow: var(--shadow-raise);
   transition:
     background var(--dur-quick) var(--ease-out),
     border-color var(--dur-quick) var(--ease-out);
@@ -324,6 +312,35 @@ a {
 .button-quiet:hover {
   background: var(--color-tint);
   border-color: var(--color-fg);
+}
+
+/* Colored buttons: the way on wears the next slice's tone. */
+.button--next-1 {
+  --btn-bg: var(--part-1-deep);
+}
+
+.button--next-2 {
+  --btn-bg: var(--part-2-deep);
+}
+
+.button--next-3 {
+  --btn-bg: var(--part-3-deep);
+}
+
+.button--finish {
+  --btn-bg: var(--color-accent);
+}
+
+.button.button--next,
+.button.button--finish {
+  background: var(--btn-bg);
+  border-color: var(--btn-bg);
+}
+
+.button.button--next:hover,
+.button.button--finish:hover {
+  background: color-mix(in srgb, var(--btn-bg) 86%, #101318);
+  border-color: color-mix(in srgb, var(--btn-bg) 86%, #101318);
 }
 
 .link-button {
@@ -371,7 +388,7 @@ a {
 .wheel-stage[data-part="1"] .dock-light {
   background: radial-gradient(
     92% 72% at 50% 106%,
-    rgba(147, 165, 216, 0.46) 0%,
+    rgba(147, 165, 216, 0.54) 0%,
     rgba(147, 165, 216, 0) 78%
   );
 }
@@ -379,7 +396,7 @@ a {
 .wheel-stage[data-part="2"] .dock-light {
   background: radial-gradient(
     92% 72% at 50% 106%,
-    rgba(130, 176, 154, 0.44) 0%,
+    rgba(130, 176, 154, 0.52) 0%,
     rgba(130, 176, 154, 0) 78%
   );
 }
@@ -387,7 +404,7 @@ a {
 .wheel-stage[data-part="3"] .dock-light {
   background: radial-gradient(
     92% 72% at 50% 106%,
-    rgba(217, 178, 115, 0.5) 0%,
+    rgba(217, 178, 115, 0.58) 0%,
     rgba(217, 178, 115, 0) 78%
   );
 }
@@ -425,7 +442,7 @@ a {
   height: 100%;
   overflow: visible;
   pointer-events: none;
-  filter: drop-shadow(0 8px 18px rgba(26, 26, 26, 0.06));
+  filter: drop-shadow(0 10px 22px rgba(26, 26, 26, 0.08));
 }
 
 .wheel-rotor {
@@ -434,8 +451,12 @@ a {
   transition: transform var(--dur-move) var(--ease-soft);
 }
 
-.wheel-stage[data-stage="arrival"] .wheel-rotor {
-  animation: rotor-drift var(--dur-drift) var(--ease-out) both;
+/* The hub's slow spin. It runs through the arrival and rest, and every stop
+   picks a target at or below the live angle, so the wheel keeps its
+   direction all the way into the dock. */
+.wheel-stage[data-stage="arrival"] .wheel-rotor,
+.wheel-stage[data-stage="rest"] .wheel-rotor {
+  animation: rotor-spin var(--dur-spin) linear infinite;
 }
 
 .wheel-stage[data-stage="handoff"] .wheel-rotor {
@@ -448,14 +469,14 @@ a {
 
 .wheel-track {
   fill: none;
-  stroke: rgba(26, 26, 26, 0.12);
-  stroke-width: 0.8;
+  stroke: rgba(26, 26, 26, 0.09);
+  stroke-width: 0.7;
 }
 
 .hub {
   fill: var(--color-bg);
-  stroke: rgba(26, 26, 26, 0.08);
-  stroke-width: 0.6;
+  stroke: rgba(26, 26, 26, 0.055);
+  stroke-width: 0.5;
   transition: fill var(--dur-move) var(--ease-soft);
 }
 
@@ -524,7 +545,35 @@ a {
   transition: stroke var(--dur-quick) var(--ease-out);
 }
 
-.wedge-link:is(:hover, :focus-visible) .wedge {
+.wedge-link[data-part="1"] .wedge {
+  fill: url(#wheel-grad-1);
+}
+
+.wedge-link[data-part="2"] .wedge {
+  fill: url(#wheel-grad-2);
+}
+
+.wedge-link[data-part="3"] .wedge {
+  fill: url(#wheel-grad-3);
+}
+
+.wedge-link[data-part="1"]:is(:hover, :focus-visible) .wedge,
+.wedge-link[data-part="1"][aria-current="page"] .wedge {
+  fill: url(#wheel-grad-strong-1);
+}
+
+.wedge-link[data-part="2"]:is(:hover, :focus-visible) .wedge,
+.wedge-link[data-part="2"][aria-current="page"] .wedge {
+  fill: url(#wheel-grad-strong-2);
+}
+
+.wedge-link[data-part="3"]:is(:hover, :focus-visible) .wedge,
+.wedge-link[data-part="3"][aria-current="page"] .wedge {
+  fill: url(#wheel-grad-strong-3);
+}
+
+.wedge-link:is(:hover, :focus-visible) .wedge,
+.wedge-link[aria-current="page"] .wedge {
   stroke: var(--part-deep);
 }
 
@@ -532,23 +581,25 @@ a {
   stroke-width: 2;
 }
 
-.wedge-link[aria-current="page"] .wedge {
-  stroke: var(--part-deep);
+/* A light rim outside, a soft shade inside: the slice reads with depth. */
+.wedge-rim {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-width: 0.9;
 }
 
-.wedge-sep {
+.wedge-inner {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.8);
-  stroke-width: 2.6;
-  stroke-linecap: round;
-  transition: opacity var(--dur-quick) var(--ease-out);
+  stroke: rgba(26, 26, 26, 0.07);
+  stroke-width: 0.8;
 }
 
 .wedge-arc {
   fill: none;
   stroke: var(--part-deep);
-  stroke-width: 1.5;
+  stroke-width: 1.2;
   stroke-linecap: round;
+  opacity: 0.85;
   transition: stroke-dashoffset var(--dur-move) var(--ease-soft);
 }
 
@@ -557,12 +608,49 @@ a {
   font-weight: 600;
   letter-spacing: 0.02em;
   fill: var(--color-fg);
-  transition: opacity var(--dur-settle) var(--ease-soft);
+  transform: scale(1);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    opacity var(--dur-settle) var(--ease-soft),
+    fill var(--dur-quick) var(--ease-out),
+    transform var(--dur-quick) var(--ease-out);
 }
 
-.wheel-stage[data-stage="dock"] .wedge-label,
+/* The label counter-rotates, so the text stays level while the wheel spins
+   or turns. The hub spin runs a matching counter on its own clock. */
+.wedge-label-spin {
+  transform: rotate(calc(-1 * var(--rotor-deg, 0deg)));
+  transition: transform var(--dur-move) var(--ease-soft);
+}
+
+.wheel-stage[data-stage="handoff"] .wedge-label-spin {
+  transition-duration: var(--dur-handoff);
+}
+
+.wheel-stage[data-stage="dock"] .wedge-label-spin {
+  transition-duration: var(--dur-turn);
+}
+
+.wheel-stage[data-stage="arrival"] .wedge-label-spin,
+.wheel-stage[data-stage="rest"] .wedge-label-spin {
+  animation: rotor-spin-rev var(--dur-spin) linear infinite;
+}
+
+.wheel-stage[data-stage="dock"] .wedge-label {
+  opacity: 0.85;
+}
+
 .wheel-stage[data-stage="handoff"] .wedge-label {
   opacity: 0;
+}
+
+/* A hot slice promotes its label into a clear button. */
+.wedge-label-spin.is-hot .wedge-label {
+  transform: scale(1.24);
+  fill: var(--part-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .wedge-glow {
@@ -581,6 +669,56 @@ a {
 
 .glow-stop--3 {
   stop-color: var(--part-3-soft);
+}
+
+/* The slice fills: soft at the cutout, deeper at the rim, and a stronger
+   set that marks the open or hovered slice. */
+.wedge-stop--1 {
+  stop-color: var(--part-1-soft);
+}
+
+.wedge-stop--1-strong {
+  stop-color: color-mix(in srgb, var(--part-1-soft) 76%, var(--part-1-deep));
+}
+
+.wedge-stop--1-outer {
+  stop-color: color-mix(in srgb, var(--part-1-soft) 66%, var(--part-1-deep));
+}
+
+.wedge-stop--1-strong-outer {
+  stop-color: color-mix(in srgb, var(--part-1-soft) 48%, var(--part-1-deep));
+}
+
+.wedge-stop--2 {
+  stop-color: var(--part-2-soft);
+}
+
+.wedge-stop--2-strong {
+  stop-color: color-mix(in srgb, var(--part-2-soft) 76%, var(--part-2-deep));
+}
+
+.wedge-stop--2-outer {
+  stop-color: color-mix(in srgb, var(--part-2-soft) 66%, var(--part-2-deep));
+}
+
+.wedge-stop--2-strong-outer {
+  stop-color: color-mix(in srgb, var(--part-2-soft) 48%, var(--part-2-deep));
+}
+
+.wedge-stop--3 {
+  stop-color: var(--part-3-soft);
+}
+
+.wedge-stop--3-strong {
+  stop-color: color-mix(in srgb, var(--part-3-soft) 76%, var(--part-3-deep));
+}
+
+.wedge-stop--3-outer {
+  stop-color: color-mix(in srgb, var(--part-3-soft) 66%, var(--part-3-deep));
+}
+
+.wedge-stop--3-strong-outer {
+  stop-color: color-mix(in srgb, var(--part-3-soft) 48%, var(--part-3-deep));
 }
 
 /* ----- Arrival ----- */
@@ -604,19 +742,23 @@ a {
   animation-delay: calc(var(--d) + var(--dur-flight) + 120ms);
 }
 
-/* ----- The center card ----- */
+/* ----- The center cutout ----- */
 .wheel-card {
   position: absolute;
   left: 50%;
   top: 50%;
   z-index: 2;
   transform: translate(-50%, -50%);
-  width: min(460px, calc(var(--wheel-size) * 0.64));
-  padding: 30px 32px 32px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  width: clamp(300px, calc(var(--wheel-size) * 0.4674), 523px);
+  aspect-ratio: 1 / 1;
+  padding: 34px 40px;
   text-align: center;
   background: var(--color-bg);
   border: 1px solid rgba(26, 26, 26, 0.06);
-  border-radius: var(--radius-card);
+  border-radius: 50%;
   box-shadow: var(--shadow-lift);
   pointer-events: auto;
   transition: opacity var(--dur-move) var(--ease-soft);
@@ -629,8 +771,8 @@ a {
 }
 
 .typed-line {
-  margin: 0 0 18px;
-  font-size: clamp(1.5rem, 3.4vw, 2rem);
+  margin: 0 0 16px;
+  font-size: clamp(1.4rem, 2.5vw, 1.7rem);
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.25;
@@ -641,7 +783,7 @@ a {
 }
 
 .typed-char {
-  white-space: pre;
+  white-space: pre-wrap;
 }
 
 .wheel-stage[data-stage="arrival"] .typed-char {
@@ -650,7 +792,7 @@ a {
 
 .wheel-stage[data-stage="arrival"] .card-fields {
   animation: fade-in 280ms var(--ease-out) both;
-  animation-delay: 1950ms;
+  animation-delay: 2050ms;
 }
 
 .name-row {
@@ -658,6 +800,8 @@ a {
   display: flex;
   align-items: center;
   gap: 6px;
+  max-width: 300px;
+  margin: 0 auto;
 }
 
 .subject-input {
@@ -735,14 +879,56 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  margin-top: 22px;
+  gap: 18px;
+  margin-top: 16px;
+}
+
+/* The About button opens the note. It shares the quiet icon chrome. */
+.about-note {
+  cursor: pointer;
+}
+
+/* The About note: the tool's description and disclaimer in one quiet popup. */
+.about-dialog {
+  width: min(90vw, 440px);
+  margin: auto;
+  padding: 28px 30px 24px;
+  text-align: left;
+  color: var(--color-fg);
+  background: var(--color-bg);
+  border: 1px solid rgba(26, 26, 26, 0.08);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lift);
+}
+
+.about-dialog::backdrop {
+  background: rgba(26, 26, 26, 0.32);
+}
+
+.about-dialog h2 {
+  margin: 0 0 12px;
+  font-size: 1.0625rem;
+}
+
+.about-dialog p {
+  margin: 0 0 12px;
+  color: var(--color-soft);
+}
+
+.about-dialog .about-disclaimer {
+  font-size: var(--text-small);
+  color: var(--color-muted);
+}
+
+.about-dialog .button {
+  margin-top: 8px;
 }
 
 /* ----- The dock: corner protrusions ----- */
-/* Above the content, so the pills stay readable and clickable while the
-   page scrolls beneath them. */
+/* Above the content, so the corner labels stay readable and clickable while
+   the page scrolls beneath them. */
 .dock-links {
+  --dock-r: calc(var(--wheel-px, 800) * var(--dock-scale, 1.4) / 2);
   position: fixed;
   inset: 0;
   z-index: 25;
@@ -770,57 +956,56 @@ a {
   right: 0;
 }
 
-.protrusion-pill {
-  position: absolute;
-  bottom: 18px;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 7px;
-  padding: 9px 14px;
-  background: var(--color-bg);
-  border: 1px solid rgba(26, 26, 26, 0.08);
+/* The other parts' names ride their slivers as quiet text, promoted to a
+   clear button on hover. The corner hit zones keep the full clickable area. */
+.protrusion-label {
+  position: fixed;
+  bottom: calc(0.22 * var(--dock-r) - 20px);
+  padding: 8px 16px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--color-fg) 88%, transparent);
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 999px;
-  box-shadow: var(--shadow-sheet);
-  max-width: calc(100% - 24px);
+  cursor: pointer;
   white-space: nowrap;
   transition:
-    opacity var(--dur-quick) var(--ease-out),
-    border-color var(--dur-quick) var(--ease-out);
+    color var(--dur-quick) var(--ease-out),
+    background var(--dur-quick) var(--ease-out),
+    border-color var(--dur-quick) var(--ease-out),
+    box-shadow var(--dur-quick) var(--ease-out),
+    transform var(--dur-quick) var(--ease-out),
+    opacity var(--dur-quick) var(--ease-out);
 }
 
-.protrusion--left .protrusion-pill {
-  left: 22px;
+.protrusion--left .protrusion-label {
+  left: max(96px, calc(50vw - 0.8 * var(--dock-r)));
+  transform: translateX(-50%) scale(var(--label-pop, 1));
 }
 
-.protrusion--right .protrusion-pill {
-  right: 22px;
+.protrusion--right .protrusion-label {
+  right: max(96px, calc(50vw - 0.8 * var(--dock-r)));
+  transform: translateX(50%) scale(var(--label-pop, 1));
 }
 
-.pill-name {
-  overflow: hidden;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-fg);
-  text-overflow: ellipsis;
+.dock-links[data-state="dock"] .protrusion-label {
+  pointer-events: auto;
 }
 
-.pill-sep {
-  color: var(--color-muted);
-}
-
-.pill-count {
-  font-size: var(--text-small);
-  color: var(--color-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.dock-links[data-state="handoff"] .protrusion-pill,
-.dock-links[data-turning="true"] .protrusion-pill {
+.dock-links[data-state="handoff"] .protrusion-label,
+.dock-links[data-turning="true"] .protrusion-label {
   opacity: 0;
+  pointer-events: none;
 }
 
-.protrusion[data-hot="true"] .protrusion-pill {
-  border-color: var(--color-fg);
+.protrusion[data-hot="true"] .protrusion-label {
+  --label-pop: 1.08;
+  color: var(--color-fg);
+  background: var(--color-bg);
+  border-color: rgba(26, 26, 26, 0.09);
+  box-shadow: var(--shadow-raise);
 }
 
 /* ----- Part pages ----- */
@@ -830,7 +1015,7 @@ a {
 }
 
 .sheet {
-  background: var(--color-bg);
+  background: var(--sheet-bg);
   border: 1px solid rgba(26, 26, 26, 0.05);
   border-radius: var(--radius-sheet);
   box-shadow: var(--shadow-sheet);
@@ -1062,6 +1247,8 @@ a {
 }
 
 .step-actions {
+  display: flex;
+  justify-content: center;
   margin: 42px 0 0;
 }
 
@@ -1157,6 +1344,9 @@ a {
 }
 
 .summary-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
   margin-top: 46px;
   padding-top: 30px;
   border-top: 1px solid var(--color-line);
@@ -1176,6 +1366,67 @@ a {
 
 .notfound p {
   color: var(--color-soft);
+}
+
+/* ----- Print ----- */
+.print-head {
+  display: none;
+  margin: 0 0 26px;
+}
+
+.print-title {
+  font-size: var(--text-small);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.print-meta {
+  margin-top: 4px;
+  font-size: var(--text-small);
+  color: var(--color-muted);
+}
+
+@media print {
+  @page {
+    margin: 18mm;
+  }
+
+  .app-header,
+  .field,
+  .subject-banner,
+  .wheel-stage,
+  .dock-links,
+  .summary-actions {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  .app-main {
+    padding: 0;
+    max-width: none;
+  }
+
+  .sheet {
+    padding: 0;
+    background: #ffffff;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .print-head {
+    display: block;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 /* ----- Motion ----- */
@@ -1265,12 +1516,21 @@ a {
   }
 }
 
-@keyframes rotor-drift {
+@keyframes rotor-spin {
   from {
     transform: rotate(0deg);
   }
   to {
-    transform: rotate(4deg);
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes rotor-spin-rev {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -1283,11 +1543,12 @@ a {
 
 @media (max-width: 760px) {
   .wheel-card {
-    width: 88vw;
+    width: min(88vw, 360px);
+    padding: 26px 30px;
   }
 
   .wedge-label {
-    font-size: 4px;
+    font-size: 4.4px;
   }
 }
 
@@ -1329,23 +1590,9 @@ a {
     height: 132px;
   }
 
-  .protrusion-pill {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
-    padding: 8px 12px;
-  }
-
-  .protrusion--left .protrusion-pill {
-    left: 14px;
-  }
-
-  .protrusion--right .protrusion-pill {
-    right: 14px;
-  }
-
-  .pill-sep {
-    display: none;
+  .protrusion-label {
+    padding: 7px 12px;
+    font-size: 0.875rem;
   }
 }
 

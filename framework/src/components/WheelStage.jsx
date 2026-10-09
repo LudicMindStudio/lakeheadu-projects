@@ -10,11 +10,11 @@ import DockLinks from "./DockLinks.jsx";
 // and docked presentations. Inline SVG, no canvas.
 const C = 50; // viewBox center
 const R = 46; // outer radius
-const HUB = 18.5; // hub disc radius
-const INNER = 20; // wedge inner edge
+const HUB = 21.5; // hub disc radius, the wheel's center cutout
+const INNER = 21.5; // wedge inner edge, flush with the hub
 const GAP = 2.4; // degrees of field between wedges
 const SPAN = 120; // degrees per wedge
-const LABEL_R = 36.5; // where a part's name sits, clear of the center card
+const LABEL_R = 36.5; // where a part's name sits, clear of the center cutout
 
 function polar(radius, deg) {
   const a = ((deg - 90) * Math.PI) / 180;
@@ -29,10 +29,10 @@ function wedgePath(a0, a1) {
   return `M ${x0} ${y0} A ${R} ${R} 0 0 1 ${x1} ${y1} L ${x2} ${y2} A ${INNER} ${INNER} 0 0 0 ${x3} ${y3} Z`;
 }
 
-function arcPath(a0, a1) {
-  const [x0, y0] = polar(R - 3, a0);
-  const [x1, y1] = polar(R - 3, a1);
-  return `M ${x0} ${y0} A ${R - 3} ${R - 3} 0 0 1 ${x1} ${y1}`;
+function arcPath(a0, a1, radius = R - 3) {
+  const [x0, y0] = polar(radius, a0);
+  const [x1, y1] = polar(radius, a1);
+  return `M ${x0} ${y0} A ${radius} ${radius} 0 0 1 ${x1} ${y1}`;
 }
 
 // Direction factors for a wedge's outward step, along its own bisector, and
@@ -54,16 +54,17 @@ function partLabel(domain, count) {
   return `${base}, ${count.answered} of ${count.total} answered`;
 }
 
-// The dock radius as a fraction of the arrival diameter, so the wrapper can
-// grow between the two presentations with one transform.
-function computeDockScale() {
+// The dock geometry: how far the wheel grows on its way down, and the wheel
+// size the corner labels ride on. Kept in step with the stylesheet
+// (--wheel-size, and the label anchors' coefficients in the dock rules).
+function computeDockGeometry() {
   const vw = window.innerWidth || 1200;
   const vh = window.innerHeight || 900;
   const narrow = vw <= 760;
-  const dockR = narrow ? Math.min(0.52 * vh, 0.62 * vw) : Math.min(0.6 * vh, 0.48 * vw);
-  const arrivalD = Math.min(0.82 * vh, 0.9 * vw, 1100);
-  if (!(arrivalD > 0)) return 1.46;
-  return Math.min(4, Math.max(0.8, (2 * dockR) / arrivalD));
+  const dockR = narrow ? Math.min(0.56 * vh, 0.72 * vw) : Math.min(0.7 * vh, 0.56 * vw);
+  const wheelPx = Math.min(0.86 * vh, 0.9 * vw, 1120);
+  const scale = wheelPx > 0 ? Math.min(4, Math.max(0.8, (2 * dockR) / wheelPx)) : 1.46;
+  return { scale, wheelPx };
 }
 
 function Wedge({ domain, index, count, stage, hot, dimmed, current, setHot, onOpen }) {
@@ -101,11 +102,9 @@ function Wedge({ domain, index, count, stage, hot, dimmed, current, setHot, onOp
         <g className="wedge-lock">
           <g className={classes}>
             <path className="wedge" d={wedgePath(a0, a1)} />
-            <path
-              className="wedge-sep"
-              d={arcPath(a0 + 3, a1 - 3)}
-              style={{ opacity: frac === 0 ? 0 : 1 }}
-            />
+            {/* A light rim and a soft inner shade give each slice depth. */}
+            <path className="wedge-rim" d={arcPath(a0 + 1.6, a1 - 1.6, R - 0.7)} />
+            <path className="wedge-inner" d={arcPath(a0 + 1.6, a1 - 1.6, INNER + 0.55)} />
             {/* Hidden at zero progress so no stray dot sits at the arc start. */}
             <path
               className="wedge-arc"
@@ -117,9 +116,15 @@ function Wedge({ domain, index, count, stage, hot, dimmed, current, setHot, onOp
           </g>
         </g>
       </g>
-      <text className="wedge-label" x={lx} y={ly} textAnchor="middle" dominantBaseline="middle">
-        {domain.name}
-      </text>
+      {/* The label counter-rotates so a turning wheel never tips its text. */}
+      <g
+        className={`wedge-label-spin${hot ? " is-hot" : ""}`}
+        style={{ transformOrigin: `${lx}px ${ly}px` }}
+      >
+        <text className="wedge-label" x={lx} y={ly} textAnchor="middle" dominantBaseline="middle">
+          {domain.name}
+        </text>
+      </g>
       <circle
         className="wedge-glow"
         cx={gx}
@@ -133,13 +138,13 @@ function Wedge({ domain, index, count, stage, hot, dimmed, current, setHot, onOp
 
 export default function WheelStage() {
   const { answers } = useAnswers();
-  const { stage, turning, rotor, reduced, route, cycle, begin, turnTo } = useWheel();
+  const { stage, turning, rotor, reduced, route, cycle, begin, turnTo, rotorElRef } = useWheel();
   const [hot, setHot] = useState(null);
-  const [dockScale, setDockScale] = useState(computeDockScale);
+  const [dock, setDock] = useState(computeDockGeometry);
   const svgRef = useRef(null);
 
   useEffect(() => {
-    const onResize = () => setDockScale(computeDockScale());
+    const onResize = () => setDock(computeDockGeometry());
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -183,10 +188,16 @@ export default function WheelStage() {
         data-part={docked ? partNumberFor(domains[lightIndex]) : undefined}
       >
         <div className="dock-light" aria-hidden="true" />
-        <div className="wheel-wrapper" style={{ "--dock-scale": dockScale }}>
+        <div className="wheel-wrapper" style={{ "--dock-scale": dock.scale }}>
           {stage !== "dock" ? <StartCard key={cycle} /> : null}
           <nav className="wheel-nav" aria-label="Parts of the evaluation">
-            <svg ref={svgRef} key={cycle} className="wheel-svg" viewBox="0 0 100 100">
+            <svg
+              ref={svgRef}
+              key={cycle}
+              className="wheel-svg"
+              viewBox="0 0 100 100"
+              style={{ "--rotor-deg": `${rotor}deg` }}
+            >
               <defs>
                 {domains.map((domain, index) => (
                   <radialGradient id={`wheel-glow-${index + 1}`} key={domain.key}>
@@ -202,9 +213,42 @@ export default function WheelStage() {
                     />
                   </radialGradient>
                 ))}
+                {domains.map((domain, index) => (
+                  <radialGradient
+                    key={`grad-${domain.key}`}
+                    id={`wheel-grad-${index + 1}`}
+                    gradientUnits="userSpaceOnUse"
+                    cx={C}
+                    cy={C}
+                    r={R}
+                  >
+                    <stop className={`wedge-stop wedge-stop--${index + 1}`} offset="0.44" />
+                    <stop className={`wedge-stop wedge-stop--${index + 1}-outer`} offset="1" />
+                  </radialGradient>
+                ))}
+                {domains.map((domain, index) => (
+                  <radialGradient
+                    key={`grad-strong-${domain.key}`}
+                    id={`wheel-grad-strong-${index + 1}`}
+                    gradientUnits="userSpaceOnUse"
+                    cx={C}
+                    cy={C}
+                    r={R}
+                  >
+                    <stop className={`wedge-stop wedge-stop--${index + 1}-strong`} offset="0.44" />
+                    <stop
+                      className={`wedge-stop wedge-stop--${index + 1}-strong-outer`}
+                      offset="1"
+                    />
+                  </radialGradient>
+                ))}
               </defs>
               <circle className="wheel-track" cx={C} cy={C} r={R} />
-              <g className="wheel-rotor" style={{ transform: `rotate(${rotor}deg)` }}>
+              <g
+                className="wheel-rotor"
+                ref={rotorElRef}
+                style={{ transform: `rotate(${rotor}deg)` }}
+              >
                 {domains.map((domain, index) => (
                   <Wedge
                     key={domain.key}
@@ -228,7 +272,7 @@ export default function WheelStage() {
           </nav>
         </div>
       </div>
-      <DockLinks hot={hot} setHot={setHot} />
+      <DockLinks hot={hot} setHot={setHot} geometry={dock} />
     </>
   );
 }
