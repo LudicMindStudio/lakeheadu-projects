@@ -14,9 +14,8 @@
   --color-tint: #f7f8fa; /* guidance panel */
   --color-tint-selected: #eef2f7; /* selected answer row */
 
-  /* The three parts, carried from the earlier prototype and tuned for
-     contrast on white. Soft tones are washes. Deep tones carry text-safe
-     accents and the wheel's edges. */
+  /* The three part tones, tuned for contrast on white. Soft tones are
+     washes. Deep tones carry text-safe accents and the wheel's edges. */
   --part-1-soft: #93a5d8;
   --part-1-deep: #4a63b0;
   --part-2-soft: #82b09a;
