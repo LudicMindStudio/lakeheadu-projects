@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run content && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "content": "node scripts/build-content.mjs",
+    "content:check": "node scripts/build-content.mjs --check"
   },
   "dependencies": {
     "react": "^19.2.8",

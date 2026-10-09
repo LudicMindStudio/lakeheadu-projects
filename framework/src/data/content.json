@@ -1,0 +1,258 @@
+{
+  "meta": {
+    "sample": true
+  },
+  "domains": [
+    {
+      "key": "type-of-technology",
+      "name": "Type of technology",
+      "intro": "Start with the kind of technology you are evaluating. What it is shapes which questions matter as you go.",
+      "questions": [
+        {
+          "id": "type-of-technology-q1",
+          "text": "What kind of technology are you evaluating?",
+          "options": [
+            {
+              "label": "mHealth app",
+              "slug": "mhealth-app",
+              "note": "A phone app that supports health or well-being — mood tracking, meditation, symptom journals, and similar. It may collect personal information as it works."
+            },
+            {
+              "label": "Chatbot",
+              "slug": "chatbot",
+              "note": "A program that talks with you in text. It can feel like a conversation, but there may be no real person behind it."
+            },
+            {
+              "label": "Social media",
+              "slug": "social-media",
+              "note": "A platform where people post and share content. It is built to hold attention, and what people share there is often public."
+            },
+            {
+              "label": "Forum or group chat",
+              "slug": "forum-or-group-chat",
+              "note": "A space where a group of people talk together online, usually around a shared topic or experience."
+            },
+            {
+              "label": "Something else",
+              "slug": "something-else",
+              "note": "A game, a wearable, a website, or something different. The questions ahead still apply — note anything specific as you go."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "quality",
+      "name": "Quality of technology",
+      "intro": "Look at what stands behind the technology: who made it, what supports it, and how it treats the people who use it.",
+      "questions": [
+        {
+          "id": "quality-q1",
+          "text": "Is it clear who made this technology, and why?",
+          "options": [
+            {
+              "label": "Yes"
+            },
+            {
+              "label": "Not sure",
+              "note": "Spend a few minutes looking into who is behind it — an about page, the company name, a news search — before going further."
+            },
+            {
+              "label": "No",
+              "note": "Treat its claims with extra caution. When it is unclear who is behind a product, there is no one to hold accountable if something goes wrong."
+            }
+          ]
+        },
+        {
+          "id": "quality-q2",
+          "text": "Is there evidence that it works?",
+          "options": [
+            {
+              "label": "Yes",
+              "note": "Look at what the evidence covers, and who it was tested with. Results for one group do not always carry over to others."
+            },
+            {
+              "label": "Not sure",
+              "note": "Look for research, a public evaluation, or a study behind the claims. If you cannot find one, treat it as unproven for now."
+            },
+            {
+              "label": "No",
+              "note": "If nothing backs up its claims, its promises may not hold up in practice. Weigh that before trusting it with someone's mental health."
+            }
+          ]
+        },
+        {
+          "id": "quality-q3",
+          "text": "If someone needs urgent help while using it, does the technology show them where to get it?",
+          "options": [
+            {
+              "label": "Yes",
+              "note": "Check that the path to help is easy to find — reachable from the main screens, not buried in a corner."
+            },
+            {
+              "label": "Not sure",
+              "note": "Open it and picture a hard moment: where would someone go? If you cannot find a path, assume there is not one."
+            },
+            {
+              "label": "No",
+              "note": "People may turn to it when they are struggling. Without a clear path to real help, it should not be anyone's only source of support."
+            }
+          ]
+        },
+        {
+          "id": "quality-q4",
+          "text": "Does it explain, in plain language, what happens to what you share?",
+          "options": [
+            {
+              "label": "Yes",
+              "note": "Check the explanation against what the app actually asks for. See whether it can be used without sharing more than you want to."
+            },
+            {
+              "label": "Not sure",
+              "note": "Look for a privacy notice you can read and understand. If it is missing or hard to find, that is worth weighing on its own."
+            },
+            {
+              "label": "No",
+              "note": "If it does not say what happens to your information, assume it collects and shares more than you would expect."
+            }
+          ]
+        },
+        {
+          "id": "quality-q5",
+          "text": "Does it use design features meant to keep people coming back?",
+          "options": [
+            {
+              "label": "Yes",
+              "note": "Streaks, constant reminders, and rewards for returning are built to hold attention. Ask whether that pull fits the person using it — and how it would feel to set it down."
+            },
+            {
+              "label": "Not sure",
+              "note": "Watch for the usual signals: notifications, streak counters, rewards for checking in. If you spot any of them, weigh it as a yes for now."
+            },
+            {
+              "label": "No"
+            }
+          ]
+        },
+        {
+          "id": "quality-q6",
+          "text": "For a chatbot: when it cannot help, does a real person take over?",
+          "types": [
+            "chatbot"
+          ],
+          "options": [
+            {
+              "label": "Yes",
+              "note": "Proceed with caution: a human safeguard is a good sign, but keep working through the other questions."
+            },
+            {
+              "label": "No",
+              "note": "If you cannot tell whether a person takes over, treat it as a no for now. Without a person in the loop, a chatbot cannot catch it when things go wrong — consider an MHCC-certified chatbot instead."
+            }
+          ]
+        }
+      ],
+      "guidance": "Look at the pattern across your answers, not any single one. A technology with clear accountability, real evidence, and a safety net is easier to trust. Where the picture is mixed, decide which gaps matter most in your situation — and what would need to change before you would rely on it."
+    },
+    {
+      "key": "user-considerations",
+      "name": "User considerations",
+      "intro": "Now the person who will use it. Quality is not the whole story — fit, support, and watchfulness matter just as much.",
+      "questions": [
+        {
+          "id": "user-considerations-q1",
+          "text": "Does the person using it know what could go wrong?",
+          "options": [
+            {
+              "label": "Yes",
+              "note": "Good — knowing the risks is what lets someone notice them early."
+            },
+            {
+              "label": "Not sure",
+              "note": "Walk it through together: what it does with information, what it cannot do, and what it is not a replacement for."
+            },
+            {
+              "label": "No",
+              "note": "Go through the basics before it gets used. Someone who does not know the risks cannot watch for them."
+            }
+          ]
+        },
+        {
+          "id": "user-considerations-q2",
+          "text": "If something goes wrong, does the person know where to turn?",
+          "options": [
+            {
+              "label": "Yes",
+              "note": "Good — knowing the way back is part of using anything safely."
+            },
+            {
+              "label": "Not sure",
+              "note": "Work it out together before it is needed: who to tell if something feels off, and how to reach them."
+            },
+            {
+              "label": "No",
+              "note": "Make a small plan now: one person to tell, and one way to reach them. That is the difference between a problem and a dead end."
+            }
+          ]
+        },
+        {
+          "id": "user-considerations-q3",
+          "text": "Does the person's age or situation call for extra care right now?",
+          "options": [
+            {
+              "label": "Yes",
+              "note": "Match the support to it: check in more often, and sooner. Age and hard seasons both change what a technology should be asked to carry."
+            },
+            {
+              "label": "Not sure",
+              "note": "When in doubt, lean toward more support. It is easier to step back later than to catch up after a problem."
+            },
+            {
+              "label": "No"
+            }
+          ]
+        },
+        {
+          "id": "user-considerations-q4",
+          "text": "Will an adult be nearby or checking in?",
+          "options": [
+            {
+              "label": "Yes",
+              "note": "Good. Agree on what checking in looks like — regular enough to matter, light enough that it does not push the person to hide their use."
+            },
+            {
+              "label": "Not sure",
+              "note": "Settle this before it matters: who checks in, and how often."
+            },
+            {
+              "label": "No",
+              "note": "Ask whether that changes the choice. For a younger or more vulnerable person, a nearby adult is often what turns a tool into a support."
+            }
+          ]
+        },
+        {
+          "id": "user-considerations-q5",
+          "text": "How much of the person's day does it take up?",
+          "options": [
+            {
+              "label": "A little"
+            },
+            {
+              "label": "A fair amount",
+              "note": "Worth watching. Check that it is not quietly crowding out other things."
+            },
+            {
+              "label": "A lot",
+              "note": "A lot of time with any technology pushes other things out — sleep, people, getting outside. Look at what it is displacing."
+            },
+            {
+              "label": "Not sure",
+              "note": "Keep an eye on it for a week. Amounts are easier to see in hindsight than in the moment."
+            }
+          ]
+        }
+      ],
+      "guidance": "Fit matters as much as quality. The same technology can be a good choice for one person and a poor one for another, depending on age, situation, and the support around them. Where something gives you pause, trust the pause — raise the support, or step back, and talk it over with someone you trust."
+    }
+  ]
+}
