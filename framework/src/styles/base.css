@@ -1,20 +1,10 @@
-/* ============================================
-   Technology Decision Framework — base styles
+/* Technology Decision Framework: base styles. */
 
-   Tokens first, then the shared shell, then
-   each surface in the order the walkthrough
-   meets it. Flat surfaces and hairlines over
-   shadows; one restrained accent, reserved
-   for selected answers, focus, and links.
-   ============================================ */
-
-/* --------------------------------------------
-   Tokens
-   -------------------------------------------- */
+/* ----- Tokens ----- */
 :root {
   --color-bg: #ffffff;
   --color-fg: #1a1a1a;
-  --color-soft: #3f4650; /* leads and notes — secondary prose */
+  --color-soft: #3f4650; /* secondary prose: leads and notes */
   --color-muted: #6b7280; /* quiet labels and footer text */
   --color-line: #e5e7eb; /* hairlines */
   --color-line-strong: #d1d5db; /* note rails, quiet borders */
@@ -24,19 +14,17 @@
 
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
-  --text-small: 0.8125rem; /* 13px — step indicator, labels, footer */
+  --text-small: 0.8125rem; /* 13px: step indicator, labels, footer */
   --text-body: 1rem; /* 16px */
-  --text-question: 1.0625rem; /* 17px — question legends */
-  --text-lead: 1.1875rem; /* 19px — intros and leads */
-  --text-domain: 1.5rem; /* 24px — step headings */
-  --text-page: 2rem; /* 32px — landing heading */
+  --text-question: 1.0625rem; /* 17px: question legends */
+  --text-lead: 1.1875rem; /* 19px: intros and leads */
+  --text-domain: 1.5rem; /* 24px: step headings */
+  --text-page: 2rem; /* 32px: landing heading */
 
   --radius: 2px;
 }
 
-/* --------------------------------------------
-   Base
-   -------------------------------------------- */
+/* ----- Base ----- */
 *,
 *::before,
 *::after {
@@ -77,9 +65,7 @@ a {
   outline-offset: 2px;
 }
 
-/* --------------------------------------------
-   Shell — header / main / footer
-   -------------------------------------------- */
+/* ----- Shell ----- */
 .app {
   min-height: 100vh;
   display: flex;
@@ -142,9 +128,7 @@ a {
   color: var(--color-muted);
 }
 
-/* --------------------------------------------
-   Shared pieces
-   -------------------------------------------- */
+/* ----- Shared pieces ----- */
 .lead {
   font-size: var(--text-lead);
   line-height: 1.5;
@@ -187,9 +171,7 @@ a {
   border-color: var(--color-fg);
 }
 
-/* --------------------------------------------
-   Landing
-   -------------------------------------------- */
+/* ----- Landing ----- */
 .landing h1 {
   font-size: var(--text-page);
   margin: 0 0 18px;
@@ -230,9 +212,7 @@ a {
   color: var(--color-soft);
 }
 
-/* --------------------------------------------
-   Step pages — indicator, heading, intro
-   -------------------------------------------- */
+/* ----- Step pages ----- */
 .step-indicator {
   margin: 0 0 10px;
   font-size: var(--text-small);
@@ -249,9 +229,7 @@ a {
   margin: 0 0 40px;
 }
 
-/* --------------------------------------------
-   Questions
-   -------------------------------------------- */
+/* ----- Questions ----- */
 .question {
   border: 0;
   border-top: 1px solid var(--color-line);
@@ -327,9 +305,7 @@ a {
   color: var(--color-soft);
 }
 
-/* --------------------------------------------
-   Guidance panel (end of a step)
-   -------------------------------------------- */
+/* ----- Guidance panel ----- */
 .guidance {
   margin: 44px 0 0;
   padding: 26px 26px 28px;
@@ -372,9 +348,7 @@ a {
   margin: 44px 0 0;
 }
 
-/* --------------------------------------------
-   Summary — your guidance
-   -------------------------------------------- */
+/* ----- Summary ----- */
 .summary h1 {
   font-size: var(--text-domain);
   margin: 0 0 14px;
@@ -426,9 +400,7 @@ a {
   border-top: 1px solid var(--color-line);
 }
 
-/* --------------------------------------------
-   Not found
-   -------------------------------------------- */
+/* ----- Not found ----- */
 .notfound h1 {
   font-size: var(--text-domain);
   margin: 0 0 12px;
@@ -438,9 +410,7 @@ a {
   color: var(--color-soft);
 }
 
-/* --------------------------------------------
-   Small screens
-   -------------------------------------------- */
+/* ----- Small screens ----- */
 @media (max-width: 640px) {
   .app-main {
     padding: 36px 20px 56px;

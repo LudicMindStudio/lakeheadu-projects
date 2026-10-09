@@ -10,9 +10,8 @@ import { useAnswers } from "../state/answers-context.js";
 import QuestionBlock from "../components/QuestionBlock.jsx";
 import GuidancePanel from "../components/GuidancePanel.jsx";
 
-// One step of the walkthrough: a domain's questions, its guidance panel,
-// and Next. Steps are real routes, so back, refresh, and direct links
-// behave.
+// One step of the walkthrough. Steps are real routes, so back, refresh,
+// and direct links behave.
 export default function StepPage({ domain }) {
   const { answers } = useAnswers();
   const questions = visibleQuestions(domain, currentTypeSlug(answers));

@@ -12,8 +12,8 @@ function loadAnswers() {
   }
 }
 
-// Answers live in the browser only — in memory for the session, and in
-// localStorage so a refresh does not lose the walkthrough.
+// Answers stay in the browser: in memory for the session, and in
+// localStorage across reloads.
 export default function AnswersProvider({ children }) {
   const [answers, setAnswers] = useState(loadAnswers);
 
@@ -21,7 +21,7 @@ export default function AnswersProvider({ children }) {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
     } catch {
-      // Storage can be unavailable; the walkthrough still works in memory.
+      // Storage can be unavailable. The walkthrough still works in memory.
     }
   }, [answers]);
 

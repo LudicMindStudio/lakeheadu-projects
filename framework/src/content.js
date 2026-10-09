@@ -4,8 +4,8 @@ export const meta = content.meta;
 export const domains = content.domains;
 export const stepCount = domains.length;
 
-// By convention, the first question of the first domain is the technology
-// picker. Its answers define the types that gate other questions.
+// The first question of the first domain is the technology picker. Its
+// answers define the types that gate other questions.
 export const pickerQuestion = domains[0].questions[0];
 
 export function domainByKey(key) {
@@ -45,8 +45,7 @@ export function chosenOption(question, answers) {
   return question.options.find((o) => o.label === label) ?? null;
 }
 
-// The notes the walkthrough has produced for a domain, one per answered
-// question that carries a note. Only visible questions contribute.
+// One note per answered, visible question that carries a note.
 export function notesFor(domain, answers, typeSlug) {
   const notes = [];
   for (const question of visibleQuestions(domain, typeSlug)) {

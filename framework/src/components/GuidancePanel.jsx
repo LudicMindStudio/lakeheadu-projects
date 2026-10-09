@@ -2,8 +2,6 @@ import { currentTypeSlug, notesFor } from "../content.js";
 import { useAnswers } from "../state/answers-context.js";
 import Prose from "./Prose.jsx";
 
-// The end-of-step panel: the domain's base guidance, plus the notes the
-// walkthrough produced in this domain so far.
 export default function GuidancePanel({ domain }) {
   const { answers } = useAnswers();
   const notes = notesFor(domain, answers, currentTypeSlug(answers));

@@ -10,8 +10,6 @@ import {
 import { useAnswers } from "../state/answers-context.js";
 import Prose from "../components/Prose.jsx";
 
-// The summary: what was evaluated, then each domain's guidance with the
-// notes the walkthrough produced.
 export default function GuidancePage() {
   const { answers, clearAnswers } = useAnswers();
   const navigate = useNavigate();

@@ -2,15 +2,13 @@
 /**
  * Build the framework app's content data.
  *
- * Reads the markdown files in content/ and writes src/data/content.json —
+ * Reads the markdown files in content/ and writes src/data/content.json,
  * the single file the app reads. Questions, answers, and guidance never
- * live in code.
+ * live in code. Zero dependencies.
  *
  *   npm run content          build (writes src/data/content.json)
  *   npm run content:check    validate without writing
  *   npm run build            runs the build first, then Vite
- *
- * Zero dependencies. The authoring format is documented in content/GUIDE.md.
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -176,8 +174,8 @@ function parseDomain(file, text) {
     }
 
     if (!line) {
-      // Blank lines separate paragraphs inside notes and guidance; elsewhere
-      // they are ignored.
+      // Blank lines mark paragraph breaks inside notes and guidance.
+      // Elsewhere they are ignored.
       if (note) note.lines.push("");
       else if (guidance) guidance.lines.push("");
       return;
@@ -405,16 +403,8 @@ function build() {
     fail("content/", 1, "no domain files found — expected NN-name.md files");
   }
 
-  const picker = domains[0] && domains[0].questions[0];
-  if (!domains[0]) {
-    // handled above
-  } else if (!picker) {
-    fail(
-      `content/${domainFiles[0] ? domainFiles[0].name : "01-*.md"}`,
-      1,
-      "the first domain needs its first question (the technology picker)",
-    );
-  } else {
+  const picker = domains[0]?.questions[0];
+  if (picker) {
     const seenSlugs = new Set();
     for (const option of picker.options) {
       const slug = slugify(option.label);
@@ -429,6 +419,12 @@ function build() {
       else option.slug = slug;
       seenSlugs.add(slug);
     }
+  } else if (domains[0]) {
+    fail(
+      `content/${domainFiles[0] ? domainFiles[0].name : "01-*.md"}`,
+      1,
+      "the first domain needs its first question (the technology picker)",
+    );
   }
 
   const knownTypes = picker ? picker.options.map((o) => o.slug).filter(Boolean) : [];
