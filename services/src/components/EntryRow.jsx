@@ -1,6 +1,4 @@
-// One result row in the rail: organization, program, a facts line, the
-// status line, and the first-step preview. No description sentences here —
-// descriptions live on the entry view.
+// One result row in the rail. Descriptions live on the entry view.
 
 import { Link, useLocation } from "react-router-dom";
 import { COST_LABELS, REFERRAL_LABELS, STATUS_LABELS, optionLabel } from "../data/filters.js";

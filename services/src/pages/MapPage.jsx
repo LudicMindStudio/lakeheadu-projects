@@ -1,6 +1,5 @@
-// The map experience. One persistent map under two states of the same
-// surface: the landing intro, or the browsing rail — and, a route deeper,
-// an entry opened as a split of the window.
+// The map experience. One persistent map under the landing intro, the
+// browsing rail, and an entry opened as a split of the window.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useMatch, useNavigate, useSearchParams } from "react-router-dom";

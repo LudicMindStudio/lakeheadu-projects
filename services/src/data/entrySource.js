@@ -1,6 +1,6 @@
 // Where the entries come from. Served with the app's server, the public site
-// reads the live store; hosted statically it falls back to the bundled
-// sample dataset, and nothing else changes.
+// reads the live store. Hosted statically it falls back to the bundled
+// sample dataset.
 
 import { createContext, useContext } from "react";
 import { ENTRIES } from "./entries.js";

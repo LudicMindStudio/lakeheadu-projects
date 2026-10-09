@@ -1,4 +1,4 @@
-// Small client for the admin API. The public site works without it; the
+// Small client for the admin API. The public site works without it. The
 // editor asks for it and shows a quiet note when it is not there.
 
 async function request(path, { method = "GET", body } = {}) {

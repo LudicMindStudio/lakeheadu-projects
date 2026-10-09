@@ -53,8 +53,7 @@ export function filterEntries(entries, filters) {
   );
 }
 
-// ---- map area -----------------------------------------------------------
-
+// ----- map area -----
 // Bounds of a set of entries: {west, south, east, north}.
 export function boundsOf(entries) {
   const lngs = entries.map((entry) => entry.lng).filter(Number.isFinite);
@@ -83,7 +82,7 @@ export function inBounds(entry, bounds) {
   );
 }
 
-// "w,s,e,n" in the URL -> bounds object, or null when unreadable.
+// Parses the "w,s,e,n" URL form to a bounds object, or null when unreadable.
 export function parseArea(value) {
   if (!value) {
     return null;
@@ -105,8 +104,7 @@ export function formatArea(bounds) {
     .join(",");
 }
 
-// ---- distance and sorting ----------------------------------------------
-
+// ----- distance and sorting -----
 // Straight-line distance in kilometres between two town points.
 export function distanceKm(from, to) {
   if (!from || !to) {

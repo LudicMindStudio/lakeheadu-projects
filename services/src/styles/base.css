@@ -1,10 +1,8 @@
-/* Services — stylesheet.
-   One token sheet feeds the map surface, the rail, the entry card, and the
-   editor pages: washes, hairlines, one overlay shadow per elevation, and a
-   short motion set. Crisp over soft — no blur anywhere. */
+/* Services stylesheet. One token sheet feeds every surface: washes,
+   hairlines, one overlay shadow per elevation, and a short motion set.
+   Crisp over soft. No blur anywhere. */
 
-/* ---- typefaces (vendored, offline) ------------------------------------- */
-
+/* ----- typefaces (vendored, offline) ----- */
 @font-face {
   font-family: "Source Sans 3";
   font-style: normal;
@@ -27,8 +25,7 @@
     U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* ---- tokens ------------------------------------------------------------ */
-
+/* ----- tokens ----- */
 :root {
   --ink: #1c2226;
   --ink-soft: #39424a;
@@ -123,8 +120,7 @@
   --cat-wash: var(--cat-substance-use-wash);
 }
 
-/* ---- base -------------------------------------------------------------- */
-
+/* ----- base ----- */
 *,
 *::before,
 *::after {
@@ -193,8 +189,7 @@ a {
   color: var(--muted);
 }
 
-/* ---- buttons, chips, tags ---------------------------------------------- */
-
+/* ----- buttons, chips, tags ----- */
 .btn {
   display: inline-block;
   padding: 9px 18px;
@@ -315,8 +310,7 @@ a {
   color: var(--status-wait-ink);
 }
 
-/* ---- the map surface --------------------------------------------------- */
-
+/* ----- the map surface ----- */
 .map-shell {
   position: fixed;
   inset: 0;
@@ -704,8 +698,7 @@ a {
   margin-bottom: 1px;
 }
 
-/* ---- landing intro ----------------------------------------------------- */
-
+/* ----- landing intro ----- */
 .intro {
   position: absolute;
   top: 84px;
@@ -861,8 +854,7 @@ a {
   cursor: pointer;
 }
 
-/* ---- results rail ------------------------------------------------------ */
-
+/* ----- results rail ----- */
 .rail {
   position: absolute;
   top: 16px;
@@ -1075,8 +1067,7 @@ a {
   color: var(--muted);
 }
 
-/* ---- filter panel ------------------------------------------------------ */
-
+/* ----- filter panel ----- */
 .filter-panel {
   position: absolute;
   inset: 0;
@@ -1173,8 +1164,7 @@ a {
   border-top: 1px solid var(--line);
 }
 
-/* ---- entry card (the split) -------------------------------------------- */
-
+/* ----- entry card (the split) ----- */
 .entry-card {
   position: absolute;
   top: 16px;
@@ -1399,8 +1389,7 @@ a {
   font-size: 22px;
 }
 
-/* ---- plain pages (not found, editor) ----------------------------------- */
-
+/* ----- plain pages (not found, editor) ----- */
 .page {
   min-height: 100vh;
   display: flex;
@@ -1518,8 +1507,7 @@ a {
   color: var(--danger-ink);
 }
 
-/* ---- login + entry form ------------------------------------------------ */
-
+/* ----- login + entry form ----- */
 .login-form {
   display: grid;
   gap: 14px;
@@ -1654,8 +1642,7 @@ a {
   padding-top: 6px;
 }
 
-/* ---- small screens ----------------------------------------------------- */
-
+/* ----- small screens ----- */
 @media (max-width: 899px) {
   .intro {
     top: auto;
@@ -1723,8 +1710,7 @@ a {
   }
 }
 
-/* ---- reduced motion ---------------------------------------------------- */
-
+/* ----- reduced motion ----- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

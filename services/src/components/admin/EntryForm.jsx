@@ -1,5 +1,5 @@
-// The entry editor form. Every field in the entry shape is editable here;
-// changes publish to the store the public site reads.
+// The entry editor form. Every field in the entry shape is editable here.
+// Changes publish to the store the public site reads.
 
 import { useState } from "react";
 import { FILTER_GROUPS } from "../../data/filters.js";

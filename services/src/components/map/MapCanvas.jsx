@@ -18,7 +18,7 @@ import { TOWNS } from "../../data/towns.js";
 import { STATUS_LABELS } from "../../data/filters.js";
 import { fanIndices, fanOffset, fanScale } from "../../lib/mapPins.js";
 
-// The map worker ships with the map library; the bundler emits it as an
+// The map worker ships with the map library. The bundler emits it as an
 // asset and MapLibre is pointed at it here.
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 

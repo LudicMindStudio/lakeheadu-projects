@@ -3,7 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import { expect, test, vi } from "vitest";
 import App from "./App.jsx";
 
-// The map itself runs in a real browser (MapLibre + WebGL); these tests
+// The map itself runs in a real browser (MapLibre + WebGL). These tests
 // cover everything layered over it.
 vi.mock("./components/map/MapCanvas.jsx", () => ({
   default: function MockMapCanvas() {

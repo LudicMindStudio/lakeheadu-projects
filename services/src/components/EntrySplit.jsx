@@ -1,5 +1,5 @@
 // The entry view: a pseudo page rendered as an animated split of the map.
-// The card slides in from the right as a floating sub-window; the first
+// The card slides in from the right as a floating sub-window. The first
 // step leads.
 
 import { useEffect, useRef } from "react";

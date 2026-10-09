@@ -1,5 +1,5 @@
 // The entry manager, behind the login. One password, one editor: create,
-// edit, and delete entries; changes publish to the store the public site
+// edit, and delete entries. Changes publish to the store the public site
 // reads. Present when the app runs with its server.
 
 import { useCallback, useEffect, useState } from "react";

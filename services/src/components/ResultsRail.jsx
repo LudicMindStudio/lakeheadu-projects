@@ -1,5 +1,5 @@
-// The browsing state: the results rail floating over the map. Compact,
-// comparable rows; search, sort, filters, and the active chips live here.
+// The browsing state: the results rail floating over the map. Search, sort,
+// filters, and the active chips live here.
 
 import { useEffect, useMemo, useRef } from "react";
 import EntryRow from "./EntryRow.jsx";

@@ -44,7 +44,7 @@ export function createAppServer({
 } = {}) {
   const store = createStore({ file: dataFile });
   const auth = createAuth({ password });
-  const failures = new Map(); // remote address -> failed attempt count
+  const failures = new Map(); // remote address to failed attempt count
 
   const json = (res, status, body, headers = {}) => {
     res.writeHead(status, {
@@ -121,7 +121,7 @@ export function createAppServer({
       sendFile(req, res, resolved, { cache });
       return;
     }
-    // SPA routes fall back to the app shell; missing files do not.
+    // SPA routes fall back to the app shell. Missing files do not.
     if (path.extname(relative)) {
       notFound(res);
       return;
@@ -145,13 +145,13 @@ export function createAppServer({
     }
 
     try {
-      // ---- public API ---------------------------------------------------
+      // ----- public API -----
       if (pathname === "/api/entries" && req.method === "GET") {
         json(res, 200, { entries: store.list() });
         return;
       }
 
-      // ---- session ------------------------------------------------------
+      // ----- session -----
       if (pathname === "/api/session") {
         if (req.method === "GET") {
           json(res, 200, { enabled: auth.enabled, admin: isAdmin(req) });
@@ -188,7 +188,7 @@ export function createAppServer({
         return;
       }
 
-      // ---- admin: entries ----------------------------------------------
+      // ----- admin: entries -----
       if (pathname === "/api/entries" && req.method === "POST") {
         if (!isAdmin(req)) {
           json(res, 401, { error: "unauthorized" });
@@ -248,7 +248,7 @@ export function createAppServer({
         return;
       }
 
-      // ---- static app ---------------------------------------------------
+      // ----- static app -----
       if (req.method !== "GET" && req.method !== "HEAD") {
         json(res, 405, { error: "method" });
         return;

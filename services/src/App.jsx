@@ -8,8 +8,8 @@ import NotFoundPage from "./pages/NotFoundPage.jsx";
 export default function App() {
   const [entries, setEntries] = useState(null);
 
-  // Served with the app's server the entries come from the live store;
-  // hosted statically they fall back to the bundled sample dataset.
+  // Served with the app's server the entries come from the live store.
+  // Hosted statically they fall back to the bundled sample dataset.
   useEffect(() => {
     let active = true;
     loadEntries().then((list) => {
