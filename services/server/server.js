@@ -266,10 +266,11 @@ const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPat
 
 if (isMain) {
   const port = Number(process.env.PORT ?? 5175);
+  const host = process.env.HOST ?? "127.0.0.1";
   const server = createAppServer();
-  server.listen(port, "127.0.0.1", () => {
+  server.listen(port, host, () => {
     const editor = (process.env.SERVICES_ADMIN_PASSWORD ?? "").length > 0;
-    console.log(`services: http://127.0.0.1:${port}`);
+    console.log(`services: http://${host}:${port}`);
     console.log(
       editor
         ? "services: admin editor enabled"
