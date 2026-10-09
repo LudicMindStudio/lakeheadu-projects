@@ -53,6 +53,60 @@ export function filterEntries(entries, filters) {
   );
 }
 
+// ---- map area -----------------------------------------------------------
+
+// Bounds of a set of entries: {west, south, east, north}.
+export function boundsOf(entries) {
+  const lngs = entries.map((entry) => entry.lng).filter(Number.isFinite);
+  const lats = entries.map((entry) => entry.lat).filter(Number.isFinite);
+  if (lngs.length === 0) {
+    return null;
+  }
+  return {
+    west: Math.min(...lngs),
+    east: Math.max(...lngs),
+    south: Math.min(...lats),
+    north: Math.max(...lats),
+  };
+}
+
+// True when the entry's coordinates fall inside the bounds.
+export function inBounds(entry, bounds) {
+  if (!Number.isFinite(entry.lat) || !Number.isFinite(entry.lng)) {
+    return false;
+  }
+  return (
+    entry.lng >= bounds.west &&
+    entry.lng <= bounds.east &&
+    entry.lat >= bounds.south &&
+    entry.lat <= bounds.north
+  );
+}
+
+// "w,s,e,n" in the URL -> bounds object, or null when unreadable.
+export function parseArea(value) {
+  if (!value) {
+    return null;
+  }
+  const parts = value.split(",").map(Number);
+  if (parts.length !== 4 || parts.some((part) => !Number.isFinite(part))) {
+    return null;
+  }
+  const [west, south, east, north] = parts;
+  if (west >= east || south >= north) {
+    return null;
+  }
+  return { west, south, east, north };
+}
+
+export function formatArea(bounds) {
+  return [bounds.west, bounds.south, bounds.east, bounds.north]
+    .map((part) => part.toFixed(3))
+    .join(",");
+}
+
+// ---- distance and sorting ----------------------------------------------
+
 // Straight-line distance in kilometres between two town points.
 export function distanceKm(from, to) {
   if (!from || !to) {
@@ -127,9 +181,12 @@ export function sortEntries(entries, { sort = "relevance", town = "", query = ""
 
 export function selectEntries(
   entries,
-  { query = "", filters = {}, sort = "relevance", town = "" } = {},
+  { query = "", filters = {}, sort = "relevance", town = "", area = null } = {},
 ) {
-  const searched = searchEntries(entries, query);
-  const filtered = filterEntries(searched, filters);
-  return sortEntries(filtered, { sort, town, query });
+  let list = searchEntries(entries, query);
+  list = filterEntries(list, filters);
+  if (area) {
+    list = list.filter((entry) => inBounds(entry, area));
+  }
+  return sortEntries(list, { sort, town, query });
 }

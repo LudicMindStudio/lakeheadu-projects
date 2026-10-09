@@ -8,10 +8,12 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "serve": "node server/server.js",
     "test": "vitest run",
     "format": "prettier --write ."
   },
   "dependencies": {
+    "maplibre-gl": "^6.13.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.4"

@@ -81,6 +81,18 @@ export const COST_LABELS = { free: "Free", "not-free": "Has a fee" };
 
 export const REFERRAL_LABELS = { self: "No referral needed", required: "Referral needed" };
 
+export const REFERRAL_NOTES = {
+  self: "No referral needed. You can reach out directly.",
+  required: "A referral is needed to get started.",
+};
+
+// The availability states, in the words readers see.
+export const STATUS_LABELS = {
+  accepting: "Accepting new clients",
+  "call-first": "Call to check",
+  waitlist: "Waitlist",
+};
+
 export const SORTS = [
   { value: "relevance", label: "Relevance" },
   { value: "closest", label: "Closest first" },

@@ -3,8 +3,12 @@ import { ENTRIES } from "../data/entries.js";
 import { emptyFilters } from "../data/filters.js";
 import { findTown } from "../data/towns.js";
 import {
+  boundsOf,
   distanceKm,
   filterEntries,
+  formatArea,
+  inBounds,
+  parseArea,
   searchEntries,
   selectEntries,
   sortEntries,
@@ -90,6 +94,68 @@ describe("filterEntries", () => {
       "clearwater-video-counselling",
       "kestrel-app",
     ]);
+  });
+});
+
+describe("map area", () => {
+  it("round-trips area bounds through the URL format", () => {
+    const bounds = { west: -90.125, south: 48.5, east: -89.25, north: 49.75 };
+    expect(parseArea(formatArea(bounds))).toEqual(bounds);
+  });
+
+  it("rejects unreadable area values", () => {
+    expect(parseArea("")).toBeNull();
+    expect(parseArea("1,2,3")).toBeNull();
+    expect(parseArea("a,b,c,d")).toBeNull();
+    expect(parseArea("0,2,0,4")).toBeNull();
+    expect(parseArea("0,5,4,2")).toBeNull();
+  });
+
+  it("filters entries to the bounds", () => {
+    const kenora = { west: -94.6, south: 49.6, east: -94.3, north: 49.9 };
+    expect(slugs(selectEntries(ENTRIES, { area: kenora }))).toEqual([
+      "full-circle-womens-counselling",
+    ]);
+  });
+
+  it("composes with search and filters", () => {
+    const thunderBay = { west: -89.5, south: 48.2, east: -89, north: 48.6 };
+    const results = selectEntries(ENTRIES, {
+      area: thunderBay,
+      filters: { ...emptyFilters(), cost: ["free"] },
+    });
+    expect(results).toHaveLength(3);
+    for (const entry of results) {
+      expect(entry.region).toBe("Thunder Bay");
+    }
+  });
+
+  it("computes the bounds of a set of entries", () => {
+    const bounds = boundsOf(ENTRIES);
+    expect(bounds.west).toBeCloseTo(-94.482, 3);
+    expect(bounds.east).toBeCloseTo(-86.372, 3);
+    expect(bounds.south).toBeCloseTo(48.375, 3);
+    expect(bounds.north).toBeCloseTo(51.058, 3);
+  });
+
+  it("checks coordinates directly", () => {
+    const entry = ENTRIES[0];
+    expect(
+      inBounds(entry, {
+        west: entry.lng - 1,
+        south: entry.lat - 1,
+        east: entry.lng + 1,
+        north: entry.lat + 1,
+      }),
+    ).toBe(true);
+    expect(
+      inBounds(entry, {
+        west: entry.lng + 1,
+        south: entry.lat + 1,
+        east: entry.lng + 2,
+        north: entry.lat + 2,
+      }),
+    ).toBe(false);
   });
 });
 

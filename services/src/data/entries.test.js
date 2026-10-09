@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ENTRIES } from "./entries.js";
-import { FILTER_GROUPS } from "./filters.js";
+import { FILTER_GROUPS, STATUS_LABELS } from "./filters.js";
+import { REGION } from "./region.js";
 import { findTown } from "./towns.js";
 
 const FIELD_ACCESSORS = {
@@ -35,6 +36,8 @@ describe("sample entries", () => {
       for (const field of required) {
         expect(entry[field], `${entry.slug}: ${field}`).toBeTruthy();
       }
+      expect(Number.isFinite(entry.lat), `${entry.slug}: lat`).toBe(true);
+      expect(Number.isFinite(entry.lng), `${entry.slug}: lng`).toBe(true);
       expect(["free", "not-free"], entry.slug).toContain(entry.cost);
       expect(["self", "required"], entry.slug).toContain(entry.referral);
       expect(entry.nature.length, entry.slug).toBeGreaterThan(0);
@@ -46,6 +49,15 @@ describe("sample entries", () => {
   it("name a town that carries coordinates", () => {
     for (const entry of ENTRIES) {
       expect(findTown(entry.region), entry.slug).toBeTruthy();
+    }
+  });
+
+  it("carry coordinates inside the region bounds", () => {
+    for (const entry of ENTRIES) {
+      expect(entry.lat, entry.slug).toBeGreaterThanOrEqual(REGION.south);
+      expect(entry.lat, entry.slug).toBeLessThanOrEqual(REGION.north);
+      expect(entry.lng, entry.slug).toBeGreaterThanOrEqual(REGION.west);
+      expect(entry.lng, entry.slug).toBeLessThanOrEqual(REGION.east);
     }
   });
 
@@ -89,3 +101,12 @@ for (const group of FILTER_GROUPS) {
     }
   });
 }
+
+// Every status value appears at least once.
+describe("coverage: status", () => {
+  for (const value of Object.keys(STATUS_LABELS)) {
+    it(`covers ${value}`, () => {
+      expect(ENTRIES.some((entry) => entry.status === value)).toBe(true);
+    });
+  }
+});

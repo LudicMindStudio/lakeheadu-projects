@@ -1,32 +1,49 @@
+// One result row in the rail: organization, program, a facts line, the
+// status line, and the first-step preview. No description sentences here —
+// descriptions live on the entry view.
+
 import { Link, useLocation } from "react-router-dom";
-import { COST_LABELS, REFERRAL_LABELS, optionLabel } from "../data/filters.js";
+import { COST_LABELS, REFERRAL_LABELS, STATUS_LABELS, optionLabel } from "../data/filters.js";
 import { formatDistance } from "../lib/format.js";
 
-export default function EntryRow({ entry, distance }) {
+const MAX_NATURE = 2;
+
+export default function EntryRow({ entry, distance, hovered, onHover }) {
   const location = useLocation();
-  const meta = [
+  const facts = [
     COST_LABELS[entry.cost],
-    ...entry.nature.map((value) => optionLabel("nature", value)),
-    REFERRAL_LABELS[entry.referral],
-    entry.region,
-    ...(distance === null || distance === undefined
-      ? []
-      : [formatDistance(distance, entry.region)]),
+    ...entry.nature.slice(0, MAX_NATURE).map((value) => optionLabel("nature", value)),
   ];
+  if (entry.nature.length > MAX_NATURE) {
+    facts.push(`+${entry.nature.length - MAX_NATURE} more`);
+  }
+  facts.push(REFERRAL_LABELS[entry.referral]);
+  if (distance !== null && distance !== undefined) {
+    facts.push(formatDistance(distance, entry.region));
+  }
 
   return (
-    <li className="entry-row">
+    <li className={`rail-row${hovered ? " is-active" : ""}`}>
       <Link
-        className="entry-row-link"
+        className="rail-row-link"
         to={`/entry/${entry.slug}`}
         state={{ from: `${location.pathname}${location.search}` }}
+        onMouseEnter={() => onHover?.(entry.slug)}
+        onMouseLeave={() => onHover?.(null)}
+        onFocus={() => onHover?.(entry.slug)}
+        onBlur={() => onHover?.(null)}
       >
-        <span className="entry-row-org">{entry.org}</span>
-        <span className="entry-row-title">{entry.program}</span>
-        <span className="entry-row-desc">{entry.description}</span>
-        <span className="entry-row-meta">{meta.join(" · ")}</span>
-        <span className="entry-row-step">
-          <span className="entry-row-step-label">First step:</span> {entry.firstStep}
+        <span className="rail-row-org">{entry.org}</span>
+        <span className="rail-row-title">{entry.program}</span>
+        <span className="rail-row-facts">{facts.join(" · ")}</span>
+        {entry.status && STATUS_LABELS[entry.status] && (
+          <span className={`rail-row-status status-${entry.status}`}>
+            {STATUS_LABELS[entry.status]}
+          </span>
+        )}
+        <span className="rail-row-step">
+          <span className="rail-row-step-label">First step</span>
+          {entry.firstStep}
         </span>
       </Link>
     </li>

@@ -1,31 +1,39 @@
-import { Link, Route, Routes } from "react-router-dom";
-import LandingPage from "./pages/LandingPage.jsx";
-import DirectoryPage from "./pages/DirectoryPage.jsx";
-import EntryPage from "./pages/EntryPage.jsx";
+import { useEffect, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { EntriesContext, loadEntries } from "./data/entrySource.js";
+import AdminPage from "./pages/AdminPage.jsx";
+import MapPage from "./pages/MapPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 
 export default function App() {
+  const [entries, setEntries] = useState(null);
+
+  // Served with the app's server the entries come from the live store;
+  // hosted statically they fall back to the bundled sample dataset.
+  useEffect(() => {
+    let active = true;
+    loadEntries().then((list) => {
+      if (active) {
+        setEntries(list);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
-    <div className="app">
+    <EntriesContext.Provider value={entries}>
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <header className="app-header">
-        <Link className="app-title" to="/">
-          Services
-        </Link>
-      </header>
-      <main className="app-main" id="main" tabIndex={-1}>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/directory" element={<DirectoryPage />} />
-          <Route path="/entry/:slug" element={<EntryPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </main>
-      <footer className="app-footer">
-        <div className="app-footer-inner">Sample listings, not real services yet.</div>
-      </footer>
-    </div>
+      <Routes>
+        <Route path="/" element={<MapPage />} />
+        <Route path="/entry/:slug" element={<MapPage />} />
+        <Route path="/directory" element={<Navigate to="/" replace />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </EntriesContext.Provider>
   );
 }
